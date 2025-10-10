@@ -3,10 +3,13 @@ import type { Vector2 } from './types'
 import { ptr } from 'bun:ffi'
 
 export default class Raylib {
+    private previousMousePos: Vector2 = { x: 0, y: 0 }
+    private textEncoder = new TextEncoder()
+
     constructor() { }
 
     public InitWindow(width: number, height: number, title: string) {
-        const titleBuffer = new TextEncoder().encode(title + '\0')
+        const titleBuffer = this.textEncoder.encode(title + '\0')
         const titlePtr = ptr(titleBuffer)
         rl.InitWindow(width, height, titlePtr)
     }
@@ -44,7 +47,7 @@ export default class Raylib {
     }
 
     public DrawText(text: string, posX: number, posY: number, fontSize: number, color: number) {
-        const textBuffer = new TextEncoder().encode(text + '\0')
+        const textBuffer = this.textEncoder.encode(text + '\0')
         const textPtr = ptr(textBuffer)
         rl.DrawText(textPtr, posX, posY, fontSize, color)
     }
@@ -52,4 +55,58 @@ export default class Raylib {
     public DrawFPS(posX: number, posY: number) {
         rl.DrawFPS(posX, posY)
     }
+
+    public GetFrameTime() {
+        return rl.GetFrameTime()
+    }
+
+    public IsKeyDown(key: number): boolean {
+        return rl.IsKeyDown(key)
+    }
+
+    public IsKeyUp(key: number): boolean {
+        return rl.IsKeyUp(key)
+    }
+
+    public GetKeyPressed() {
+        return rl.GetKeyPressed()
+    }
+
+    public IsMouseButtonDown(button: number): boolean {
+        return rl.IsMouseButtonDown(button)
+    }
+
+    public IsMouseButtonUp(button: number): boolean {
+        return rl.IsMouseButtonUp(button)
+    }
+
+    public GetMouseX(): number {
+        return rl.GetMouseX()
+    }
+
+    public GetMouseY(): number {
+        return rl.GetMouseY()
+    }
+
+    public GetMousePosition(): Vector2 {
+        return {
+            x: this.GetMouseX(),
+            y: this.GetMouseY()
+        }
+    }
+
+    public GetMouseDelta(): Vector2 {
+        const currentPos = this.GetMousePosition()
+        const delta = {
+            x: currentPos.x - this.previousMousePos.x,
+            y: currentPos.y - this.previousMousePos.y
+        }
+        this.previousMousePos = currentPos
+        return delta
+    }
+
+    public SetMousePosition(x: number, y: number) {
+        rl.SetMousePosition(x, y)
+    }
+
 }

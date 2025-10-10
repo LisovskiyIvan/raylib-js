@@ -40,6 +40,42 @@ const { symbols } = dlopen(`./assets/raylib-5.5_macos/lib/libraylib.${suffix}`, 
   DrawFPS: {
     args: [FFIType.i32, FFIType.i32],
     returns: FFIType.void
+  },
+  GetFrameTime: {
+    args: [],
+    returns: FFIType.f32
+  },
+  IsKeyDown: {
+    args: [FFIType.i16],
+    returns: FFIType.bool
+  },
+  IsKeyUp: {
+    args: [FFIType.i16],
+    returns: FFIType.bool
+  },
+  GetKeyPressed: {
+    args: [],
+    returns: FFIType.i8
+},
+  IsMouseButtonDown: {
+    args: [FFIType.i32],
+    returns: FFIType.bool
+  },
+  IsMouseButtonUp: {
+    args: [FFIType.i32],
+    returns: FFIType.bool
+  },
+  GetMouseX: {
+    args: [],
+    returns: FFIType.i32
+  },
+  GetMouseY: {
+    args: [],
+    returns: FFIType.i32
+  },
+  SetMousePosition: {
+    args: [FFIType.i32, FFIType.i32],
+    returns: FFIType.void
   }
 });
 
