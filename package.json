@@ -1,7 +1,17 @@
 {
   "name": "raylib-js",
-  "module": "index.ts",
+  "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "build": "bun build src/index.ts --outdir dist",
+    "test": "bun test tests/",
+    "test:watch": "bun test tests/ --watch",
+    "example:basic": "bun --hot examples/basic.ts",
+    "example:advanced": "bun --hot examples/example.ts",
+    "example:shapes": "bun --hot examples/shapes.ts",
+    "example:mouse": "bun --hot examples/mouse-input.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

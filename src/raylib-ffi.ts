@@ -1,6 +1,9 @@
 import { dlopen, FFIType, suffix } from 'bun:ffi';
 
-const { symbols } = dlopen(`./assets/raylib-5.5_macos/lib/libraylib.${suffix}`, {
+let symbols: any;
+
+try {
+  const lib = dlopen(`./assets/raylib-5.5_macos/lib/libraylib.${suffix}`, {
   InitWindow: {
     args: [FFIType.i32, FFIType.i32, FFIType.ptr],
     returns: FFIType.void
@@ -78,5 +81,12 @@ const { symbols } = dlopen(`./assets/raylib-5.5_macos/lib/libraylib.${suffix}`, 
     returns: FFIType.void
   }
 });
+  
+  symbols = lib.symbols;
+} catch (error) {
+  throw new Error(
+    `Failed to load Raylib library: ${error instanceof Error ? error.message : 'Unknown error'}`
+  );
+}
 
 export default symbols;
