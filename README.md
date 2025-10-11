@@ -17,7 +17,11 @@ import Raylib from "./src/Raylib";
 import { Colors } from "./src/constants";
 import type { RaylibError } from "./src/types";
 
+// Использование пути по умолчанию
 const rl = new Raylib();
+
+// Или указание пользовательского пути к библиотеке
+// const rl = new Raylib('./path/to/your/raylib/library');
 
 // Rust-style error handling
 const result = rl.initWindow(800, 450, 'My Game')
@@ -144,6 +148,21 @@ bun run test:watch        # Тесты в watch режиме
 
 # Сборка
 bun run build
+```
+
+## Конструктор
+
+```typescript
+// Использование пути по умолчанию (./assets/raylib-5.5_macos/lib/libraylib.dylib)
+const rl = new Raylib();
+
+// Указание пользовательского пути к библиотеке
+const rl = new Raylib('./my-raylib/lib/libraylib.dylib');
+
+// Поддерживаются различные форматы библиотек в зависимости от платформы
+const rl = new Raylib('./raylib/lib/libraylib.so');    // Linux
+const rl = new Raylib('./raylib/lib/libraylib.dll');   // Windows
+const rl = new Raylib('./raylib/lib/libraylib.dylib'); // macOS
 ```
 
 ## API

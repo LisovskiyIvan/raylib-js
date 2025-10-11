@@ -2,7 +2,11 @@ import { Colors } from "../src/constants";
 import Raylib from "../src/Raylib";
 
 function main() {
+    // Можно использовать путь по умолчанию
     const rl = new Raylib()
+    
+    // Или передать свой путь к библиотеке
+    // const rl = new Raylib('./path/to/your/raylib/library')
     
     // Simple initialization with error handling
     const result = rl.initWindow(800, 450, 'Basic Raylib Example')

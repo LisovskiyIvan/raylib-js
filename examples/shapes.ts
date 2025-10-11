@@ -3,7 +3,11 @@ import Raylib from "../src/Raylib";
 import { collectResults } from "../src/utils";
 
 function main() {
+    // Можно использовать путь по умолчанию
     const rl = new Raylib()
+    
+    // Или передать свой путь к библиотеке
+    // const rl = new Raylib('./path/to/your/raylib/library')
     
     const result = rl.initWindow(800, 450, 'Shapes Example')
         .andThen(() => rl.setTargetFPS(60))
@@ -61,7 +65,11 @@ function main() {
         })
 
     result.match(
-        () => console.log('Shapes example completed!'),
+        () => {
+            console.log('Shapes example completed!')
+            
+            rl.closeWindow()
+        },
         (error) => {
             console.error(`Example failed: [${error.kind}] ${error.message}`)
             rl.closeWindow()

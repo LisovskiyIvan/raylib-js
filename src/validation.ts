@@ -16,8 +16,15 @@ export const validateNonNegative = (value: number, name: string): RaylibResult<v
 }
 
 export const validateFinite = (value: number, name: string): RaylibResult<void> => {
-    if (!isFinite(value)) {
+    if (!isFinite(value) || isNaN(value)) {
         return new Err(validationError(`${name} must be finite`, `got ${value}`))
+    }
+    return new Ok(undefined)
+}
+
+export const validateColor = (value: number, name: string): RaylibResult<void> => {
+    if (typeof value !== 'number' || isNaN(value) || value < 0 || value > 0xFFFFFFFF) {
+        return new Err(validationError(`${name} must be a valid color (0x00000000 - 0xFFFFFFFF)`, `got ${value}`))
     }
     return new Ok(undefined)
 }

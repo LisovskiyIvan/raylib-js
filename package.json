@@ -8,7 +8,6 @@
     "test": "bun test tests/",
     "test:watch": "bun test tests/ --watch",
     "example:basic": "bun --hot examples/basic.ts",
-    "example:advanced": "bun --hot examples/example.ts",
     "example:shapes": "bun --hot examples/shapes.ts",
     "example:mouse": "bun --hot examples/mouse-input.ts"
   },

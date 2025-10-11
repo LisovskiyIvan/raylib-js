@@ -1,9 +1,13 @@
 import { Colors } from "../src/constants";
+import Vector2 from "../src/math/Vector2";
 import Raylib from "../src/Raylib";
-import type { Vector2 } from "../src/types";
 
 function main() {
+    // Можно использовать путь по умолчанию
     const rl = new Raylib()
+    
+    // Или передать свой путь к библиотеке
+    // const rl = new Raylib('./path/to/your/raylib/library')
     
     const result = rl.initWindow(800, 450, 'Mouse Input Example')
         .andThen(() => rl.setTargetFPS(60))
@@ -17,8 +21,8 @@ function main() {
                 }
 
                 // Get mouse data with Result API
-                const mousePos = rl.getMousePosition().unwrapOr({ x: 0, y: 0 })
-                const mouseDelta = rl.getMouseDelta().unwrapOr({ x: 0, y: 0 })
+                const mousePos = rl.getMousePosition().unwrapOr(Vector2.Zero())
+                const mouseDelta = rl.getMouseDelta().unwrapOr(Vector2.Zero())
                 
                 // Draw frame
                 rl.beginDrawing()

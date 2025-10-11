@@ -1,7 +1,3 @@
-export interface Vector2 {
-    x: number,
-    y: number
-}
 
 // Rust-style error types
 export enum RaylibErrorKind {

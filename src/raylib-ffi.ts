@@ -1,9 +1,6 @@
 import { dlopen, FFIType, suffix } from 'bun:ffi';
 
-let symbols: any;
-
-try {
-  const lib = dlopen(`./assets/raylib-5.5_macos/lib/libraylib.${suffix}`, {
+const symbolsDefinition = {
   InitWindow: {
     args: [FFIType.i32, FFIType.i32, FFIType.ptr],
     returns: FFIType.void
@@ -79,14 +76,24 @@ try {
   SetMousePosition: {
     args: [FFIType.i32, FFIType.i32],
     returns: FFIType.void
+  },
+  DrawPixel: {
+    args: [FFIType.i16, FFIType.i16, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawLine: {
+    args: [FFIType.i16, FFIType.i16, FFIType.i16, FFIType.i16, FFIType.u32],
+    returns: FFIType.void
   }
-});
-  
-  symbols = lib.symbols;
-} catch (error) {
-  throw new Error(
-    `Failed to load Raylib library: ${error instanceof Error ? error.message : 'Unknown error'}`
-  );
-}
+};
 
-export default symbols;
+export const initRaylib = (libraryPath: string) => {
+  try {
+    const lib = dlopen(libraryPath, symbolsDefinition);
+    return lib.symbols;
+  } catch (error) {
+    throw new Error(
+      `Failed to load Raylib library from ${libraryPath}: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+};

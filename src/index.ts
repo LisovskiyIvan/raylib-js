@@ -1,6 +1,6 @@
 import { Colors } from "./constants";
 import Raylib from "./Raylib";
-import type { Vector2, RaylibError } from "./types";
+import type { RaylibError } from "./types";
 
 function handleError(error: RaylibError): void {
     console.error(`[${error.kind}] ${error.message}`)
@@ -32,13 +32,10 @@ function main() {
         return
     }
 
-    const position: Vector2 = { x: 100, y: 100 }
-
     // Main game loop with Result handling
-    while (true) {
+    while (rl.windowShouldClose().isOk) {
         const shouldCloseResult = rl.windowShouldClose()
 
-        // Handle potential errors in window state check
         const shouldClose = shouldCloseResult.match(
             (value) => value,
             (error) => {
@@ -49,65 +46,18 @@ function main() {
 
         if (shouldClose) {
             rl.closeWindow()
+            break
         }
 
-        // Drawing with comprehensive error handling
-        const frameResult = rl.beginDrawing()
-            .andThen(() => rl.clearBackground(Colors.WHITE))
-            .andThen(() => rl.drawFPS(0, 0))
-            .andThen(() => rl.drawRectangle(50, 50, 100, 100, Colors.RED))
-            .andThen(() => rl.drawRectangle(200, 50, 100, 100, Colors.GREEN))
-            .andThen(() => rl.drawRectangle(350, 50, 100, 100, Colors.BLUE))
-            .andThen(() => rl.drawRectangle(500, 50, 100, 100, Colors.YELLOW))
-            .andThen(() => rl.drawRectangle(200, 200, 100, 100, Colors.BLACK))
+        rl.beginDrawing()
+        rl.clearBackground(Colors.WHITE)
 
-        // Handle mouse position with Result
-        const mouseResult = rl.getMousePosition()
-            .andThen(mousePos =>
-                rl.drawText(mousePos.x.toString(), position.x, position.y, 20, Colors.GREEN)
-            )
-
-        const deltaResult = rl.getMouseDelta()
-            .andThen(mouseDelta =>
-                rl.drawText(mouseDelta.x.toString(), position.x + 100, position.y + 100, 20, Colors.RED)
-            )
-
-        const endResult = rl.endDrawing()
-
-        // Combine all results and handle errors
-        const allResults = [frameResult, mouseResult, deltaResult, endResult]
-
-        for (const result of allResults) {
-            if (result.isErr()) {
-                handleError(result.error)
-
-                // Different strategies based on error type
-                switch (result.error.kind) {
-                    case 'DRAW_ERROR':
-                        console.log('Continuing despite draw error...')
-                        break
-                    case 'STATE_ERROR':
-                    case 'FFI_ERROR':
-                        console.log('Critical error, exiting...')
-                        rl.closeWindow()
-                        return
-                    default:
-                        console.log('Unknown error, continuing...')
-                }
-            }
+        for (let i = 0; i < 100; i++) {
+            rl.drawLine(100, 100 + i, 200, 200 + i, Colors.RED)
         }
+
+        rl.endDrawing()
     }
-
-    // Cleanup with error handling
-    const closeResult = rl.closeWindow()
-    closeResult.match(
-        () => console.log('Window closed successfully'),
-        (error) => {
-            console.error('Error closing window:')
-            handleError(error)
-        }
-    )
 }
 
-// Run the application
 main()

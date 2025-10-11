@@ -1,19 +1,31 @@
-import rl from './raylib-ffi'
-import type { Vector2, RaylibResult } from './types'
+import { initRaylib } from './raylib-ffi'
+import type { RaylibResult } from './types'
 import { initError, ffiError, stateError } from './types'
 import { Ok, Err, tryFn} from './result'
-import { ptr } from 'bun:ffi'
-import { validateAll, validateFinite, validateNonEmptyString, validateNonNegative, validatePositive, validateRange } from './validation'
+import { ptr, suffix } from 'bun:ffi'
+import { validateAll, validateFinite, validateNonEmptyString, validateNonNegative, validatePositive, validateRange, validateColor } from './validation'
+import Vector2 from './math/Vector2'
 
 
 export default class Raylib {
-    private previousMousePos: Vector2 = { x: 0, y: 0 }
+    private previousMousePos: Vector2 = Vector2.Zero()
     private textEncoder = new TextEncoder()
     private isInitialized = false
     private windowWidth = 0
     private windowHeight = 0
+    private rl: any
 
-    constructor() { }
+    constructor(libraryPath?: string) {
+        // Используем путь по умолчанию, если не передан
+        const defaultPath = `./assets/raylib-5.5_macos/lib/libraylib.${suffix}`
+        const path = libraryPath || defaultPath
+        
+        try {
+            this.rl = initRaylib(path)
+        } catch (error) {
+            throw new Error(`Failed to initialize Raylib: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        }
+    }
 
     private requireInitialized(): RaylibResult<void> {
         if (!this.isInitialized) {
@@ -50,7 +62,7 @@ export default class Raylib {
         return this.safeFFICall('initialize window', () => {
             const titleBuffer = this.textEncoder.encode(title + '\0')
             const titlePtr = ptr(titleBuffer)
-            rl.InitWindow(width, height, titlePtr)
+            this.rl.InitWindow(width, height, titlePtr)
 
             this.isInitialized = true
             this.windowWidth = width
@@ -64,7 +76,7 @@ export default class Raylib {
         }
 
         return this.safeFFICall('close window', () => {
-            rl.CloseWindow()
+            this.rl.CloseWindow()
             this.isInitialized = false
             this.windowWidth = 0
             this.windowHeight = 0
@@ -74,29 +86,29 @@ export default class Raylib {
     public setTargetFPS(target: number): RaylibResult<void> {
         return this.requireInitialized()
             .andThen(() => validateRange(target, 1, 1000, 'target FPS'))
-            .andThen(() => this.safeFFICall('set target FPS', () => rl.SetTargetFPS(target)))
+            .andThen(() => this.safeFFICall('set target FPS', () => this.rl.SetTargetFPS(target)))
     }
 
     public windowShouldClose(): RaylibResult<boolean> {
         return this.requireInitialized()
-            .andThen(() => this.safeFFICall('check window close state', () => rl.WindowShouldClose()))
+            .andThen(() => this.safeFFICall('check window close state', () => this.rl.WindowShouldClose()))
     }
 
     // Drawing
     public beginDrawing(): RaylibResult<void> {
         return this.requireInitialized()
-            .andThen(() => this.safeFFICall('begin drawing', () => rl.BeginDrawing()))
+            .andThen(() => this.safeFFICall('begin drawing', () => this.rl.BeginDrawing()))
     }
 
     public endDrawing(): RaylibResult<void> {
         return this.requireInitialized()
-            .andThen(() => this.safeFFICall('end drawing', () => rl.EndDrawing()))
+            .andThen(() => this.safeFFICall('end drawing', () => this.rl.EndDrawing()))
     }
 
     public clearBackground(color: number): RaylibResult<void> {
         return this.requireInitialized()
-            .andThen(() => validateFinite(color, 'color'))
-            .andThen(() => this.safeFFICall('clear background', () => rl.ClearBackground(color)))
+            .andThen(() => validateColor(color, 'color'))
+            .andThen(() => this.safeFFICall('clear background', () => this.rl.ClearBackground(color)))
     }
 
     public drawRectangle(posX: number, posY: number, width: number, height: number, color: number): RaylibResult<void> {
@@ -106,10 +118,10 @@ export default class Raylib {
                 validateFinite(posY, 'posY'),
                 validateNonNegative(width, 'width'),
                 validateNonNegative(height, 'height'),
-                validateFinite(color, 'color')
+                validateColor(color, 'color')
             ))
             .andThen(() => this.safeFFICall('draw rectangle', () =>
-                rl.DrawRectangle(posX, posY, width, height, color)
+                this.rl.DrawRectangle(posX, posY, width, height, color)
             ))
     }
 
@@ -120,12 +132,12 @@ export default class Raylib {
                 validateFinite(posX, 'posX'),
                 validateFinite(posY, 'posY'),
                 validatePositive(fontSize, 'fontSize'),
-                validateFinite(color, 'color')
+                validateColor(color, 'color')
             ))
             .andThen(() => this.safeFFICall('draw text', () => {
                 const textBuffer = this.textEncoder.encode(text + '\0')
                 const textPtr = ptr(textBuffer)
-                rl.DrawText(textPtr, posX, posY, fontSize, color)
+                this.rl.DrawText(textPtr, posX, posY, fontSize, color)
             }))
     }
 
@@ -135,51 +147,43 @@ export default class Raylib {
                 validateFinite(posX, 'posX'),
                 validateFinite(posY, 'posY')
             ))
-            .andThen(() => this.safeFFICall('draw FPS', () => rl.DrawFPS(posX, posY)))
+            .andThen(() => this.safeFFICall('draw FPS', () => this.rl.DrawFPS(posX, posY)))
     }
 
     // Input
     public isKeyDown(key: number): RaylibResult<boolean> {
         return this.requireInitialized()
             .andThen(() => validateFinite(key, 'key'))
-            .andThen(() => this.safeFFICall('check key down', () => rl.IsKeyDown(key)))
+            .andThen(() => this.safeFFICall('check key down', () => this.rl.IsKeyDown(key)))
     }
 
     public isKeyUp(key: number): RaylibResult<boolean> {
         return this.requireInitialized()
             .andThen(() => validateFinite(key, 'key'))
-            .andThen(() => this.safeFFICall('check key up', () => rl.IsKeyUp(key)))
+            .andThen(() => this.safeFFICall('check key up', () => this.rl.IsKeyUp(key)))
     }
 
     public getKeyPressed(): RaylibResult<number> {
         return this.requireInitialized()
-            .andThen(() => this.safeFFICall('get key pressed', () => rl.GetKeyPressed()))
+            .andThen(() => this.safeFFICall('get key pressed', () => this.rl.GetKeyPressed()))
     }
 
     public isMouseButtonDown(button: number): RaylibResult<boolean> {
         return this.requireInitialized()
             .andThen(() => validateFinite(button, 'button'))
-            .andThen(() => this.safeFFICall('check mouse button down', () => rl.IsMouseButtonDown(button)))
+            .andThen(() => this.safeFFICall('check mouse button down', () => this.rl.IsMouseButtonDown(button)))
     }
 
     public getMousePosition(): RaylibResult<Vector2> {
         return this.requireInitialized()
-            .andThen(() => this.safeFFICall('get mouse position', () => ({
-                x: rl.GetMouseX(),
-                y: rl.GetMouseY()
-            })))
+            .andThen(() => this.safeFFICall('get mouse position', () => new Vector2(this.rl.GetMouseX(), this.rl.GetMouseY())))
     }
 
     public getMouseDelta(): RaylibResult<Vector2> {
-        return this.getMousePosition()
-            .map(currentPos => {
-                const delta = {
-                    x: currentPos.x - this.previousMousePos.x,
-                    y: currentPos.y - this.previousMousePos.y
-                }
-                this.previousMousePos = currentPos
-                return delta
-            })
+        const pos = this.getMousePosition().unwrap()
+        const delta = pos.subtract(this.previousMousePos)
+        this.previousMousePos.copyFrom(pos)
+        return new Ok(delta)
     }
 
     public setMousePosition(x: number, y: number): RaylibResult<void> {
@@ -188,13 +192,38 @@ export default class Raylib {
                 validateFinite(x, 'x'),
                 validateFinite(y, 'y')
             ))
-            .andThen(() => this.safeFFICall('set mouse position', () => rl.SetMousePosition(x, y)))
+            .andThen(() => this.safeFFICall('set mouse position', () => this.rl.SetMousePosition(x, y)))
     }
 
     public getFrameTime(): RaylibResult<number> {
         return this.requireInitialized()
-            .andThen(() => this.safeFFICall('get frame time', () => rl.GetFrameTime()))
+            .andThen(() => this.safeFFICall('get frame time', () => this.rl.GetFrameTime()))
     }
+
+    public drawPixel(posX: number, posY: number, color: number) {
+        return this.requireInitialized()
+        .andThen(() => validateColor(color, 'color'))
+        .andThen(() => this.safeFFICall('draw a pixel', () => this.rl.DrawPixel(posX, posY, color)))
+    }
+
+    public drawPixelV(position: Vector2, color: number) {
+        return this.requireInitialized()
+        .andThen(() => validateColor(color, 'color'))
+        .andThen(() => this.safeFFICall('draw a pixel', () => this.rl.DrawPixel(position.x, position.y, color)))
+    }
+
+    public drawLine(startX: number, startY: number, endX: number, endY: number, color: number) {
+        return this.requireInitialized()
+        .andThen(() => validateColor(color, 'color'))
+        .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawLine(startX, startY, endX, endY, color)))
+    }
+
+    public drawLineV(start: Vector2, end: Vector2, color: number) {
+        return this.requireInitialized()
+        .andThen(() => validateColor(color, 'color'))
+        .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawLine(start.x, start.y, end.x, end.y, color)))
+    }
+
 
     // State getters
     public get initialized(): boolean {
