@@ -97,6 +97,34 @@ const symbolsDefinition = {
     args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
+  CheckCollisionRecs: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
+  CheckCollisionCircles: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
+  CheckCollisionCircleRec: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
+  CheckCollisionCircleLine: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
+  CheckCollisionPointRec: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
+  CheckCollisionPointCircle: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
+  CheckCollisionPointTriangle: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
 };
 
 export const initRaylib = (libraryPath: string) => {

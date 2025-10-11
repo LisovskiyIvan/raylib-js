@@ -126,6 +126,10 @@ export default class Raylib {
             ))
     }
 
+    public drawRectangleRec(rec: Rectangle, color: number): RaylibResult<void> {
+        return this.drawRectangle(rec.x, rec.y, rec.width, rec.height, color)
+    }
+
     public drawText(text: string, posX: number, posY: number, fontSize: number, color: number): RaylibResult<void> {
         return this.requireInitialized()
             .andThen(() => validateAll(
@@ -270,6 +274,116 @@ export default class Raylib {
             ))
     }
 
+    // Collision detection
+    public checkCollisionRecs(rec1: Rectangle, rec2: Rectangle): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(rec1.x, 'rec1.x'),
+                validateFinite(rec1.y, 'rec1.y'),
+                validateNonNegative(rec1.width, 'rec1.width'),
+                validateNonNegative(rec1.height, 'rec1.height'),
+                validateFinite(rec2.x, 'rec2.x'),
+                validateFinite(rec2.y, 'rec2.y'),
+                validateNonNegative(rec2.width, 'rec2.width'),
+                validateNonNegative(rec2.height, 'rec2.height')
+            ))
+            .andThen(() => this.safeFFICall('check collision rectangles', () =>
+                this.rl.CheckCollisionRecs(rec1.x, rec1.y, rec1.width, rec1.height, rec2.x, rec2.y, rec2.width, rec2.height)
+            ))
+    }
+
+    public checkCollisionCircles(center1: Vector2, radius1: number, center2: Vector2, radius2: number): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(center1.x, 'center1.x'),
+                validateFinite(center1.y, 'center1.y'),
+                validateNonNegative(radius1, 'radius1'),
+                validateFinite(center2.x, 'center2.x'),
+                validateFinite(center2.y, 'center2.y'),
+                validateNonNegative(radius2, 'radius2')
+            ))
+            .andThen(() => this.safeFFICall('check collision circles', () =>
+                this.rl.CheckCollisionCircles(center1.x, center1.y, radius1, center2.x, center2.y, radius2)
+            ))
+    }
+
+    public checkCollisionCircleRec(center: Vector2, radius: number, rec: Rectangle): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(center.x, 'center.x'),
+                validateFinite(center.y, 'center.y'),
+                validateNonNegative(radius, 'radius'),
+                validateFinite(rec.x, 'rec.x'),
+                validateFinite(rec.y, 'rec.y'),
+                validateNonNegative(rec.width, 'rec.width'),
+                validateNonNegative(rec.height, 'rec.height')
+            ))
+            .andThen(() => this.safeFFICall('check collision circle rectangle', () =>
+                this.rl.CheckCollisionCircleRec(center.x, center.y, radius, rec.x, rec.y, rec.width, rec.height)
+            ))
+    }
+
+    public checkCollisionCircleLine(center: Vector2, radius: number, p1: Vector2, p2: Vector2): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(center.x, 'center.x'),
+                validateFinite(center.y, 'center.y'),
+                validateNonNegative(radius, 'radius'),
+                validateFinite(p1.x, 'p1.x'),
+                validateFinite(p1.y, 'p1.y'),
+                validateFinite(p2.x, 'p2.x'),
+                validateFinite(p2.y, 'p2.y')
+            ))
+            .andThen(() => this.safeFFICall('check collision circle line', () =>
+                this.rl.CheckCollisionCircleLine(center.x, center.y, radius, p1.x, p1.y, p2.x, p2.y)
+            ))
+    }
+
+    public checkCollisionPointRec(point: Vector2, rec: Rectangle): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(point.x, 'point.x'),
+                validateFinite(point.y, 'point.y'),
+                validateFinite(rec.x, 'rec.x'),
+                validateFinite(rec.y, 'rec.y'),
+                validateNonNegative(rec.width, 'rec.width'),
+                validateNonNegative(rec.height, 'rec.height')
+            ))
+            .andThen(() => this.safeFFICall('check collision point rectangle', () =>
+                this.rl.CheckCollisionPointRec(point.x, point.y, rec.x, rec.y, rec.width, rec.height)
+            ))
+    }
+
+    public checkCollisionPointCircle(point: Vector2, center: Vector2, radius: number): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(point.x, 'point.x'),
+                validateFinite(point.y, 'point.y'),
+                validateFinite(center.x, 'center.x'),
+                validateFinite(center.y, 'center.y'),
+                validateNonNegative(radius, 'radius')
+            ))
+            .andThen(() => this.safeFFICall('check collision point circle', () =>
+                this.rl.CheckCollisionPointCircle(point.x, point.y, center.x, center.y, radius)
+            ))
+    }
+
+    public checkCollisionPointTriangle(point: Vector2, p1: Vector2, p2: Vector2, p3: Vector2): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(point.x, 'point.x'),
+                validateFinite(point.y, 'point.y'),
+                validateFinite(p1.x, 'p1.x'),
+                validateFinite(p1.y, 'p1.y'),
+                validateFinite(p2.x, 'p2.x'),
+                validateFinite(p2.y, 'p2.y'),
+                validateFinite(p3.x, 'p3.x'),
+                validateFinite(p3.y, 'p3.y')
+            ))
+            .andThen(() => this.safeFFICall('check collision point triangle', () =>
+                this.rl.CheckCollisionPointTriangle(point.x, point.y, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y)
+            ))
+    }
 
     // State getters
     public get initialized(): boolean {

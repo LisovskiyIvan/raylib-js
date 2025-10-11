@@ -184,6 +184,16 @@ const rl = new Raylib('./raylib/lib/libraylib.dylib'); // macOS
 - `drawText(text, x, y, fontSize, color)` - рисование текста
 - `drawFPS(x, y)` - отображение FPS
 
+### Обнаружение коллизий
+
+- `checkCollisionRecs(rec1, rec2)` - проверка коллизии между двумя прямоугольниками
+- `checkCollisionCircles(center1, radius1, center2, radius2)` - проверка коллизии между двумя кругами
+- `checkCollisionCircleRec(center, radius, rectangle)` - проверка коллизии между кругом и прямоугольником
+- `checkCollisionCircleLine(center, radius, p1, p2)` - проверка коллизии круга с линией
+- `checkCollisionPointRec(point, rectangle)` - проверка нахождения точки в прямоугольнике
+- `checkCollisionPointCircle(point, center, radius)` - проверка нахождения точки в круге
+- `checkCollisionPointTriangle(point, p1, p2, p3)` - проверка нахождения точки в треугольнике
+
 ### Ввод
 
 - `isKeyDown(key)` / `isKeyUp(key)` - состояние клавиш
