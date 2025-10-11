@@ -84,7 +84,19 @@ const symbolsDefinition = {
   DrawLine: {
     args: [FFIType.i16, FFIType.i16, FFIType.i16, FFIType.i16, FFIType.u32],
     returns: FFIType.void
-  }
+  },
+  DrawCircle: {
+    args: [FFIType.i16, FFIType.i16, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawTriangle: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawRectanglePro: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
 };
 
 export const initRaylib = (libraryPath: string) => {

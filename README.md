@@ -179,6 +179,8 @@ const rl = new Raylib('./raylib/lib/libraylib.dylib'); // macOS
 - `beginDrawing()` / `endDrawing()` - начало/конец кадра
 - `clearBackground(color)` - очистка фона
 - `drawRectangle(x, y, width, height, color)` - рисование прямоугольника
+- `drawRectanglePro(rectangle, origin, rotation, color)` - рисование прямоугольника с поворотом
+- `drawTriangle(v1, v2, v3, color)` - рисование треугольника по трем точкам
 - `drawText(text, x, y, fontSize, color)` - рисование текста
 - `drawFPS(x, y)` - отображение FPS
 

@@ -5,6 +5,7 @@ import { Ok, Err, tryFn} from './result'
 import { ptr, suffix } from 'bun:ffi'
 import { validateAll, validateFinite, validateNonEmptyString, validateNonNegative, validatePositive, validateRange, validateColor } from './validation'
 import Vector2 from './math/Vector2'
+import Rectangle from './math/Rectangle'
 
 
 export default class Raylib {
@@ -222,6 +223,51 @@ export default class Raylib {
         return this.requireInitialized()
         .andThen(() => validateColor(color, 'color'))
         .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawLine(start.x, start.y, end.x, end.y, color)))
+    }
+
+     public drawCircle(centerX: number, centerY: number, radius: number, color: number) {
+        return this.requireInitialized()
+        .andThen(() => validateColor(color, 'color'))
+        .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawCircle(centerX, centerY, radius, color)))
+    }
+
+    public drawCircleV(center: Vector2, radius: number, color: number) {
+        return this.requireInitialized()
+        .andThen(() => validateColor(color, 'color'))
+        .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawCircle(center.x, center.y, radius, color)))
+    }
+
+    public drawTriangle(v1: Vector2, v2: Vector2, v3: Vector2, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(v1.x, 'v1.x'),
+                validateFinite(v1.y, 'v1.y'),
+                validateFinite(v2.x, 'v2.x'),
+                validateFinite(v2.y, 'v2.y'),
+                validateFinite(v3.x, 'v3.x'),
+                validateFinite(v3.y, 'v3.y'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw triangle', () =>
+                this.rl.DrawTriangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, color)
+            ))
+    }
+
+    public drawRectanglePro(rec: Rectangle, origin: Vector2, rotation: number, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(rec.x, 'rec.x'),
+                validateFinite(rec.y, 'rec.y'),
+                validateNonNegative(rec.width, 'rec.width'),
+                validateNonNegative(rec.height, 'rec.height'),
+                validateFinite(origin.x, 'origin.x'),
+                validateFinite(origin.y, 'origin.y'),
+                validateFinite(rotation, 'rotation'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw rectangle pro', () =>
+                this.rl.DrawRectanglePro(rec.x, rec.y, rec.width, rec.height, origin.x, origin.y, rotation, color)
+            ))
     }
 
 
