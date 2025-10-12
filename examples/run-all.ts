@@ -1,6 +1,4 @@
 #!/usr/bin/env bun
-// Скрипт для демонстрации всех примеров
-import { Colors } from '../src/index'
 
 const examples = [
     {
@@ -52,12 +50,6 @@ for (let i = 0; i < examples.length; i++) {
     console.log(`   Запуск: bun examples/${example.name}`)
     console.log()
 }
-
-console.log("Инструкции:")
-console.log("• Выберите пример и запустите его командой выше")
-console.log("• Во всех примерах ESC - выход из программы")
-console.log("• FPS отображается в левом верхнем углу")
-console.log()
 
 console.log("Требования:")
 console.log("• Bun установлен и настроен")

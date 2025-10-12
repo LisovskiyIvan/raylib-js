@@ -1,0 +1,33 @@
+# Development files
+src/
+tests/
+examples/
+scripts/
+node_modules/
+.git/
+.vscode/
+.cursor/
+.kiro/
+assets
+
+# Build artifacts
+*.log
+*.tsbuildinfo
+
+# Test files
+*.test.ts
+*.test.js
+
+# Development configs
+tsconfig.json
+bun.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keep only what's needed for the package
+!dist/
+!README.md
+!LICENSE
+!package.json

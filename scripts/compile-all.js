@@ -4,11 +4,8 @@ const { spawn } = require('child_process');
 
 const parentDir = path.dirname(__dirname + "/scripts");
 const scriptFiles = fs.readdirSync(parentDir)
-  .filter(file => file.endsWith('.js') && file !== 'compile-all.js')
+  .filter(file => file.endsWith('.js') && file !== 'compile-all.js' && file.includes('compile'))
   .map(file => path.join(parentDir, file));
-
-console.log(parentDir);
-  console.log(scriptFiles);
 
 async function runScriptsSequentially() {
   for (const scriptPath of scriptFiles) {

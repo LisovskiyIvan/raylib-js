@@ -1,10 +1,51 @@
 {
-  "name": "raylib-js",
-  "module": "src/index.ts",
+  "name": "raylib-ts",
+  "version": "1.0.0",
+  "description": "TypeScript wrapper for Raylib with Bun FFI and Rust-style error handling",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "raylib",
+    "game-development",
+    "graphics",
+    "typescript",
+    "bun",
+    "ffi",
+    "rust-style",
+    "result-type"
+  ],
+  "author": "Lisovskii Ivan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LisovskiyIvan/raylib-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LisovskiyIvan/raylib-js/issues"
+  },
+  "homepage": "https://github.com/LisovskiyIvan/raylib-js#readme",
+  "engines": {
+    "bun": ">=1.0.0"
+  },
   "scripts": {
     "dev": "bun --hot src/index.ts",
-    "build": "bun build src/index.ts --outdir dist",
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build src/index.ts --outdir dist --format esm --target bun",
+    "build:types": "bun x tsc --project tsconfig.build.json --emitDeclarationOnly",
+    "prepublishOnly": "bun run test && bun run build",
     "compile": "bun scripts/compile-all.js",
     "compile:textures": "bun scripts/compile-textures.js",
     "generate:readme": "bun scripts/generate-readme.js",
@@ -20,9 +61,10 @@
     "example:demo": "bun examples/07-complete-demo.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "bun": ">=1.0.0"
   }
 }
