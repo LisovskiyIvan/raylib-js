@@ -1,5 +1,5 @@
 import { initRaylib } from './raylib-ffi'
-import type { RaylibResult } from './types'
+import type { RaylibResult, Texture2D } from './types'
 import { initError, ffiError, stateError } from './types'
 import { Ok, Err, tryFn} from './result'
 import { ptr, suffix } from 'bun:ffi'
@@ -383,6 +383,96 @@ export default class Raylib {
             .andThen(() => this.safeFFICall('check collision point triangle', () =>
                 this.rl.CheckCollisionPointTriangle(point.x, point.y, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y)
             ))
+    }
+
+    // Multiple texture management
+    public loadTexture(fileName: string): RaylibResult<number> {
+        return this.requireInitialized()
+            .andThen(() => validateNonEmptyString(fileName, 'fileName'))
+            .andThen(() => this.safeFFICall('load texture to slot', () => {
+                const fileNameBuffer = this.textEncoder.encode(fileName + '\0')
+                const fileNamePtr = ptr(fileNameBuffer)
+                
+                const slotIndex = this.rl.LoadTextureToSlot(fileNamePtr)
+                
+                if (slotIndex < 0) {
+                    throw new Error('Failed to load texture or no free slots available')
+                }
+                
+                return slotIndex
+            }))
+    }
+
+    public getTextureFromSlot(slotIndex: number): RaylibResult<Texture2D> {
+        return this.requireInitialized()
+            .andThen(() => validateFinite(slotIndex, 'slotIndex'))
+            .andThen(() => this.safeFFICall('get texture from slot', () => {
+                const id = this.rl.GetTextureIdBySlot(slotIndex)
+                if (id === 0) {
+                    throw new Error('Invalid slot index or texture not loaded')
+                }
+                
+                const texture: Texture2D = {
+                    id,
+                    width: this.rl.GetTextureWidthBySlot(slotIndex),
+                    height: this.rl.GetTextureHeightBySlot(slotIndex),
+                    mipmaps: this.rl.GetTextureMipmapsBySlot(slotIndex),
+                    format: this.rl.GetTextureFormatBySlot(slotIndex)
+                }
+                return texture
+            }))
+    }
+
+    public unloadTextureFromSlot(slotIndex: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateFinite(slotIndex, 'slotIndex'))
+            .andThen(() => this.safeFFICall('unload texture from slot', () => {
+                this.rl.UnloadTextureBySlot(slotIndex)
+            }))
+    }
+
+    public drawTextureFromSlot(slotIndex: number, posX: number, posY: number, tint: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(slotIndex, 'slotIndex'),
+                validateFinite(posX, 'posX'),
+                validateFinite(posY, 'posY'),
+                validateColor(tint, 'tint')
+            ))
+            .andThen(() => this.safeFFICall('draw texture from slot', () => {
+                this.rl.DrawTextureBySlot(slotIndex, posX, posY, tint)
+            }))
+    }
+
+    public drawTextureProFromSlot(slotIndex: number, posX: number, posY: number, originX: number, originY: number, rotation: number, scale: number, tint: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(slotIndex, 'slotIndex'),
+                validateFinite(posX, 'posX'),
+                validateFinite(posY, 'posY'),
+                validateFinite(originX, 'originX'),
+                validateFinite(originY, 'originY'),
+                validateFinite(rotation, 'rotation'),
+                validateFinite(scale, 'scale'),
+                validateColor(tint, 'tint')
+            ))
+            .andThen(() => this.safeFFICall('draw texture pro from slot', () => {
+                this.rl.DrawTextureProBySlot(slotIndex, posX, posY, originX, originY, rotation, scale, tint)
+            }))
+    }
+
+    public getLoadedTextureCount(): RaylibResult<number> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('get loaded texture count', () => {
+                return this.rl.GetLoadedTextureCount()
+            }))
+    }
+
+    public unloadAllTextures(): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('unload all textures', () => {
+                this.rl.UnloadAllTextures()
+            }))
     }
 
     // State getters

@@ -127,10 +127,63 @@ const symbolsDefinition = {
   },
 };
 
+const wrapperSymbols = {
+  // Multiple texture management
+  LoadTextureToSlot: {
+    args: [FFIType.ptr],
+    returns: FFIType.i32
+  },
+  GetTextureWidthBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetTextureHeightBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetTextureMipmapsBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetTextureFormatBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetTextureIdBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.u32
+  },
+  UnloadTextureBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.void
+  },
+  DrawTextureBySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawTextureProBySlot: {
+    args: [FFIType.i32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  GetLoadedTextureCount: {
+    args: [],
+    returns: FFIType.i32
+  },
+  UnloadAllTextures: {
+    args: [],
+    returns: FFIType.void
+  },
+};
+
 export const initRaylib = (libraryPath: string) => {
   try {
     const lib = dlopen(libraryPath, symbolsDefinition);
-    return lib.symbols;
+    const wrapperLib = dlopen('./assets/texture-wrapper.dylib', wrapperSymbols);
+    
+    return {
+      ...lib.symbols,
+      ...wrapperLib.symbols
+    };
   } catch (error) {
     throw new Error(
       `Failed to load Raylib library from ${libraryPath}: ${error instanceof Error ? error.message : 'Unknown error'}`

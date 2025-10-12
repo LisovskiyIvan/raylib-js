@@ -44,5 +44,14 @@ export const stateError = (message: string): RaylibError =>
 export const drawError = (message: string, context?: string): RaylibError =>
     createError(RaylibErrorKind.DrawError, message, context)
 
+// Texture2D structure matching Raylib's Texture2D
+export interface Texture2D {
+    id: number      // OpenGL texture id
+    width: number   // Texture base width
+    height: number  // Texture base height
+    mipmaps: number // Mipmap levels, 1 by default
+    format: number  // Data format (PixelFormat type)
+}
+
 // Type aliases для Result types
 export type RaylibResult<T> = import('./result').Result<T, RaylibError>
