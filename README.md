@@ -2,239 +2,353 @@
 
 TypeScript обертка для Raylib с использованием Bun FFI и Rust-style обработкой ошибок через Result<T, E> типы.
 
+## Особенности
+
+- 🦀 **Rust-style error handling** - безопасная обработка ошибок через Result<T, E> и Option<T>
+- ⚡ **Bun FFI** - высокопроизводительные биндинги через Bun Foreign Function Interface
+- 🎯 **Type Safety** - полная типизация всех API методов
+- 🔧 **Валидация параметров** - автоматическая проверка входных данных
+- 🎮 **Полный API** - поддержка рисования, ввода, коллизий, текстур и render texture
+- 📦 **Менеджер текстур** - встроенная система управления текстурами
+- 🧪 **Тестируемость** - покрытие тестами основного функционала
+
 ## Установка
+
+### Требования
+
+- [Bun](https://bun.sh/) runtime
+- Raylib библиотека (включена в `assets/raylib-5.5_macos/lib/`)
+- TypeScript 5+
+
+### Установка зависимостей
 
 ```bash
 bun install
 ```
 
-## Использование
+### Компиляция нативных модулей (опционально)
 
-### Основной пример
+```bash
+# Компиляция всех модулей
+bun run compile
+
+# Компиляция только текстурных модулей
+bun run compile:textures
+```
+
+## Быстрый старт
+
+### Базовый пример
 
 ```typescript
-import Raylib from "./src/Raylib";
-import { Colors } from "./src/constants";
-import type { RaylibError } from "./src/types";
+import Raylib from "./src/Raylib"
+import { Colors } from "./src/constants"
 
-// Использование пути по умолчанию
-const rl = new Raylib();
-
-// Или указание пользовательского пути к библиотеке
-// const rl = new Raylib('./path/to/your/raylib/library');
+const rl = new Raylib()
 
 // Rust-style error handling
-const result = rl.initWindow(800, 450, 'My Game')
+const result = rl.initWindow(800, 450, 'Мое приложение')
   .andThen(() => rl.setTargetFPS(60))
   .andThen(() => {
-    // Game loop
+    // Игровой цикл
     while (true) {
-      const shouldClose = rl.windowShouldClose().unwrapOr(true);
-      if (shouldClose) break;
+      const shouldClose = rl.windowShouldClose().unwrapOr(true)
+      if (shouldClose) break
 
       rl.beginDrawing()
         .andThen(() => rl.clearBackground(Colors.WHITE))
-        .andThen(() => rl.drawText("Hello, Raylib!", 190, 200, 20, Colors.BLACK))
+        .andThen(() => rl.drawText("Привет, Raylib!", 190, 200, 20, Colors.BLACK))
         .andThen(() => rl.endDrawing())
         .match(
-          () => {}, // Success - continue
+          () => {}, // Успех - продолжаем
           (error) => {
-            console.error(`Frame error: [${error.kind}] ${error.message}`);
-            return; // Exit on error
+            console.error('Ошибка кадра: [' + error.kind + '] ' + error.message)
+            return // Выход при ошибке
           }
-        );
+        )
     }
-    return rl.closeWindow();
-  });
+    return rl.closeWindow()
+  })
 
-// Handle final result
+// Обработка финального результата
 result.match(
-  () => console.log('Program completed successfully!'),
+  () => console.log('Программа завершена успешно!'),
   (error) => {
-    console.error(`Program failed: [${error.kind}] ${error.message}`);
-    if (error.context) console.error(`Context: ${error.context}`);
+    console.error('Ошибка программы: [' + error.kind + '] ' + error.message)
+    if (error.context) console.error('Контекст: ' + error.context)
   }
-);
+)
 ```
 
-### Типы ошибок
-
-```typescript
-enum RaylibErrorKind {
-  InitError = 'INIT_ERROR',        // Ошибки инициализации
-  FFIError = 'FFI_ERROR',          // Ошибки FFI/библиотеки
-  ValidationError = 'VALIDATION_ERROR', // Неверные параметры
-  StateError = 'STATE_ERROR',      // Неверное состояние
-  DrawError = 'DRAW_ERROR',        // Ошибки рисования
-  InputError = 'INPUT_ERROR'       // Ошибки ввода
-}
-```
-
-### Result API методы
+### Result API
 
 ```typescript
 // Проверка результата
 if (result.isOk()) {
-  console.log('Success:', result.value);
+  console.log('Успех:', result.value)
 } else {
-  console.error('Error:', result.error);
+  console.error('Ошибка:', result.error)
 }
 
 // Pattern matching
 result.match(
-  (value) => console.log('Success:', value),
-  (error) => console.error('Error:', error.message)
-);
+  (value) => console.log('Успех:', value),
+  (error) => console.error('Ошибка:', error.message)
+)
 
 // Цепочка операций
 result
   .andThen(value => anotherOperation(value))
   .andThen(value => yetAnotherOperation(value))
   .match(
-    (finalValue) => console.log('All operations succeeded'),
-    (error) => console.error('One operation failed:', error)
-  );
+    (finalValue) => console.log('Все операции успешны'),
+    (error) => console.error('Одна из операций провалилась:', error)
+  )
 
 // Значения по умолчанию
-const position = rl.getMousePosition().unwrapOr({ x: 0, y: 0 });
-
-// Трансформация значений
-const windowInfo = rl.initWindow(800, 600, "Test")
-  .map(() => ({ width: rl.width, height: rl.height }));
+const position = rl.getMousePosition().unwrapOr({ x: 0, y: 0 })
 ```
 
-### Утилиты для работы с Result
 
-```typescript
-import { collectResults, sequence, retry, logResult } from "./src/utils";
+## API Методы
 
-// Выполнить несколько операций и собрать результаты
-const operations = [
-  () => rl.drawRectangle(0, 0, 100, 100, Colors.RED),
-  () => rl.drawRectangle(100, 0, 100, 100, Colors.GREEN),
-  () => rl.drawRectangle(200, 0, 100, 100, Colors.BLUE)
-];
+### Управление окном
 
-const allResults = collectResults(operations.map(op => op()));
+- **`initWindow(width: number, height: number, title: string)`** → `Result<void>`
 
-// Последовательное выполнение с остановкой на первой ошибке
-const sequenceResult = sequence(operations);
+- **`closeWindow()`** → `Result<void>`
 
-// Повторные попытки
-const retryResult = retry(() => rl.initWindow(800, 600, "Test"), 3);
+- **`setTargetFPS(target: number)`** → `Result<void>`
 
-// Логирование результатов
-const loggedResult = logResult(
-  rl.drawText("Hello", 100, 100, 20, Colors.BLACK),
-  "draw hello text"
-);
-```
-
-## Запуск
-
-```bash
-# Основное приложение
-bun run dev
-
-# Примеры
-bun run example:basic      # Базовый пример
-bun run example:advanced   # Расширенный пример
-bun run example:shapes     # Пример с фигурами
-bun run example:mouse      # Пример с мышью
-
-# Тесты
-bun run test              # Все тесты
-bun run test:watch        # Тесты в watch режиме
-
-# Сборка
-bun run build
-```
-
-## Конструктор
-
-```typescript
-// Использование пути по умолчанию (./assets/raylib-5.5_macos/lib/libraylib.dylib)
-const rl = new Raylib();
-
-// Указание пользовательского пути к библиотеке
-const rl = new Raylib('./my-raylib/lib/libraylib.dylib');
-
-// Поддерживаются различные форматы библиотек в зависимости от платформы
-const rl = new Raylib('./raylib/lib/libraylib.so');    // Linux
-const rl = new Raylib('./raylib/lib/libraylib.dll');   // Windows
-const rl = new Raylib('./raylib/lib/libraylib.dylib'); // macOS
-```
-
-## API
-
-### Основные методы
-
-- `initWindow(width, height, title)` - инициализация окна
-- `closeWindow()` - закрытие окна
-- `windowShouldClose()` - проверка закрытия окна
-- `setTargetFPS(fps)` - установка целевого FPS
+- **`drawFPS(posX: number, posY: number)`** → `Result<void>`
 
 ### Рисование
 
-- `beginDrawing()` / `endDrawing()` - начало/конец кадра
-- `clearBackground(color)` - очистка фона
-- `drawRectangle(x, y, width, height, color)` - рисование прямоугольника
-- `drawRectanglePro(rectangle, origin, rotation, color)` - рисование прямоугольника с поворотом
-- `drawTriangle(v1, v2, v3, color)` - рисование треугольника по трем точкам
-- `drawText(text, x, y, fontSize, color)` - рисование текста
-- `drawFPS(x, y)` - отображение FPS
+- **`beginDrawing()`** → `Result<void>`
 
-### Обнаружение коллизий
+- **`endDrawing()`** → `Result<void>`
 
-- `checkCollisionRecs(rec1, rec2)` - проверка коллизии между двумя прямоугольниками
-- `checkCollisionCircles(center1, radius1, center2, radius2)` - проверка коллизии между двумя кругами
-- `checkCollisionCircleRec(center, radius, rectangle)` - проверка коллизии между кругом и прямоугольником
-- `checkCollisionCircleLine(center, radius, p1, p2)` - проверка коллизии круга с линией
-- `checkCollisionPointRec(point, rectangle)` - проверка нахождения точки в прямоугольнике
-- `checkCollisionPointCircle(point, center, radius)` - проверка нахождения точки в круге
-- `checkCollisionPointTriangle(point, p1, p2, p3)` - проверка нахождения точки в треугольнике
+- **`clearBackground(color: number)`** → `Result<void>`
+
+- **`drawRectangle(posX: number, posY: number, width: number, height: number, color: number)`** → `Result<void>`
+
+- **`drawRectangleRec(rec: Rectangle, color: number)`** → `Result<void>`
+
+- **`drawText(text: string, posX: number, posY: number, fontSize: number, color: number)`** → `Result<void>`
+
+- **`drawTriangle(v1: Vector2, v2: Vector2, v3: Vector2, color: number)`** → `Result<void>`
+
+- **`drawRectanglePro(rec: Rectangle, origin: Vector2, rotation: number, color: number)`** → `Result<void>`
+
+- **`drawTextureFromSlot(slotIndex: number, posX: number, posY: number, tint: number)`** → `Result<void>`
+
+- **`drawTextureProFromSlot(slotIndex: number, posX: number, posY: number, originX: number, originY: number, rotation: number, scale: number, tint: number)`** → `Result<void>`
 
 ### Ввод
 
-- `isKeyDown(key)` / `isKeyUp(key)` - состояние клавиш
-- `getKeyPressed()` - получение нажатой клавиши
-- `isMouseButtonDown(button)` - состояние кнопок мыши
-- `getMousePosition()` - позиция мыши
-- `getMouseDelta()` - изменение позиции мыши
-- `setMousePosition(x, y)` - установка позиции мыши
+- **`isKeyDown(key: number)`** → `Result<boolean>`
 
-### Свойства
+- **`isKeyUp(key: number)`** → `Result<boolean>`
 
-- `initialized` - состояние инициализации
-- `width` / `height` - размеры окна
+- **`getKeyPressed()`** → `Result<number>`
+
+- **`isMouseButtonDown(button: number)`** → `Result<boolean>`
+
+- **`getMousePosition()`** → `Result<Vector2>`
+
+- **`getMouseDelta()`** → `Result<Vector2>`
+
+- **`setMousePosition(x: number, y: number)`** → `Result<void>`
+
+### Коллизии
+
+- **`checkCollisionRecs(rec1: Rectangle, rec2: Rectangle)`** → `Result<boolean>`
+
+- **`checkCollisionCircles(center1: Vector2, radius1: number, center2: Vector2, radius2: number)`** → `Result<boolean>`
+
+- **`checkCollisionCircleRec(center: Vector2, radius: number, rec: Rectangle)`** → `Result<boolean>`
+
+- **`checkCollisionCircleLine(center: Vector2, radius: number, p1: Vector2, p2: Vector2)`** → `Result<boolean>`
+
+- **`checkCollisionPointRec(point: Vector2, rec: Rectangle)`** → `Result<boolean>`
+
+- **`checkCollisionPointCircle(point: Vector2, center: Vector2, radius: number)`** → `Result<boolean>`
+
+- **`checkCollisionPointTriangle(point: Vector2, p1: Vector2, p2: Vector2, p3: Vector2)`** → `Result<boolean>`
+
+### Текстуры
+
+- **`loadTexture(fileName: string)`** → `Result<number>`
+
+- **`getTextureFromSlot(slotIndex: number)`** → `Result<Texture2D>`
+
+- **`unloadTextureFromSlot(slotIndex: number)`** → `Result<void>`
+
+- **`getLoadedTextureCount()`** → `Result<number>`
+
+- **`unloadAllTextures()`** → `Result<void>`
+
+- **`loadRenderTexture(width: number, height: number)`** → `Result<number>`
+
+- **`getRenderTextureFromSlot(slotIndex: number)`** → `Result<RenderTexture2D>`
+
+- **`unloadRenderTextureFromSlot(slotIndex: number)`** → `Result<void>`
+
+- **`getLoadedRenderTextureCount()`** → `Result<number>`
+
+- **`unloadAllRenderTextures()`** → `Result<void>`
+
+### Прочее
+
+- **`windowShouldClose()`** → `Result<boolean>`
+
+- **`getFrameTime()`** → `Result<number>`
+
+
+## Примеры
+
+```bash
+# Basic
+bun run example:basic
+
+# Collision detection
+bun run example:collision:detection
+
+# Mouse input
+bun run example:mouse:input
+
+# Multiple textures
+bun run example:multiple:textures
+
+# Render texture
+bun run example:render:texture
+
+# Render texture-advanced
+bun run example:render:texture-advanced
+
+# Render texture-complete
+bun run example:render:texture-complete
+
+# Shapes
+bun run example:shapes
+
+# Texture manager-demo
+bun run example:texture:manager-demo
+
+# Triangle and-rectangle-pro
+bun run example:triangle:and-rectangle-pro
+
+```
+
+
+## Доступные команды
+
+### Разработка
+
+```bash
+# Запуск в режиме разработки
+bun run dev
+
+# Сборка проекта
+bun run build
+
+```
+
+### Тестирование
+
+```bash
+# Запуск тестов
+bun run test
+
+# Запуск тестов в watch режиме
+bun run test:watch
+
+```
+
+### Примеры
+
+```bash
+# Базовый пример использования
+bun run example:basic
+
+# Пример рисования фигур
+bun run example:shapes
+
+# Пример работы с мышью
+bun run example:mouse
+
+# Пример работы с несколькими текстурами
+bun run example:multiple-textures
+
+# Пример менеджера текстур
+bun run example:texture-manager
+
+```
+
+### Компиляция
+
+```bash
+# Компиляция всех нативных модулей
+bun run compile
+
+# Компиляция модулей для работы с текстурами
+bun run compile:textures
+
+```
+
 
 ## Структура проекта
 
 ```
 src/
-├── index.ts          # Основной файл приложения
-├── Raylib.ts         # Основной класс с Result API
-├── result.ts         # Result<T, E> и Option<T> типы
-├── utils.ts          # Утилиты для работы с Result
-├── raylib-ffi.ts     # FFI биндинги
-├── types.ts          # TypeScript типы и ошибки
-└── constants.ts      # Константы (цвета, клавиши)
+├── index.ts              # Основной файл приложения
+├── Raylib.ts             # Основной класс с Result API
+├── result.ts             # Result<T, E> и Option<T> типы
+├── utils.ts              # Утилиты для работы с Result
+├── raylib-ffi.ts         # FFI биндинги
+├── types.ts              # TypeScript типы и ошибки
+├── constants.ts          # Константы (цвета, клавиши)
+├── validation.ts         # Валидация параметров
+├── math/                 # Математические типы
+│   ├── Vector2.ts        # 2D вектор
+│   └── Rectangle.ts      # Прямоугольник
+└── wrappers/             # Нативные обертки
+    ├── texture-wrapper.c # Обертка для текстур
+    └── render-texture-wrapper.c # Обертка для render texture
 
 examples/
-├── README.md         # Документация примеров
-├── basic.ts          # Базовый пример
-├── example.ts        # Расширенный пример
-├── shapes.ts         # Пример с фигурами
-└── mouse-input.ts    # Пример с мышью
+├── basic.ts              # Базовый пример
+├── shapes.ts             # Пример с фигурами
+├── mouse-input.ts        # Пример с мышью
+├── multiple-textures.ts  # Пример с текстурами
+└── texture-manager-demo.ts # Демо менеджера текстур
 
 tests/
-├── README.md         # Документация тестов
-├── raylib.test.ts    # Тесты Raylib API
-└── utils.test.ts     # Тесты утилит
+├── raylib.test.ts        # Тесты Raylib API
+├── utils.test.ts         # Тесты утилит
+├── texture.test.ts       # Тесты текстур
+└── render-texture.test.ts # Тесты render texture
+
+assets/
+├── raylib-5.5_macos/     # Raylib библиотека для macOS
+├── textures/             # Тестовые текстуры
+├── texture-wrapper.dylib # Скомпилированная обертка текстур
+└── render-texture-wrapper.dylib # Скомпилированная обертка render texture
 ```
 
-## Требования
 
-- Bun runtime
-- Raylib библиотека (в папке `assets/raylib-5.5_macos/lib/`)
-- TypeScript 5+
+## Лицензия
+
+MIT License
+
+## Вклад в проект
+
+Приветствуются pull requests и issues! Перед внесением изменений:
+
+1. Запустите тесты: `bun test`
+2. Убедитесь что код проходит линтинг
+3. Добавьте тесты для новой функциональности
+
+---
+
+*Сгенерировано автоматически с помощью `bun run scripts/generate-readme.js`*

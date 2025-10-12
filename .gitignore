@@ -6,9 +6,5 @@ dist/
 .kiro
 
 # Compiled wrappers
-assets/*.dylib
-assets/*.so
-assets/*.dll
-
-# Keep raylib distribution
-!assets/raylib-*/
+assets
+!assets/textures
