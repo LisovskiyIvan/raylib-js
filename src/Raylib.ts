@@ -1,5 +1,5 @@
 import { initRaylib } from './raylib-ffi'
-import type { RaylibResult, Texture2D } from './types'
+import type { RaylibResult, Texture2D, RenderTexture2D } from './types'
 import { initError, ffiError, stateError } from './types'
 import { Ok, Err, tryFn} from './result'
 import { ptr, suffix } from 'bun:ffi'
@@ -472,6 +472,80 @@ export default class Raylib {
         return this.requireInitialized()
             .andThen(() => this.safeFFICall('unload all textures', () => {
                 this.rl.UnloadAllTextures()
+            }))
+    }
+
+    // Render texture management
+    public loadRenderTexture(width: number, height: number): RaylibResult<number> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validatePositive(width, 'width'),
+                validatePositive(height, 'height')
+            ))
+            .andThen(() => this.safeFFICall('load render texture to slot', () => {
+                const slotIndex = this.rl.LoadRenderTextureToSlot(width, height)
+                
+                if (slotIndex < 0) {
+                    throw new Error('Failed to create render texture or no free slots available')
+                }
+                
+                return slotIndex
+            }))
+    }
+
+    public getRenderTextureFromSlot(slotIndex: number): RaylibResult<RenderTexture2D> {
+        return this.requireInitialized()
+            .andThen(() => validateFinite(slotIndex, 'slotIndex'))
+            .andThen(() => this.safeFFICall('get render texture from slot', () => {
+                const id = this.rl.GetRenderTextureIdBySlot(slotIndex)
+                if (id === 0) {
+                    throw new Error('Invalid slot index or render texture not loaded')
+                }
+                
+                const texture: Texture2D = {
+                    id: this.rl.GetRenderTextureColorIdBySlot(slotIndex),
+                    width: this.rl.GetRenderTextureColorWidthBySlot(slotIndex),
+                    height: this.rl.GetRenderTextureColorHeightBySlot(slotIndex),
+                    mipmaps: this.rl.GetRenderTextureColorMipmapsBySlot(slotIndex),
+                    format: this.rl.GetRenderTextureColorFormatBySlot(slotIndex)
+                }
+
+                const depth: Texture2D = {
+                    id: this.rl.GetRenderTextureDepthIdBySlot(slotIndex),
+                    width: this.rl.GetRenderTextureDepthWidthBySlot(slotIndex),
+                    height: this.rl.GetRenderTextureDepthHeightBySlot(slotIndex),
+                    mipmaps: this.rl.GetRenderTextureDepthMipmapsBySlot(slotIndex),
+                    format: this.rl.GetRenderTextureDepthFormatBySlot(slotIndex)
+                }
+
+                const renderTexture: RenderTexture2D = {
+                    id,
+                    texture,
+                    depth
+                }
+                return renderTexture
+            }))
+    }
+
+    public unloadRenderTextureFromSlot(slotIndex: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateFinite(slotIndex, 'slotIndex'))
+            .andThen(() => this.safeFFICall('unload render texture from slot', () => {
+                this.rl.UnloadRenderTextureBySlot(slotIndex)
+            }))
+    }
+
+    public getLoadedRenderTextureCount(): RaylibResult<number> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('get loaded render texture count', () => {
+                return this.rl.GetLoadedRenderTextureCount()
+            }))
+    }
+
+    public unloadAllRenderTextures(): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('unload all render textures', () => {
+                this.rl.UnloadAllRenderTextures()
             }))
     }
 

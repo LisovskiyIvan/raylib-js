@@ -175,14 +175,80 @@ const wrapperSymbols = {
   },
 };
 
+const renderTextureWrapperSymbols = {
+  // Render texture management
+  LoadRenderTextureToSlot: {
+    args: [FFIType.i32, FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetRenderTextureIdBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.u32
+  },
+  GetRenderTextureColorIdBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.u32
+  },
+  GetRenderTextureColorWidthBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetRenderTextureColorHeightBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetRenderTextureColorMipmapsBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetRenderTextureColorFormatBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetRenderTextureDepthIdBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.u32
+  },
+  GetRenderTextureDepthWidthBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetRenderTextureDepthHeightBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetRenderTextureDepthMipmapsBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetRenderTextureDepthFormatBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  UnloadRenderTextureBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.void
+  },
+  GetLoadedRenderTextureCount: {
+    args: [],
+    returns: FFIType.i32
+  },
+  UnloadAllRenderTextures: {
+    args: [],
+    returns: FFIType.void
+  },
+};
+
 export const initRaylib = (libraryPath: string) => {
   try {
     const lib = dlopen(libraryPath, symbolsDefinition);
     const wrapperLib = dlopen('./assets/texture-wrapper.dylib', wrapperSymbols);
+    const renderTextureWrapperLib = dlopen('./assets/render-texture-wrapper.dylib', renderTextureWrapperSymbols);
     
     return {
       ...lib.symbols,
-      ...wrapperLib.symbols
+      ...wrapperLib.symbols,
+      ...renderTextureWrapperLib.symbols
     };
   } catch (error) {
     throw new Error(

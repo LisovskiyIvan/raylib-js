@@ -53,5 +53,12 @@ export interface Texture2D {
     format: number  // Data format (PixelFormat type)
 }
 
+// RenderTexture2D structure matching Raylib's RenderTexture2D
+export interface RenderTexture2D {
+    id: number          // OpenGL framebuffer object id
+    texture: Texture2D  // Color buffer attachment texture
+    depth: Texture2D    // Depth buffer attachment texture
+}
+
 // Type aliases для Result types
 export type RaylibResult<T> = import('./result').Result<T, RaylibError>
