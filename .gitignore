@@ -4,10 +4,11 @@ dist/
 .DS_Store
 .cursor
 .kiro
-
+.vscode
 # Compiled wrappers
-assets/raylib-5.5_macos/
+assets/raylib/
 assets/*.dylib
 assets/*.so
 assets/*.dll
 !assets/textures/
+*.tgz

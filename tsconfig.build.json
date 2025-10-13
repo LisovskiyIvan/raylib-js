@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": false,
+    "outDir": "dist",
+    "allowImportingTsExtensions": false,
+    "verbatimModuleSyntax": false,
+    "moduleResolution": "node",
+    "stripInternal": true
+  },
+  "include": ["src/index.ts"],
+  "exclude": ["node_modules", "dist", "tests", "examples", "scripts"]
+}

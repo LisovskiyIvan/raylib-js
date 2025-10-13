@@ -16,33 +16,56 @@ TypeScript обертка для Raylib с использованием Bun FFI 
 
 ### Требования
 
-- [Bun](https://bun.sh/) runtime
-- Raylib библиотека (включена в `assets/raylib-5.5_macos/lib/`)
-- TypeScript 5+
+- [Bun](https://bun.sh/) runtime (>= 1.0.0)
+- [Raylib](https://www.raylib.com/) библиотека
+- C компилятор (clang на macOS, gcc на Linux)
 
-### Установка зависимостей
+### Установка Raylib
 
+**macOS (Homebrew):**
 ```bash
-bun install
+brew install raylib
 ```
 
-### Компиляция нативных модулей (опционально)
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt install libraylib-dev
+```
+
+**Другие системы:** См. [официальную документацию Raylib](https://github.com/raysan5/raylib#build-and-installation)
+
+### Установка пакета
+
+```bash
+bun add raylib-ts
+```
+
+### Компиляция нативных модулей
+
+После установки пакета автоматически запустится компиляция C модулей. Если это не произошло или raylib установлен в нестандартном месте:
 
 ```bash
 # Компиляция всех модулей
 bun run compile
 
-# Компиляция только текстурных модулей
+# Или с указанием путей к raylib
+export RAYLIB_INCLUDE=/path/to/raylib/include
+export RAYLIB_LIB=/path/to/raylib/lib
+bun run compile
+
+# Компиляция отдельных модулей
 bun run compile:textures
+bun run compile:render-texture
 ```
+
+**Примечание:** Нативные модули необходимы для работы с текстурами и render texture. Основной функционал (окна, рисование, ввод) работает без них.
 
 ## Быстрый старт
 
 ### Базовый пример
 
 ```typescript
-import Raylib from "./src/Raylib"
-import { Colors } from "./src/constants"
+import { Raylib, Colors } from "raylib-ts"
 
 const rl = new Raylib()
 

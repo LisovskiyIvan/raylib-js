@@ -18,7 +18,7 @@ export default class Raylib {
 
     constructor(libraryPath?: string) {
         // Используем путь по умолчанию, если не передан
-        const defaultPath = `./assets/raylib-5.5_macos/lib/libraylib.${suffix}`
+        const defaultPath = `./assets/raylib/lib/libraylib.${suffix}`
         const path = libraryPath || defaultPath
         
         try {

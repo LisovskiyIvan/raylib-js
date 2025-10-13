@@ -1,8 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const { spawn } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
 
-const parentDir = path.dirname(__dirname + "/scripts");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const parentDir = __dirname;
 const scriptFiles = fs.readdirSync(parentDir)
   .filter(file => file.endsWith('.js') && file !== 'compile-all.js' && file.includes('compile'))
   .map(file => path.join(parentDir, file));
