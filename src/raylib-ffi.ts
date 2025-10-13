@@ -77,6 +77,26 @@ const symbolsDefinition = {
     args: [FFIType.i32, FFIType.i32],
     returns: FFIType.void
   },
+  DisableCursor: {
+    args: [],
+    returns: FFIType.void
+  },
+  EnableCursor: {
+    args: [],
+    returns: FFIType.void
+  },
+  HideCursor: {
+    args: [],
+    returns: FFIType.void
+  },
+  ShowCursor: {
+    args: [],
+    returns: FFIType.void
+  },
+  IsCursorHidden: {
+    args: [],
+    returns: FFIType.bool
+  },
   DrawPixel: {
     args: [FFIType.i16, FFIType.i16, FFIType.u32],
     returns: FFIType.void

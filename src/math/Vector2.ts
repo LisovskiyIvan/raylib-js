@@ -33,7 +33,7 @@ export default class Vector2 {
         this.y = vector.y
     }
 
-     public length() {
+    public length() {
         return Math.sqrt(this.x * this.x + this.y * this.y)
     }
 
@@ -44,7 +44,7 @@ export default class Vector2 {
     }
 
     public normaliseInPlace() {
-         const len = this.length()
+        const len = this.length()
         if (len === 0) return Vector2.Zero()
         this.x /= len
         this.y /= len
@@ -56,5 +56,14 @@ export default class Vector2 {
 
     public cross(vector: Vector2) {
         return this.x * vector.y - this.y * vector.x
+    }
+
+    public scale(scalar: number) {
+        return new Vector2(this.x * scalar, this.y * scalar)
+    }
+
+    public scaleInPlace(scalar: number) {
+        this.x *= scalar
+        this.y *= scalar
     }
 }

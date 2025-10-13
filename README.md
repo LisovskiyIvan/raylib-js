@@ -183,6 +183,18 @@ const position = rl.getMousePosition().unwrapOr({ x: 0, y: 0 })
 
 - **`setMousePosition(x: number, y: number)`** → `Result<void>`
 
+### Управление курсором мыши
+
+- **`disableCursor()`** → `Result<void>` - Захватывает мышь, скрывает курсор и блокирует его в окне
+
+- **`enableCursor()`** → `Result<void>` - Освобождает мышь и показывает курсор
+
+- **`hideCursor()`** → `Result<void>` - Скрывает курсор мыши
+
+- **`showCursor()`** → `Result<void>` - Показывает курсор мыши
+
+- **`isCursorHidden()`** → `Result<boolean>` - Проверяет, скрыт ли курсор
+
 ### Коллизии
 
 - **`checkCollisionRecs(rec1: Rectangle, rec2: Rectangle)`** → `Result<boolean>`
@@ -299,6 +311,9 @@ bun run example:shapes
 
 # Пример работы с мышью
 bun run example:mouse
+
+# Пример захвата мыши
+bun examples/10-mouse-capture.ts
 
 # Пример работы с несколькими текстурами
 bun run example:multiple-textures

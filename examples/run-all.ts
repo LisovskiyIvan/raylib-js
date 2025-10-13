@@ -38,9 +38,14 @@ const examples = [
     },
     {
         name: "08-3d-shapes.ts",
-        title: "3d",
-        description: "3д демонстрация"
-    }
+        title: "3D фигуры",
+        description: "3D демонстрация с вращающейся камерой"
+    },
+    {
+        name: "09-3d-wasd-camera.ts",
+        title: "3D WASD камера",
+        description: "3D сцена с управлением камерой на WASD и мышь"
+    },
 ]
 
 console.log("🎮 Raylib TypeScript - Примеры")

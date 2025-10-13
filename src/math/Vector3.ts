@@ -1,6 +1,6 @@
 export default class Vector3 {
 
-    constructor(public x: number, public y: number, public z: number) {}
+    constructor(public x: number, public y: number, public z: number) { }
 
     public static Zero() {
         return new Vector3(0, 0, 0)
@@ -70,8 +70,8 @@ export default class Vector3 {
         return new Vector3(this.x / len, this.y / len, this.z / len)
     }
 
-     public normaliseInPlace() {
-         const len = this.length()
+    public normaliseInPlace() {
+        const len = this.length()
         if (len === 0) return Vector3.Zero()
         this.x /= len
         this.y /= len
@@ -88,5 +88,15 @@ export default class Vector3 {
             this.z * vector.x - this.x * vector.z,
             this.x * vector.y - this.y * vector.x
         )
+    }
+
+    public scale(scalar: number) {
+        return new Vector3(this.x * scalar, this.y * scalar, this.z * scalar)
+    }
+
+    public scaleInPlace(scalar: number) {
+        this.x *= scalar
+        this.y *= scalar
+        this.z *= scalar
     }
 }

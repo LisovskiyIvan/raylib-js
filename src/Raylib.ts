@@ -201,6 +201,31 @@ export default class Raylib {
             .andThen(() => this.safeFFICall('set mouse position', () => this.rl.SetMousePosition(x, y)))
     }
 
+    public disableCursor(): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('disable cursor', () => this.rl.DisableCursor()))
+    }
+
+    public enableCursor(): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('enable cursor', () => this.rl.EnableCursor()))
+    }
+
+    public hideCursor(): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('hide cursor', () => this.rl.HideCursor()))
+    }
+
+    public showCursor(): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('show cursor', () => this.rl.ShowCursor()))
+    }
+
+    public isCursorHidden(): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('check cursor hidden', () => this.rl.IsCursorHidden()))
+    }
+
     public getFrameTime(): RaylibResult<number> {
         return this.requireInitialized()
             .andThen(() => this.safeFFICall('get frame time', () => this.rl.GetFrameTime()))
