@@ -56,7 +56,7 @@ const symbolsDefinition = {
   GetKeyPressed: {
     args: [],
     returns: FFIType.i8
-},
+  },
   IsMouseButtonDown: {
     args: [FFIType.i32],
     returns: FFIType.bool
@@ -124,6 +124,65 @@ const symbolsDefinition = {
   CheckCollisionPointTriangle: {
     args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
+  },
+  // 3D Drawing functions
+  DrawLine3D: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawPoint3D: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawCircle3D: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawTriangle3D: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  // Additional 3D shapes
+  DrawCube: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawCubeV: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawSphere: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawCylinder: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawCapsule: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32, FFIType.i32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawPlane: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawRay: {
+    args: [FFIType.ptr, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawGrid: {
+    args: [FFIType.i32, FFIType.f32],
+    returns: FFIType.void
+  },
+  // 3D Camera and mode functions - Camera3D struct should be passed as pointer
+  BeginMode3D: {
+    args: [FFIType.ptr],
+    returns: FFIType.void
+  },
+  EndMode3D: {
+    args: [],
+    returns: FFIType.void
   },
 };
 
@@ -244,7 +303,7 @@ export const initRaylib = (libraryPath: string) => {
     const lib = dlopen(libraryPath, symbolsDefinition);
     const wrapperLib = dlopen('./assets/texture-wrapper.dylib', wrapperSymbols);
     const renderTextureWrapperLib = dlopen('./assets/render-texture-wrapper.dylib', renderTextureWrapperSymbols);
-    
+
     return {
       ...lib.symbols,
       ...wrapperLib.symbols,

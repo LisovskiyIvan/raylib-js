@@ -1,10 +1,11 @@
 import { initRaylib } from './raylib-ffi'
 import type { RaylibResult, Texture2D, RenderTexture2D } from './types'
 import { initError, ffiError, stateError } from './types'
-import { Ok, Err, tryFn} from './result'
+import { Ok, Err, tryFn } from './result'
 import { ptr, suffix } from 'bun:ffi'
 import { validateAll, validateFinite, validateNonEmptyString, validateNonNegative, validatePositive, validateRange, validateColor } from './validation'
 import Vector2 from './math/Vector2'
+import Vector3 from './math/Vector3'
 import Rectangle from './math/Rectangle'
 
 
@@ -20,7 +21,7 @@ export default class Raylib {
         // Используем путь по умолчанию, если не передан
         const defaultPath = `./assets/raylib/lib/libraylib.${suffix}`
         const path = libraryPath || defaultPath
-        
+
         try {
             this.rl = initRaylib(path)
         } catch (error) {
@@ -207,38 +208,38 @@ export default class Raylib {
 
     public drawPixel(posX: number, posY: number, color: number) {
         return this.requireInitialized()
-        .andThen(() => validateColor(color, 'color'))
-        .andThen(() => this.safeFFICall('draw a pixel', () => this.rl.DrawPixel(posX, posY, color)))
+            .andThen(() => validateColor(color, 'color'))
+            .andThen(() => this.safeFFICall('draw a pixel', () => this.rl.DrawPixel(posX, posY, color)))
     }
 
     public drawPixelV(position: Vector2, color: number) {
         return this.requireInitialized()
-        .andThen(() => validateColor(color, 'color'))
-        .andThen(() => this.safeFFICall('draw a pixel', () => this.rl.DrawPixel(position.x, position.y, color)))
+            .andThen(() => validateColor(color, 'color'))
+            .andThen(() => this.safeFFICall('draw a pixel', () => this.rl.DrawPixel(position.x, position.y, color)))
     }
 
     public drawLine(startX: number, startY: number, endX: number, endY: number, color: number) {
         return this.requireInitialized()
-        .andThen(() => validateColor(color, 'color'))
-        .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawLine(startX, startY, endX, endY, color)))
+            .andThen(() => validateColor(color, 'color'))
+            .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawLine(startX, startY, endX, endY, color)))
     }
 
     public drawLineV(start: Vector2, end: Vector2, color: number) {
         return this.requireInitialized()
-        .andThen(() => validateColor(color, 'color'))
-        .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawLine(start.x, start.y, end.x, end.y, color)))
+            .andThen(() => validateColor(color, 'color'))
+            .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawLine(start.x, start.y, end.x, end.y, color)))
     }
 
-     public drawCircle(centerX: number, centerY: number, radius: number, color: number) {
+    public drawCircle(centerX: number, centerY: number, radius: number, color: number) {
         return this.requireInitialized()
-        .andThen(() => validateColor(color, 'color'))
-        .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawCircle(centerX, centerY, radius, color)))
+            .andThen(() => validateColor(color, 'color'))
+            .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawCircle(centerX, centerY, radius, color)))
     }
 
     public drawCircleV(center: Vector2, radius: number, color: number) {
         return this.requireInitialized()
-        .andThen(() => validateColor(color, 'color'))
-        .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawCircle(center.x, center.y, radius, color)))
+            .andThen(() => validateColor(color, 'color'))
+            .andThen(() => this.safeFFICall('draw a line', () => this.rl.DrawCircle(center.x, center.y, radius, color)))
     }
 
     public drawTriangle(v1: Vector2, v2: Vector2, v3: Vector2, color: number): RaylibResult<void> {
@@ -392,13 +393,13 @@ export default class Raylib {
             .andThen(() => this.safeFFICall('load texture to slot', () => {
                 const fileNameBuffer = this.textEncoder.encode(fileName + '\0')
                 const fileNamePtr = ptr(fileNameBuffer)
-                
+
                 const slotIndex = this.rl.LoadTextureToSlot(fileNamePtr)
-                
+
                 if (slotIndex < 0) {
                     throw new Error('Failed to load texture or no free slots available')
                 }
-                
+
                 return slotIndex
             }))
     }
@@ -411,7 +412,7 @@ export default class Raylib {
                 if (id === 0) {
                     throw new Error('Invalid slot index or texture not loaded')
                 }
-                
+
                 const texture: Texture2D = {
                     id,
                     width: this.rl.GetTextureWidthBySlot(slotIndex),
@@ -484,11 +485,11 @@ export default class Raylib {
             ))
             .andThen(() => this.safeFFICall('load render texture to slot', () => {
                 const slotIndex = this.rl.LoadRenderTextureToSlot(width, height)
-                
+
                 if (slotIndex < 0) {
                     throw new Error('Failed to create render texture or no free slots available')
                 }
-                
+
                 return slotIndex
             }))
     }
@@ -501,7 +502,7 @@ export default class Raylib {
                 if (id === 0) {
                     throw new Error('Invalid slot index or render texture not loaded')
                 }
-                
+
                 const texture: Texture2D = {
                     id: this.rl.GetRenderTextureColorIdBySlot(slotIndex),
                     width: this.rl.GetRenderTextureColorWidthBySlot(slotIndex),
@@ -547,6 +548,249 @@ export default class Raylib {
             .andThen(() => this.safeFFICall('unload all render textures', () => {
                 this.rl.UnloadAllRenderTextures()
             }))
+    }
+
+    // 3D Camera and mode functions
+    public beginMode3D(cameraPosition: Vector3, cameraTarget: Vector3, cameraUp: Vector3, fovy: number, projection: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(cameraPosition.x, 'cameraPosition.x'),
+                validateFinite(cameraPosition.y, 'cameraPosition.y'),
+                validateFinite(cameraPosition.z, 'cameraPosition.z'),
+                validateFinite(cameraTarget.x, 'cameraTarget.x'),
+                validateFinite(cameraTarget.y, 'cameraTarget.y'),
+                validateFinite(cameraTarget.z, 'cameraTarget.z'),
+                validateFinite(cameraUp.x, 'cameraUp.x'),
+                validateFinite(cameraUp.y, 'cameraUp.y'),
+                validateFinite(cameraUp.z, 'cameraUp.z'),
+                validateFinite(fovy, 'fovy'),
+                validateFinite(projection, 'projection')
+            ))
+            .andThen(() => this.safeFFICall('begin mode 3D', () => {
+                // Create Camera3D structure as Float32Array
+                // Camera3D: position(3f) + target(3f) + up(3f) + fovy(1f) + projection(1i)
+                const camera = new Float32Array(11)
+                camera[0] = cameraPosition.x
+                camera[1] = cameraPosition.y
+                camera[2] = cameraPosition.z
+                camera[3] = cameraTarget.x
+                camera[4] = cameraTarget.y
+                camera[5] = cameraTarget.z
+                camera[6] = cameraUp.x
+                camera[7] = cameraUp.y
+                camera[8] = cameraUp.z
+                camera[9] = fovy
+                camera[10] = projection
+                
+                this.rl.BeginMode3D(ptr(camera))
+            }))
+    }
+
+    public endMode3D(): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('end mode 3D', () => this.rl.EndMode3D()))
+    }
+
+    // 3D Drawing functions
+    public drawLine3D(startPos: Vector3, endPos: Vector3, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(startPos.x, 'startPos.x'),
+                validateFinite(startPos.y, 'startPos.y'),
+                validateFinite(startPos.z, 'startPos.z'),
+                validateFinite(endPos.x, 'endPos.x'),
+                validateFinite(endPos.y, 'endPos.y'),
+                validateFinite(endPos.z, 'endPos.z'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw line 3D', () =>
+                this.rl.DrawLine3D(startPos.x, startPos.y, startPos.z, endPos.x, endPos.y, endPos.z, color)
+            ))
+    }
+
+    public drawPoint3D(position: Vector3, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(position.x, 'position.x'),
+                validateFinite(position.y, 'position.y'),
+                validateFinite(position.z, 'position.z'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw point 3D', () =>
+                this.rl.DrawPoint3D(position.x, position.y, position.z, color)
+            ))
+    }
+
+    public drawCircle3D(center: Vector3, radius: number, rotationAxis: Vector3, rotationAngle: number, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(center.x, 'center.x'),
+                validateFinite(center.y, 'center.y'),
+                validateFinite(center.z, 'center.z'),
+                validateNonNegative(radius, 'radius'),
+                validateFinite(rotationAxis.x, 'rotationAxis.x'),
+                validateFinite(rotationAxis.y, 'rotationAxis.y'),
+                validateFinite(rotationAxis.z, 'rotationAxis.z'),
+                validateFinite(rotationAngle, 'rotationAngle'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw circle 3D', () =>
+                this.rl.DrawCircle3D(center.x, center.y, center.z, radius, rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle, color)
+            ))
+    }
+
+    public drawTriangle3D(v1: Vector3, v2: Vector3, v3: Vector3, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(v1.x, 'v1.x'),
+                validateFinite(v1.y, 'v1.y'),
+                validateFinite(v1.z, 'v1.z'),
+                validateFinite(v2.x, 'v2.x'),
+                validateFinite(v2.y, 'v2.y'),
+                validateFinite(v2.z, 'v2.z'),
+                validateFinite(v3.x, 'v3.x'),
+                validateFinite(v3.y, 'v3.y'),
+                validateFinite(v3.z, 'v3.z'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw triangle 3D', () =>
+                this.rl.DrawTriangle3D(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z, color)
+            ))
+    }
+
+    // Additional 3D shapes
+    public drawCube(position: Vector3, width: number, height: number, length: number, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(position.x, 'position.x'),
+                validateFinite(position.y, 'position.y'),
+                validateFinite(position.z, 'position.z'),
+                validateNonNegative(width, 'width'),
+                validateNonNegative(height, 'height'),
+                validateNonNegative(length, 'length'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw cube', () =>
+                this.rl.DrawCube(position.x, position.y, position.z, width, height, length, color)
+            ))
+    }
+
+    public drawCubeV(position: Vector3, size: Vector3, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(position.x, 'position.x'),
+                validateFinite(position.y, 'position.y'),
+                validateFinite(position.z, 'position.z'),
+                validateNonNegative(size.x, 'size.x'),
+                validateNonNegative(size.y, 'size.y'),
+                validateNonNegative(size.z, 'size.z'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw cube V', () =>
+                this.rl.DrawCubeV(position.x, position.y, position.z, size.x, size.y, size.z, color)
+            ))
+    }
+
+    public drawSphere(centerPos: Vector3, radius: number, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(centerPos.x, 'centerPos.x'),
+                validateFinite(centerPos.y, 'centerPos.y'),
+                validateFinite(centerPos.z, 'centerPos.z'),
+                validateNonNegative(radius, 'radius'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw sphere', () =>
+                this.rl.DrawSphere(centerPos.x, centerPos.y, centerPos.z, radius, color)
+            ))
+    }
+
+    public drawCylinder(position: Vector3, radiusTop: number, radiusBottom: number, height: number, slices: number, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(position.x, 'position.x'),
+                validateFinite(position.y, 'position.y'),
+                validateFinite(position.z, 'position.z'),
+                validateNonNegative(radiusTop, 'radiusTop'),
+                validateNonNegative(radiusBottom, 'radiusBottom'),
+                validateNonNegative(height, 'height'),
+                validatePositive(slices, 'slices'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw cylinder', () =>
+                this.rl.DrawCylinder(position.x, position.y, position.z, radiusTop, radiusBottom, height, slices, color)
+            ))
+    }
+
+    public drawCapsule(startPos: Vector3, endPos: Vector3, radius: number, slices: number, rings: number, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(startPos.x, 'startPos.x'),
+                validateFinite(startPos.y, 'startPos.y'),
+                validateFinite(startPos.z, 'startPos.z'),
+                validateFinite(endPos.x, 'endPos.x'),
+                validateFinite(endPos.y, 'endPos.y'),
+                validateFinite(endPos.z, 'endPos.z'),
+                validateNonNegative(radius, 'radius'),
+                validatePositive(slices, 'slices'),
+                validatePositive(rings, 'rings'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw capsule', () =>
+                this.rl.DrawCapsule(startPos.x, startPos.y, startPos.z, endPos.x, endPos.y, endPos.z, radius, slices, rings, color)
+            ))
+    }
+
+    public drawPlane(centerPos: Vector3, size: Vector2, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(centerPos.x, 'centerPos.x'),
+                validateFinite(centerPos.y, 'centerPos.y'),
+                validateFinite(centerPos.z, 'centerPos.z'),
+                validateNonNegative(size.x, 'size.x'),
+                validateNonNegative(size.y, 'size.y'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw plane', () =>
+                this.rl.DrawPlane(centerPos.x, centerPos.y, centerPos.z, size.x, size.y, color)
+            ))
+    }
+
+    public drawRay(rayPosition: Vector3, rayDirection: Vector3, color: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(rayPosition.x, 'rayPosition.x'),
+                validateFinite(rayPosition.y, 'rayPosition.y'),
+                validateFinite(rayPosition.z, 'rayPosition.z'),
+                validateFinite(rayDirection.x, 'rayDirection.x'),
+                validateFinite(rayDirection.y, 'rayDirection.y'),
+                validateFinite(rayDirection.z, 'rayDirection.z'),
+                validateColor(color, 'color')
+            ))
+            .andThen(() => this.safeFFICall('draw ray', () => {
+                // Create Ray structure as Float32Array
+                // Ray: position(3f) + direction(3f)
+                const ray = new Float32Array(6)
+                ray[0] = rayPosition.x
+                ray[1] = rayPosition.y
+                ray[2] = rayPosition.z
+                ray[3] = rayDirection.x
+                ray[4] = rayDirection.y
+                ray[5] = rayDirection.z
+                
+                this.rl.DrawRay(ptr(ray), color)
+            }))
+    }
+
+    public drawGrid(slices: number, spacing: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validatePositive(slices, 'slices'),
+                validatePositive(spacing, 'spacing')
+            ))
+            .andThen(() => this.safeFFICall('draw grid', () =>
+                this.rl.DrawGrid(slices, spacing)
+            ))
     }
 
     // State getters

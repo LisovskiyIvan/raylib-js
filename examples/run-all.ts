@@ -35,6 +35,11 @@ const examples = [
         name: "07-complete-demo.ts",
         title: "Полная демонстрация",
         description: "Все возможности в одном интерактивном примере"
+    },
+    {
+        name: "08-3d-shapes.ts",
+        title: "3d",
+        description: "3д демонстрация"
     }
 ]
 
@@ -53,7 +58,7 @@ for (let i = 0; i < examples.length; i++) {
 
 console.log("Требования:")
 console.log("• Bun установлен и настроен")
-console.log("• Raylib библиотека в ./assets/raylib-5.5_macos/lib/")
+console.log("• Raylib библиотека в ./assets/raylib/lib/")
 console.log("• Для примера 5: файл ./assets/textures/texture.jpg")
 console.log()
 
@@ -64,7 +69,7 @@ const rl = readline.createInterface({
     output: process.stdout
 })
 
-rl.question('Введите номер примера для запуска (1-7) или Enter для выхода: ', (answer: string) => {
+rl.question(`Введите номер примера для запуска (1-${examples.length}) или Enter для выхода: `, (answer: string) => {
     const num = parseInt(answer.trim())
 
     if (isNaN(num) || num < 1 || num > examples.length) {
