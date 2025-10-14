@@ -958,4 +958,90 @@ export default class Raylib {
     public get height(): number {
         return this.windowHeight
     }
+
+    // 3D Collision detection functions
+    public checkCollisionSpheres(center1: Vector3, radius1: number, center2: Vector3, radius2: number): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(center1.x, 'center1.x'),
+                validateFinite(center1.y, 'center1.y'),
+                validateFinite(center1.z, 'center1.z'),
+                validateNonNegative(radius1, 'radius1'),
+                validateFinite(center2.x, 'center2.x'),
+                validateFinite(center2.y, 'center2.y'),
+                validateFinite(center2.z, 'center2.z'),
+                validateNonNegative(radius2, 'radius2')
+            ))
+            .andThen(() => this.safeFFICall('check collision spheres', () =>
+                this.rl.CheckCollisionSpheres(center1.x, center1.y, center1.z, radius1, center2.x, center2.y, center2.z, radius2)
+            ))
+    }
+
+    public checkCollisionBoxes(box1: BoundingBox, box2: BoundingBox): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(box1.min.x, 'box1.min.x'),
+                validateFinite(box1.min.y, 'box1.min.y'),
+                validateFinite(box1.min.z, 'box1.min.z'),
+                validateFinite(box1.max.x, 'box1.max.x'),
+                validateFinite(box1.max.y, 'box1.max.y'),
+                validateFinite(box1.max.z, 'box1.max.z'),
+                validateFinite(box2.min.x, 'box2.min.x'),
+                validateFinite(box2.min.y, 'box2.min.y'),
+                validateFinite(box2.min.z, 'box2.min.z'),
+                validateFinite(box2.max.x, 'box2.max.x'),
+                validateFinite(box2.max.y, 'box2.max.y'),
+                validateFinite(box2.max.z, 'box2.max.z')
+            ))
+            .andThen(() => this.safeFFICall('check collision boxes', () => {
+                // Create BoundingBox structures as Float32Array
+                const box1Array = new Float32Array(6)
+                box1Array[0] = box1.min.x
+                box1Array[1] = box1.min.y
+                box1Array[2] = box1.min.z
+                box1Array[3] = box1.max.x
+                box1Array[4] = box1.max.y
+                box1Array[5] = box1.max.z
+
+                const box2Array = new Float32Array(6)
+                box2Array[0] = box2.min.x
+                box2Array[1] = box2.min.y
+                box2Array[2] = box2.min.z
+                box2Array[3] = box2.max.x
+                box2Array[4] = box2.max.y
+                box2Array[5] = box2.max.z
+
+                return this.rl.CheckCollisionBoxes(ptr(box1Array), ptr(box2Array))
+            }))
+    }
+
+    public checkCollisionBoxSphere(box: BoundingBox, center: Vector3, radius: number): RaylibResult<boolean> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(box.min.x, 'box.min.x'),
+                validateFinite(box.min.y, 'box.min.y'),
+                validateFinite(box.min.z, 'box.min.z'),
+                validateFinite(box.max.x, 'box.max.x'),
+                validateFinite(box.max.y, 'box.max.y'),
+                validateFinite(box.max.z, 'box.max.z'),
+                validateFinite(center.x, 'center.x'),
+                validateFinite(center.y, 'center.y'),
+                validateFinite(center.z, 'center.z'),
+                validateNonNegative(radius, 'radius')
+            ))
+            .andThen(() => this.safeFFICall('check collision box sphere', () => {
+                // Create BoundingBox structure as Float32Array
+                const boxArray = new Float32Array(6)
+                boxArray[0] = box.min.x
+                boxArray[1] = box.min.y
+                boxArray[2] = box.min.z
+                boxArray[3] = box.max.x
+                boxArray[4] = box.max.y
+                boxArray[5] = box.max.z
+
+                return this.rl.CheckCollisionBoxSphere(ptr(boxArray), center.x, center.y, center.z, radius)
+            }))
+    }
+
+
 }

@@ -73,5 +73,34 @@ export interface BoundingBox {
     max: { x: number; y: number; z: number }  // Maximum vertex box-corner
 }
 
+// Ray structure matching Raylib's Ray
+export interface Ray {
+    position: { x: number; y: number; z: number }  // Ray position (origin)
+    direction: { x: number; y: number; z: number } // Ray direction
+}
+
+// RayCollision structure matching Raylib's RayCollision
+export interface RayCollision {
+    hit: boolean                                   // Did the ray hit something?
+    distance: number                               // Distance to nearest hit
+    point: { x: number; y: number; z: number }     // Point of nearest hit
+    normal: { x: number; y: number; z: number }    // Surface normal of hit
+}
+
+// Mesh structure (simplified for collision detection)
+export interface Mesh {
+    slotIndex: number      // Index in the mesh wrapper's slot array
+    vertexCount: number    // Number of vertices stored in arrays
+    triangleCount: number  // Number of triangles stored (indexed or not)
+}
+
+// Matrix structure matching Raylib's Matrix (4x4 matrix)
+export interface Matrix {
+    m0: number; m4: number; m8: number;  m12: number  // Matrix first row (4 components)
+    m1: number; m5: number; m9: number;  m13: number  // Matrix second row (4 components)
+    m2: number; m6: number; m10: number; m14: number  // Matrix third row (4 components)
+    m3: number; m7: number; m11: number; m15: number  // Matrix fourth row (4 components)
+}
+
 // Type aliases для Result types
 export type RaylibResult<T> = import('./result').Result<T, RaylibError>

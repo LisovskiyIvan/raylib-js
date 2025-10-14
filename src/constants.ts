@@ -10,7 +10,8 @@ export const Colors = {
   RAYWHITE: 0xFFF5F5F5,  // Raylib стандартный белый
   DARKGRAY: 0xFF505050,   // Темно-серый
   PURPLE: 0xFFFF00FF,    // Фиолетовый
-  ORANGE: 0xFF0080FF     // Оранжевый
+  ORANGE: 0xFF0080FF,    // Оранжевый
+  LIME: 0xFF00FF80       // Лайм
 };
 
 

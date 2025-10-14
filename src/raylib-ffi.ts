@@ -195,6 +195,20 @@ const symbolsDefinition = {
     args: [FFIType.i32, FFIType.f32],
     returns: FFIType.void
   },
+  // 3D Collision detection functions
+  CheckCollisionSpheres: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
+  CheckCollisionBoxes: {
+    args: [FFIType.ptr, FFIType.ptr],
+    returns: FFIType.bool
+  },
+  CheckCollisionBoxSphere: {
+    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.bool
+  },
+
   // 3D Camera and mode functions - Camera3D struct should be passed as pointer
   BeginMode3D: {
     args: [FFIType.ptr],
