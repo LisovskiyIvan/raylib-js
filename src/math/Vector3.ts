@@ -70,9 +70,14 @@ export default class Vector3 {
         return new Vector3(this.x / len, this.y / len, this.z / len)
     }
 
-    public normaliseInPlace() {
+    public normalizeInPlace() {
         const len = this.length()
-        if (len === 0) return Vector3.Zero()
+        if (len === 0) {
+            this.x = 0
+            this.y = 0
+            this.z = 0
+            return
+        }
         this.x /= len
         this.y /= len
         this.z /= len

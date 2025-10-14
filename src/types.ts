@@ -60,5 +60,18 @@ export interface RenderTexture2D {
     depth: Texture2D    // Depth buffer attachment texture
 }
 
+// Model structure using slot-based approach (like textures)
+export interface Model {
+    slotIndex: number      // Index in the model wrapper's slot array
+    meshCount: number      // Number of meshes in the model
+    materialCount: number  // Number of materials in the model
+}
+
+// BoundingBox structure matching Raylib's BoundingBox
+export interface BoundingBox {
+    min: { x: number; y: number; z: number }  // Minimum vertex box-corner
+    max: { x: number; y: number; z: number }  // Maximum vertex box-corner
+}
+
 // Type aliases для Result types
 export type RaylibResult<T> = import('./result').Result<T, RaylibError>

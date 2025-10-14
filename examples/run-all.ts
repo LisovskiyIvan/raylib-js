@@ -46,6 +46,11 @@ const examples = [
         title: "3D WASD камера",
         description: "3D сцена с управлением камерой на WASD и мышь"
     },
+    {
+        name: "10-model-loading.ts",
+        title: "Загрузка 3D моделей",
+        description: "Загрузка и отображение 3D моделей, получение bounding box"
+    },
 ]
 
 console.log("🎮 Raylib TypeScript - Примеры")

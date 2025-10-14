@@ -233,6 +233,17 @@ const position = rl.getMousePosition().unwrapOr({ x: 0, y: 0 })
 
 - **`unloadAllRenderTextures()`** → `Result<void>`
 
+### 3D Модели
+
+- **`loadModel(fileName: string)`** → `Result<Model>` - Загружает 3D модель из файла (поддерживает OBJ, GLTF, IQM и др.)
+- **`unloadModel(model: Model)`** → `Result<void>` - Выгружает модель из памяти
+- **`getModelBoundingBox(model: Model)`** → `Result<BoundingBox>` - Получает ограничивающий прямоугольник модели
+- **`drawModel(model: Model, position: Vector3, scale: number, tint: number)`** → `Result<void>` - Рисует модель
+- **`drawModelEx(model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: number, scale: Vector3, tint: number)`** → `Result<void>` - Рисует модель с расширенными параметрами
+- **`drawModelWires(model: Model, position: Vector3, scale: number, tint: number)`** → `Result<void>` - Рисует каркас модели
+- **`getLoadedModelCount()`** → `Result<number>` - Получает количество загруженных моделей
+- **`unloadAllModels()`** → `Result<void>` - Выгружает все модели
+
 ### Прочее
 
 - **`windowShouldClose()`** → `Result<boolean>`

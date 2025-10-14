@@ -112,14 +112,13 @@ describe('Vector2', () => {
         test('should handle zero vector normalization', () => {
             const v = Vector2.Zero()
             const normalized = v.normalize()
-            
             expect(normalized.x).toBe(0)
             expect(normalized.y).toBe(0)
         })
 
         test('should normalize vector in place', () => {
             const v = new Vector2(3, 4)
-            v.normaliseInPlace()
+            v.normalizeInPlace()
             
             expect(v.x).toBeCloseTo(0.6, 5)
             expect(v.y).toBeCloseTo(0.8, 5)
@@ -128,12 +127,9 @@ describe('Vector2', () => {
 
         test('should handle zero vector normalization in place', () => {
             const v = Vector2.Zero()
-            const result = v.normaliseInPlace()
-            
+            v.normalizeInPlace()
             expect(v.x).toBe(0)
             expect(v.y).toBe(0)
-            expect(result.x).toBe(0) // Returns zero vector
-            expect(result.y).toBe(0)
         })
     })
 
@@ -152,22 +148,6 @@ describe('Vector2', () => {
             const dot = v1.dot(v2)
             
             expect(dot).toBe(0)
-        })
-
-        test('should calculate cross product', () => {
-            const v1 = new Vector2(2, 3)
-            const v2 = new Vector2(4, 5)
-            const cross = v1.cross(v2)
-            
-            expect(cross).toBe(-2) // 2*5 - 3*4 = 10 - 12 = -2
-        })
-
-        test('should calculate cross product with parallel vectors', () => {
-            const v1 = new Vector2(2, 4)
-            const v2 = new Vector2(1, 2)
-            const cross = v1.cross(v2)
-            
-            expect(cross).toBe(0) // Parallel vectors have zero cross product
         })
     })
 })

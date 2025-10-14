@@ -254,6 +254,74 @@ const wrapperSymbols = {
   },
 };
 
+const modelWrapperSymbols = {
+  // Model management
+  LoadModelToSlot: {
+    args: [FFIType.ptr],
+    returns: FFIType.i32
+  },
+  GetModelMeshCountBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetModelMaterialCountBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.i32
+  },
+  GetModelBoundingBoxMinXBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.f32
+  },
+  GetModelBoundingBoxMinYBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.f32
+  },
+  GetModelBoundingBoxMinZBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.f32
+  },
+  GetModelBoundingBoxMaxXBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.f32
+  },
+  GetModelBoundingBoxMaxYBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.f32
+  },
+  GetModelBoundingBoxMaxZBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.f32
+  },
+  UnloadModelBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.void
+  },
+  DrawModelBySlot: {
+    args: [FFIType.i32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawModelExBySlot: {
+    args: [FFIType.i32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawModelWiresBySlot: {
+    args: [FFIType.i32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  GetLoadedModelCount: {
+    args: [],
+    returns: FFIType.i32
+  },
+  UnloadAllModels: {
+    args: [],
+    returns: FFIType.void
+  },
+  IsModelSlotValid: {
+    args: [FFIType.i32],
+    returns: FFIType.bool
+  }
+};
+
 const renderTextureWrapperSymbols = {
   // Render texture management
   LoadRenderTextureToSlot: {
@@ -323,11 +391,13 @@ export const initRaylib = (libraryPath: string) => {
     const lib = dlopen(libraryPath, symbolsDefinition);
     const wrapperLib = dlopen('./assets/texture-wrapper.dylib', wrapperSymbols);
     const renderTextureWrapperLib = dlopen('./assets/render-texture-wrapper.dylib', renderTextureWrapperSymbols);
+    const modelWrapperLib = dlopen('./assets/model-wrapper.dylib', modelWrapperSymbols);
 
     return {
       ...lib.symbols,
       ...wrapperLib.symbols,
-      ...renderTextureWrapperLib.symbols
+      ...renderTextureWrapperLib.symbols,
+      ...modelWrapperLib.symbols
     };
   } catch (error) {
     throw new Error(

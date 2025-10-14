@@ -43,19 +43,19 @@ export default class Vector2 {
         return new Vector2(this.x / len, this.y / len)
     }
 
-    public normaliseInPlace() {
+    public normalizeInPlace() {
         const len = this.length()
-        if (len === 0) return Vector2.Zero()
+        if (len === 0 ) {
+            this.x = 0
+            this.y = 0
+            return
+        }
         this.x /= len
         this.y /= len
     }
 
     public dot(vector: Vector2) {
         return this.x * vector.x + this.y * vector.y
-    }
-
-    public cross(vector: Vector2) {
-        return this.x * vector.y - this.y * vector.x
     }
 
     public scale(scalar: number) {

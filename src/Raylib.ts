@@ -1,6 +1,6 @@
 import { initRaylib } from './raylib-ffi'
-import type { RaylibResult, Texture2D, RenderTexture2D } from './types'
-import { initError, ffiError, stateError } from './types'
+import type { RaylibResult, Texture2D, RenderTexture2D, Model, BoundingBox } from './types'
+import { initError, ffiError, stateError, validationError } from './types'
 import { Ok, Err, tryFn } from './result'
 import { ptr, suffix } from 'bun:ffi'
 import { validateAll, validateFinite, validateNonEmptyString, validateNonNegative, validatePositive, validateRange, validateColor } from './validation'
@@ -816,6 +816,134 @@ export default class Raylib {
             .andThen(() => this.safeFFICall('draw grid', () =>
                 this.rl.DrawGrid(slices, spacing)
             ))
+    }
+
+    // Model loading/unloading functions
+    public loadModel(fileName: string): RaylibResult<Model> {
+        return this.requireInitialized()
+            .andThen(() => validateNonEmptyString(fileName, 'fileName'))
+            .andThen(() => this.safeFFICall('load model to slot', () => {
+                const fileNameBuffer = this.textEncoder.encode(fileName + '\0')
+                const fileNamePtr = ptr(fileNameBuffer)
+                
+                const slotIndex = this.rl.LoadModelToSlot(fileNamePtr)
+                if (slotIndex < 0) {
+                    throw new Error('Failed to load model or no free slots available')
+                }
+                
+                const model: Model = {
+                    slotIndex,
+                    meshCount: this.rl.GetModelMeshCountBySlot(slotIndex),
+                    materialCount: this.rl.GetModelMaterialCountBySlot(slotIndex)
+                }
+                
+                return model
+            }))
+    }
+
+    public unloadModel(model: Model): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => {
+                if (model.slotIndex < 0) {
+                    return new Err(validationError('Invalid model slot index'))
+                }
+                return this.safeFFICall('unload model from slot', () => {
+                    this.rl.UnloadModelBySlot(model.slotIndex)
+                })
+            })
+    }
+
+    public getModelBoundingBox(model: Model): RaylibResult<BoundingBox> {
+        return this.requireInitialized()
+            .andThen(() => {
+                if (model.slotIndex < 0) {
+                    return new Err(validationError('Invalid model slot index'))
+                }
+                return this.safeFFICall('get model bounding box', () => {
+                    const boundingBox: BoundingBox = {
+                        min: {
+                            x: this.rl.GetModelBoundingBoxMinXBySlot(model.slotIndex),
+                            y: this.rl.GetModelBoundingBoxMinYBySlot(model.slotIndex),
+                            z: this.rl.GetModelBoundingBoxMinZBySlot(model.slotIndex)
+                        },
+                        max: {
+                            x: this.rl.GetModelBoundingBoxMaxXBySlot(model.slotIndex),
+                            y: this.rl.GetModelBoundingBoxMaxYBySlot(model.slotIndex),
+                            z: this.rl.GetModelBoundingBoxMaxZBySlot(model.slotIndex)
+                        }
+                    }
+                    
+                    return boundingBox
+                })
+            })
+    }
+
+    // Additional model functions
+    public drawModel(model: Model, position: Vector3, scale: number, tint: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(model.slotIndex, 'model.slotIndex'),
+                validateFinite(position.x, 'position.x'),
+                validateFinite(position.y, 'position.y'),
+                validateFinite(position.z, 'position.z'),
+                validateFinite(scale, 'scale'),
+                validateColor(tint, 'tint')
+            ))
+            .andThen(() => this.safeFFICall('draw model', () => {
+                this.rl.DrawModelBySlot(model.slotIndex, position.x, position.y, position.z, scale, tint)
+            }))
+    }
+
+    public drawModelEx(model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: number, scale: Vector3, tint: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(model.slotIndex, 'model.slotIndex'),
+                validateFinite(position.x, 'position.x'),
+                validateFinite(position.y, 'position.y'),
+                validateFinite(position.z, 'position.z'),
+                validateFinite(rotationAxis.x, 'rotationAxis.x'),
+                validateFinite(rotationAxis.y, 'rotationAxis.y'),
+                validateFinite(rotationAxis.z, 'rotationAxis.z'),
+                validateFinite(rotationAngle, 'rotationAngle'),
+                validateFinite(scale.x, 'scale.x'),
+                validateFinite(scale.y, 'scale.y'),
+                validateFinite(scale.z, 'scale.z'),
+                validateColor(tint, 'tint')
+            ))
+            .andThen(() => this.safeFFICall('draw model ex', () => {
+                this.rl.DrawModelExBySlot(model.slotIndex, position.x, position.y, position.z, 
+                    rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle,
+                    scale.x, scale.y, scale.z, tint)
+            }))
+    }
+
+    public drawModelWires(model: Model, position: Vector3, scale: number, tint: number): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(model.slotIndex, 'model.slotIndex'),
+                validateFinite(position.x, 'position.x'),
+                validateFinite(position.y, 'position.y'),
+                validateFinite(position.z, 'position.z'),
+                validateFinite(scale, 'scale'),
+                validateColor(tint, 'tint')
+            ))
+            .andThen(() => this.safeFFICall('draw model wires', () => {
+                this.rl.DrawModelWiresBySlot(model.slotIndex, position.x, position.y, position.z, scale, tint)
+            }))
+    }
+
+    public getLoadedModelCount(): RaylibResult<number> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('get loaded model count', () => {
+                return this.rl.GetLoadedModelCount()
+            }))
+    }
+
+    public unloadAllModels(): RaylibResult<void> {
+        return this.requireInitialized()
+            .andThen(() => this.safeFFICall('unload all models', () => {
+                this.rl.UnloadAllModels()
+            }))
     }
 
     // State getters

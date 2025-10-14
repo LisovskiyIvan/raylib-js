@@ -171,7 +171,7 @@ describe('Vector3', () => {
 
         test('should normalize vector in place', () => {
             const v = new Vector3(3, 0, 4)
-            v.normaliseInPlace()
+            v.normalizeInPlace()
             
             expect(v.x).toBeCloseTo(0.6, 5)
             expect(v.y).toBeCloseTo(0, 5)
@@ -181,14 +181,11 @@ describe('Vector3', () => {
 
         test('should handle zero vector normalization in place', () => {
             const v = Vector3.Zero()
-            const result = v.normaliseInPlace()
+            v.normalizeInPlace()
             
             expect(v.x).toBe(0)
             expect(v.y).toBe(0)
             expect(v.z).toBe(0)
-            expect(result.x).toBe(0) // Returns zero vector
-            expect(result.y).toBe(0)
-            expect(result.z).toBe(0)
         })
     })
 
