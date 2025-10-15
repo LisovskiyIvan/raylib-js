@@ -1043,7 +1043,6 @@ export default class Raylib {
             }))
     }
 
-    // Ray collision detection functions
     public getRayCollisionSphere(rayPosition: Vector3, rayDirection: Vector3, center: Vector3, radius: number): RaylibResult<import('./types').RayCollision> {
         return this.requireInitialized()
             .andThen(() => validateAll(
@@ -1070,18 +1069,22 @@ export default class Raylib {
 
                 this.rl.GetRayCollisionSphereWrapper(ptr(rayArray), center.x, center.y, center.z, radius)
 
+                // Get all data at once
+                const outBuffer = new Float32Array(8)
+                this.rl.GetLastCollisionData(ptr(outBuffer))
+
                 return {
-                    hit: this.rl.GetLastCollisionHit(),
-                    distance: this.rl.GetLastCollisionDistance(),
+                    hit: outBuffer[0]! !== 0,
+                    distance: outBuffer[1]!,
                     point: {
-                        x: this.rl.GetLastCollisionPointX(),
-                        y: this.rl.GetLastCollisionPointY(),
-                        z: this.rl.GetLastCollisionPointZ()
+                        x: outBuffer[2]!,
+                        y: outBuffer[3]!,
+                        z: outBuffer[4]!
                     },
                     normal: {
-                        x: this.rl.GetLastCollisionNormalX(),
-                        y: this.rl.GetLastCollisionNormalY(),
-                        z: this.rl.GetLastCollisionNormalZ()
+                        x: outBuffer[5]!,
+                        y: outBuffer[6]!,
+                        z: outBuffer[7]!
                     }
                 }
             }))
@@ -1124,18 +1127,22 @@ export default class Raylib {
 
                 this.rl.GetRayCollisionBoxWrapper(ptr(rayArray), ptr(boxArray))
 
+                // Get all data at once
+                const outBuffer = new Float32Array(8)
+                this.rl.GetLastCollisionData(ptr(outBuffer))
+
                 return {
-                    hit: this.rl.GetLastCollisionHit(),
-                    distance: this.rl.GetLastCollisionDistance(),
+                    hit: outBuffer[0]! !== 0,
+                    distance: outBuffer[1]!,
                     point: {
-                        x: this.rl.GetLastCollisionPointX(),
-                        y: this.rl.GetLastCollisionPointY(),
-                        z: this.rl.GetLastCollisionPointZ()
+                        x: outBuffer[2]!,
+                        y: outBuffer[3]!,
+                        z: outBuffer[4]!
                     },
                     normal: {
-                        x: this.rl.GetLastCollisionNormalX(),
-                        y: this.rl.GetLastCollisionNormalY(),
-                        z: this.rl.GetLastCollisionNormalZ()
+                        x: outBuffer[5]!,
+                        y: outBuffer[6]!,
+                        z: outBuffer[7]!
                     }
                 }
             }))
@@ -1160,7 +1167,7 @@ export default class Raylib {
                 validateFinite(p3.y, 'p3.y'),
                 validateFinite(p3.z, 'p3.z')
             ))
-            .andThen(() => this.safeFFICall('get ray collision triangle', () => {
+            .andThen(() => this.safeFFICall('get ray collision triangle optimized', () => {
                 // Create Ray structure as Float32Array
                 const rayArray = new Float32Array(6)
                 rayArray[0] = rayPosition.x
@@ -1172,18 +1179,22 @@ export default class Raylib {
 
                 this.rl.GetRayCollisionTriangleWrapper(ptr(rayArray), p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z)
 
+                // Get all data at once
+                const outBuffer = new Float32Array(8)
+                this.rl.GetLastCollisionData(ptr(outBuffer))
+
                 return {
-                    hit: this.rl.GetLastCollisionHit(),
-                    distance: this.rl.GetLastCollisionDistance(),
+                    hit: outBuffer[0]! !== 0,
+                    distance: outBuffer[1]!,
                     point: {
-                        x: this.rl.GetLastCollisionPointX(),
-                        y: this.rl.GetLastCollisionPointY(),
-                        z: this.rl.GetLastCollisionPointZ()
+                        x: outBuffer[2]!,
+                        y: outBuffer[3]!,
+                        z: outBuffer[4]!
                     },
                     normal: {
-                        x: this.rl.GetLastCollisionNormalX(),
-                        y: this.rl.GetLastCollisionNormalY(),
-                        z: this.rl.GetLastCollisionNormalZ()
+                        x: outBuffer[5]!,
+                        y: outBuffer[6]!,
+                        z: outBuffer[7]!
                     }
                 }
             }))

@@ -57,7 +57,7 @@ const examples = [
         description: "3D коллизии между сферами, боксами и лучами"
     },
     {
-        name: "12-simple-3d-collisions.ts",
+        name: "12-ray-collision.ts",
         title: "Простые 3D коллизии",
         description: "Базовые 3D коллизии с анимацией"
     },

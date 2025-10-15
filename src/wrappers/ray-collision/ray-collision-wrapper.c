@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include <stdlib.h>
+#include <string.h>
 
 // Wrapper functions for ray collision detection
 // These functions return collision data through individual component getters
@@ -22,7 +23,6 @@ void GetRayCollisionTriangleWrapper(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3)
     lastCollision = GetRayCollisionTriangle(ray, p1, p2, p3);
 }
 
-// Getters for RayCollision components
 bool GetLastCollisionHit() {
     return lastCollision.hit;
 }
@@ -53,4 +53,18 @@ float GetLastCollisionNormalY() {
 
 float GetLastCollisionNormalZ() {
     return lastCollision.normal.z;
+}
+
+void GetLastCollisionData(float* outBuffer) {
+    if (outBuffer == NULL) return;
+    
+    // Copy as floats (bool will be 0.0 or 1.0)
+    outBuffer[0] = lastCollision.hit ? 1.0f : 0.0f;
+    outBuffer[1] = lastCollision.distance;
+    outBuffer[2] = lastCollision.point.x;
+    outBuffer[3] = lastCollision.point.y;
+    outBuffer[4] = lastCollision.point.z;
+    outBuffer[5] = lastCollision.normal.x;
+    outBuffer[6] = lastCollision.normal.y;
+    outBuffer[7] = lastCollision.normal.z;
 }

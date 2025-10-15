@@ -414,7 +414,6 @@ const rayCollisionWrapperSymbols = {
     args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.void
   },
-  // Getters for last collision result
   GetLastCollisionHit: {
     args: [],
     returns: FFIType.bool
@@ -446,6 +445,11 @@ const rayCollisionWrapperSymbols = {
   GetLastCollisionNormalZ: {
     args: [],
     returns: FFIType.f32
+  },
+  // Optimized API - get all data at once (1 call)
+  GetLastCollisionData: {
+    args: [FFIType.ptr],
+    returns: FFIType.void
   },
 };
 
