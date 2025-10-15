@@ -606,7 +606,7 @@ export default class Raylib {
                 camera[8] = cameraUp.z
                 camera[9] = fovy
                 camera[10] = projection
-                
+
                 this.rl.BeginMode3D(ptr(camera))
             }))
     }
@@ -802,7 +802,7 @@ export default class Raylib {
                 ray[3] = rayDirection.x
                 ray[4] = rayDirection.y
                 ray[5] = rayDirection.z
-                
+
                 this.rl.DrawRay(ptr(ray), color)
             }))
     }
@@ -825,18 +825,18 @@ export default class Raylib {
             .andThen(() => this.safeFFICall('load model to slot', () => {
                 const fileNameBuffer = this.textEncoder.encode(fileName + '\0')
                 const fileNamePtr = ptr(fileNameBuffer)
-                
+
                 const slotIndex = this.rl.LoadModelToSlot(fileNamePtr)
                 if (slotIndex < 0) {
                     throw new Error('Failed to load model or no free slots available')
                 }
-                
+
                 const model: Model = {
                     slotIndex,
                     meshCount: this.rl.GetModelMeshCountBySlot(slotIndex),
                     materialCount: this.rl.GetModelMaterialCountBySlot(slotIndex)
                 }
-                
+
                 return model
             }))
     }
@@ -872,7 +872,7 @@ export default class Raylib {
                             z: this.rl.GetModelBoundingBoxMaxZBySlot(model.slotIndex)
                         }
                     }
-                    
+
                     return boundingBox
                 })
             })
@@ -911,7 +911,7 @@ export default class Raylib {
                 validateColor(tint, 'tint')
             ))
             .andThen(() => this.safeFFICall('draw model ex', () => {
-                this.rl.DrawModelExBySlot(model.slotIndex, position.x, position.y, position.z, 
+                this.rl.DrawModelExBySlot(model.slotIndex, position.x, position.y, position.z,
                     rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle,
                     scale.x, scale.y, scale.z, tint)
             }))
@@ -1040,6 +1040,152 @@ export default class Raylib {
                 boxArray[5] = box.max.z
 
                 return this.rl.CheckCollisionBoxSphere(ptr(boxArray), center.x, center.y, center.z, radius)
+            }))
+    }
+
+    // Ray collision detection functions
+    public getRayCollisionSphere(rayPosition: Vector3, rayDirection: Vector3, center: Vector3, radius: number): RaylibResult<import('./types').RayCollision> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(rayPosition.x, 'rayPosition.x'),
+                validateFinite(rayPosition.y, 'rayPosition.y'),
+                validateFinite(rayPosition.z, 'rayPosition.z'),
+                validateFinite(rayDirection.x, 'rayDirection.x'),
+                validateFinite(rayDirection.y, 'rayDirection.y'),
+                validateFinite(rayDirection.z, 'rayDirection.z'),
+                validateFinite(center.x, 'center.x'),
+                validateFinite(center.y, 'center.y'),
+                validateFinite(center.z, 'center.z'),
+                validateNonNegative(radius, 'radius')
+            ))
+            .andThen(() => this.safeFFICall('get ray collision sphere', () => {
+                // Create Ray structure as Float32Array
+                const rayArray = new Float32Array(6)
+                rayArray[0] = rayPosition.x
+                rayArray[1] = rayPosition.y
+                rayArray[2] = rayPosition.z
+                rayArray[3] = rayDirection.x
+                rayArray[4] = rayDirection.y
+                rayArray[5] = rayDirection.z
+
+                this.rl.GetRayCollisionSphereWrapper(ptr(rayArray), center.x, center.y, center.z, radius)
+
+                return {
+                    hit: this.rl.GetLastCollisionHit(),
+                    distance: this.rl.GetLastCollisionDistance(),
+                    point: {
+                        x: this.rl.GetLastCollisionPointX(),
+                        y: this.rl.GetLastCollisionPointY(),
+                        z: this.rl.GetLastCollisionPointZ()
+                    },
+                    normal: {
+                        x: this.rl.GetLastCollisionNormalX(),
+                        y: this.rl.GetLastCollisionNormalY(),
+                        z: this.rl.GetLastCollisionNormalZ()
+                    }
+                }
+            }))
+    }
+
+    public getRayCollisionBox(rayPosition: Vector3, rayDirection: Vector3, box: BoundingBox): RaylibResult<import('./types').RayCollision> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(rayPosition.x, 'rayPosition.x'),
+                validateFinite(rayPosition.y, 'rayPosition.y'),
+                validateFinite(rayPosition.z, 'rayPosition.z'),
+                validateFinite(rayDirection.x, 'rayDirection.x'),
+                validateFinite(rayDirection.y, 'rayDirection.y'),
+                validateFinite(rayDirection.z, 'rayDirection.z'),
+                validateFinite(box.min.x, 'box.min.x'),
+                validateFinite(box.min.y, 'box.min.y'),
+                validateFinite(box.min.z, 'box.min.z'),
+                validateFinite(box.max.x, 'box.max.x'),
+                validateFinite(box.max.y, 'box.max.y'),
+                validateFinite(box.max.z, 'box.max.z')
+            ))
+            .andThen(() => this.safeFFICall('get ray collision box', () => {
+                // Create Ray structure as Float32Array
+                const rayArray = new Float32Array(6)
+                rayArray[0] = rayPosition.x
+                rayArray[1] = rayPosition.y
+                rayArray[2] = rayPosition.z
+                rayArray[3] = rayDirection.x
+                rayArray[4] = rayDirection.y
+                rayArray[5] = rayDirection.z
+
+                // Create BoundingBox structure as Float32Array
+                const boxArray = new Float32Array(6)
+                boxArray[0] = box.min.x
+                boxArray[1] = box.min.y
+                boxArray[2] = box.min.z
+                boxArray[3] = box.max.x
+                boxArray[4] = box.max.y
+                boxArray[5] = box.max.z
+
+                this.rl.GetRayCollisionBoxWrapper(ptr(rayArray), ptr(boxArray))
+
+                return {
+                    hit: this.rl.GetLastCollisionHit(),
+                    distance: this.rl.GetLastCollisionDistance(),
+                    point: {
+                        x: this.rl.GetLastCollisionPointX(),
+                        y: this.rl.GetLastCollisionPointY(),
+                        z: this.rl.GetLastCollisionPointZ()
+                    },
+                    normal: {
+                        x: this.rl.GetLastCollisionNormalX(),
+                        y: this.rl.GetLastCollisionNormalY(),
+                        z: this.rl.GetLastCollisionNormalZ()
+                    }
+                }
+            }))
+    }
+
+    public getRayCollisionTriangle(rayPosition: Vector3, rayDirection: Vector3, p1: Vector3, p2: Vector3, p3: Vector3): RaylibResult<import('./types').RayCollision> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(rayPosition.x, 'rayPosition.x'),
+                validateFinite(rayPosition.y, 'rayPosition.y'),
+                validateFinite(rayPosition.z, 'rayPosition.z'),
+                validateFinite(rayDirection.x, 'rayDirection.x'),
+                validateFinite(rayDirection.y, 'rayDirection.y'),
+                validateFinite(rayDirection.z, 'rayDirection.z'),
+                validateFinite(p1.x, 'p1.x'),
+                validateFinite(p1.y, 'p1.y'),
+                validateFinite(p1.z, 'p1.z'),
+                validateFinite(p2.x, 'p2.x'),
+                validateFinite(p2.y, 'p2.y'),
+                validateFinite(p2.z, 'p2.z'),
+                validateFinite(p3.x, 'p3.x'),
+                validateFinite(p3.y, 'p3.y'),
+                validateFinite(p3.z, 'p3.z')
+            ))
+            .andThen(() => this.safeFFICall('get ray collision triangle', () => {
+                // Create Ray structure as Float32Array
+                const rayArray = new Float32Array(6)
+                rayArray[0] = rayPosition.x
+                rayArray[1] = rayPosition.y
+                rayArray[2] = rayPosition.z
+                rayArray[3] = rayDirection.x
+                rayArray[4] = rayDirection.y
+                rayArray[5] = rayDirection.z
+
+                this.rl.GetRayCollisionTriangleWrapper(ptr(rayArray), p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z)
+
+                return {
+                    hit: this.rl.GetLastCollisionHit(),
+                    distance: this.rl.GetLastCollisionDistance(),
+                    point: {
+                        x: this.rl.GetLastCollisionPointX(),
+                        y: this.rl.GetLastCollisionPointY(),
+                        z: this.rl.GetLastCollisionPointZ()
+                    },
+                    normal: {
+                        x: this.rl.GetLastCollisionNormalX(),
+                        y: this.rl.GetLastCollisionNormalY(),
+                        z: this.rl.GetLastCollisionNormalZ()
+                    }
+                }
             }))
     }
 

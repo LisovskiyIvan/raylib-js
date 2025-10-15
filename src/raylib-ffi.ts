@@ -400,18 +400,69 @@ const renderTextureWrapperSymbols = {
   },
 };
 
+const rayCollisionWrapperSymbols = {
+  // Ray collision detection
+  GetRayCollisionSphereWrapper: {
+    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.void
+  },
+  GetRayCollisionBoxWrapper: {
+    args: [FFIType.ptr, FFIType.ptr],
+    returns: FFIType.void
+  },
+  GetRayCollisionTriangleWrapper: {
+    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.void
+  },
+  // Getters for last collision result
+  GetLastCollisionHit: {
+    args: [],
+    returns: FFIType.bool
+  },
+  GetLastCollisionDistance: {
+    args: [],
+    returns: FFIType.f32
+  },
+  GetLastCollisionPointX: {
+    args: [],
+    returns: FFIType.f32
+  },
+  GetLastCollisionPointY: {
+    args: [],
+    returns: FFIType.f32
+  },
+  GetLastCollisionPointZ: {
+    args: [],
+    returns: FFIType.f32
+  },
+  GetLastCollisionNormalX: {
+    args: [],
+    returns: FFIType.f32
+  },
+  GetLastCollisionNormalY: {
+    args: [],
+    returns: FFIType.f32
+  },
+  GetLastCollisionNormalZ: {
+    args: [],
+    returns: FFIType.f32
+  },
+};
+
 export const initRaylib = (libraryPath: string) => {
   try {
     const lib = dlopen(libraryPath, symbolsDefinition);
     const wrapperLib = dlopen('./assets/texture-wrapper.dylib', wrapperSymbols);
     const renderTextureWrapperLib = dlopen('./assets/render-texture-wrapper.dylib', renderTextureWrapperSymbols);
     const modelWrapperLib = dlopen('./assets/model-wrapper.dylib', modelWrapperSymbols);
+    const rayCollisionWrapperLib = dlopen('./assets/ray-collision-wrapper.dylib', rayCollisionWrapperSymbols);
 
     return {
       ...lib.symbols,
       ...wrapperLib.symbols,
       ...renderTextureWrapperLib.symbols,
-      ...modelWrapperLib.symbols
+      ...modelWrapperLib.symbols,
+      ...rayCollisionWrapperLib.symbols
     };
   } catch (error) {
     throw new Error(
