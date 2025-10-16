@@ -232,7 +232,6 @@ while (true) {
     // Рисование частиц
     if (showParticles) {
         for (const particle of particles) {
-            const alpha = Math.floor(particle.life * 255)
             const color = particle.color // В реальной реализации нужно было бы изменить альфа-канал
             rl.drawCircleV(particle.pos, 2, color)
         }

@@ -71,6 +71,7 @@ test("Result API - should handle successful operations", () => {
       expect(result.error.kind).toBe(RaylibErrorKind.FFIError);
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping initialization test - no display available");
   }
 });
@@ -97,6 +98,7 @@ test("Result API - should validate FPS range", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping FPS test - no display available");
   }
 });
@@ -126,6 +128,7 @@ test("Result API - should validate drawing parameters", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping drawing test - no display available");
   }
 });
@@ -146,6 +149,7 @@ test("Result API - should prevent double initialization", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping double init test - no display available");
   }
 });
@@ -184,6 +188,7 @@ test("Result API - map should transform successful values", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping map test - no display available");
   }
 });
@@ -213,6 +218,7 @@ test("Collision Detection - Rectangle vs Rectangle", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping collision test - no display available");
   }
 });
@@ -241,6 +247,7 @@ test("Collision Detection - Circle vs Circle", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping circle collision test - no display available");
   }
 });
@@ -269,6 +276,7 @@ test("Collision Detection - Circle vs Rectangle", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping circle-rectangle collision test - no display available");
   }
 });
@@ -297,6 +305,7 @@ test("Collision Detection - Point in Rectangle", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping point-rectangle collision test - no display available");
   }
 });
@@ -325,6 +334,7 @@ test("Collision Detection - Point in Circle", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping point-circle collision test - no display available");
   }
 });
@@ -356,6 +366,7 @@ test("Collision Detection - Point in Triangle", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping point-triangle collision test - no display available");
   }
 });
@@ -386,6 +397,7 @@ test("Collision Detection - Circle vs Line", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping circle-line collision test - no display available");
   }
 });
@@ -410,6 +422,7 @@ test("Collision Detection - Validation errors", () => {
       rl.closeWindow();
     }
   } catch (error) {
+    console.log(error);
     console.log("Skipping collision validation test - no display available");
   }
 });

@@ -20,7 +20,6 @@ const projection = 0 // CAMERA_PERSPECTIVE
 
 // Movement settings
 const moveSpeed = 5.0
-const rotationSpeed = 2.0
 let yaw = 0.0 // Horizontal rotation
 let pitch = 0.0 // Vertical rotation
 
@@ -65,8 +64,6 @@ while (!rl.windowShouldClose().unwrap()) {
     ).normalize()
     
     const right = front.cross(cameraUp).normalize()
-    const up = right.cross(front).normalize()
-    
     // WASD movement
     let velocity = new Vector3(0, 0, 0)
     
@@ -125,7 +122,6 @@ while (!rl.windowShouldClose().unwrap()) {
             1,
             Math.sin(angle) * radius
         )
-        const hue = i / 8
         const color = i % 2 === 0 ? Colors.GREEN : Colors.YELLOW
         rl.drawSphere(spherePos, 1.0, color)
     }

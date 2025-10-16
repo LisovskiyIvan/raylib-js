@@ -1,5 +1,5 @@
 // Example 3: Keyboard and mouse input handling
-import { Raylib, Colors, Vector2, Rectangle, kb, mouse } from '../src/index'
+import { Raylib, Colors, Vector2, kb, mouse } from '../src/index'
 
 const rl = new Raylib()
 

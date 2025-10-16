@@ -1,5 +1,5 @@
 // Example 4: Collision detection for shapes
-import { Raylib, Colors, Vector2, Rectangle, kb, mouse } from '../src/index'
+import { Raylib, Colors, Vector2, Rectangle, kb } from '../src/index'
 
 const rl = new Raylib()
 

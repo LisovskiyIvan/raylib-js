@@ -819,6 +819,7 @@ export default class Raylib {
     }
 
     // Model loading/unloading functions
+    // TODO: optimize ffi calls
     public loadModel(fileName: string): RaylibResult<Model> {
         return this.requireInitialized()
             .andThen(() => validateNonEmptyString(fileName, 'fileName'))
@@ -853,6 +854,7 @@ export default class Raylib {
             })
     }
 
+    // TODO: do just one ffi call
     public getModelBoundingBox(model: Model): RaylibResult<BoundingBox> {
         return this.requireInitialized()
             .andThen(() => {

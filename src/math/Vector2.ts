@@ -15,8 +15,8 @@ export default class Vector2 {
     }
 
     public addInPlace(vector: Vector2) {
-        this.x + vector.x
-        this.y + vector.y
+        this.x += vector.x
+        this.y += vector.y
     }
 
     public subtract(vector: Vector2) {
@@ -24,8 +24,8 @@ export default class Vector2 {
     }
 
     public subtractInPlace(vector: Vector2) {
-        this.x - vector.x
-        this.y - vector.y
+        this.x -= vector.x
+        this.y -= vector.y
     }
 
     public copyFrom(vector: Vector2) {

@@ -259,7 +259,7 @@ describe('3D Functions', () => {
                 new Vector3(5, 5, 5)     // Diagonal view
             ]
 
-            positions.forEach((position, index) => {
+            positions.forEach((position) => {
                 const beginResult = rl.beginMode3D(
                     position,
                     Vector3.Zero(),

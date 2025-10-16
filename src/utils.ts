@@ -1,4 +1,4 @@
-import { Result, Ok, Err, ok, err } from './result'
+import { Result, ok, err } from './result'
 import type { RaylibError } from './types'
 import { RaylibErrorKind } from './types'
 
@@ -75,8 +75,7 @@ export function withTimeout<T>(
     operation: () => Result<T, RaylibError>,
     timeoutMs: number
 ): Result<T, RaylibError> {
-    // В реальном приложении здесь была бы асинхронная логика
-    // Для демонстрации просто выполняем операцию
+
     return operation()
 }
 
