@@ -95,15 +95,15 @@ while (true) {
     // Check ray collision with triangle
     const triangleCollision = rl.getRayCollisionTriangle(rayPosition, animatedRayDirection, triangleP1, triangleP2, triangleP3)
     const triangleHit = triangleCollision.unwrapOr({ hit: false, distance: 0, point: { x: 0, y: 0, z: 0 }, normal: { x: 0, y: 0, z: 0 } })
-    const triangleColor = triangleHit.hit ? Colors.RED : Colors.YELLOW
+    const triangleColor = triangleHit.hit ? Colors.RED : Colors.GREEN
     rl.drawTriangle3D(triangleP1, triangleP2, triangleP3, triangleColor)
 
     // Draw ray - make it longer and more visible
     const rayEnd = rayPosition.add(animatedRayDirection.scale(15))
-    rl.drawLine3D(rayPosition, rayEnd, Colors.MAGENTA)
+    rl.drawLine3D(rayPosition, rayEnd, Colors.BLUE)
     
     // Draw ray origin point
-    rl.drawSphere(rayPosition, 0.15, Colors.MAGENTA)
+    rl.drawSphere(rayPosition, 0.15, Colors.BLACK)
 
     // Draw collision points
     if (sphereHit.hit) {
@@ -170,7 +170,7 @@ while (true) {
     yOffset += 40
     rl.drawText("Legend:", 10, yOffset, 16, Colors.DARKGRAY)
     yOffset += 25
-    rl.drawText("Magenta Line = Ray", 10, yOffset, 14, Colors.MAGENTA)
+    rl.drawText("Magenta Line = Ray", 10, yOffset, 14, Colors.LIME)
     yOffset += 20
     rl.drawText("Orange Sphere = Hit Point", 10, yOffset, 14, Colors.ORANGE)
     yOffset += 20

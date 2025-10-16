@@ -1,4 +1,4 @@
-import { dlopen, FFIType, suffix } from 'bun:ffi';
+import { dlopen, FFIType } from 'bun:ffi';
 
 const symbolsDefinition = {
   InitWindow: {
@@ -403,15 +403,15 @@ const renderTextureWrapperSymbols = {
 const rayCollisionWrapperSymbols = {
   // Ray collision detection
   GetRayCollisionSphereWrapper: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.ptr],
     returns: FFIType.void
   },
   GetRayCollisionBoxWrapper: {
-    args: [FFIType.ptr, FFIType.ptr],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.ptr],
     returns: FFIType.void
   },
   GetRayCollisionTriangleWrapper: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.ptr],
     returns: FFIType.void
   },
   GetLastCollisionHit: {

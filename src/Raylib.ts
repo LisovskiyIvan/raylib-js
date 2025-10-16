@@ -1067,11 +1067,8 @@ export default class Raylib {
                 rayArray[4] = rayDirection.y
                 rayArray[5] = rayDirection.z
 
-                this.rl.GetRayCollisionSphereWrapper(ptr(rayArray), center.x, center.y, center.z, radius)
-
-                // Get all data at once
                 const outBuffer = new Float32Array(8)
-                this.rl.GetLastCollisionData(ptr(outBuffer))
+                this.rl.GetRayCollisionSphereWrapper(ptr(rayArray), center.x, center.y, center.z, radius, ptr(outBuffer))
 
                 return {
                     hit: outBuffer[0]! !== 0,
@@ -1125,11 +1122,8 @@ export default class Raylib {
                 boxArray[4] = box.max.y
                 boxArray[5] = box.max.z
 
-                this.rl.GetRayCollisionBoxWrapper(ptr(rayArray), ptr(boxArray))
-
-                // Get all data at once
                 const outBuffer = new Float32Array(8)
-                this.rl.GetLastCollisionData(ptr(outBuffer))
+                this.rl.GetRayCollisionBoxWrapper(ptr(rayArray), ptr(boxArray), ptr(outBuffer))
 
                 return {
                     hit: outBuffer[0]! !== 0,
@@ -1177,11 +1171,8 @@ export default class Raylib {
                 rayArray[4] = rayDirection.y
                 rayArray[5] = rayDirection.z
 
-                this.rl.GetRayCollisionTriangleWrapper(ptr(rayArray), p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z)
-
-                // Get all data at once
                 const outBuffer = new Float32Array(8)
-                this.rl.GetLastCollisionData(ptr(outBuffer))
+                this.rl.GetRayCollisionTriangleWrapper(ptr(rayArray), p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, ptr(outBuffer))
 
                 return {
                     hit: outBuffer[0]! !== 0,
