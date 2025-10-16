@@ -11,7 +11,9 @@ export const Colors = {
   DARKGRAY: 0xFF505050,   // Темно-серый
   PURPLE: 0xFFFF00FF,    // Фиолетовый
   ORANGE: 0xFF0080FF,    // Оранжевый
-  LIME: 0xFF00FF80       // Лайм
+  LIME: 0xFF00FF80,      // Лайм
+  CYAN: 0xFFFFFF00,      // Циан
+  MAGENTA: 0xFFFF00FF    // Маджента (то же что PURPLE)
 };
 
 

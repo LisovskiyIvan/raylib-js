@@ -40,10 +40,8 @@ describe('Vector2', () => {
             const v2 = new Vector2(3, 4)
             v1.addInPlace(v2)
             
-            // Note: There's a bug in the original code - it doesn't assign the result
-            // This test documents the current behavior
-            expect(v1.x).toBe(1) // Should be 4 when bug is fixed
-            expect(v1.y).toBe(2) // Should be 6 when bug is fixed
+            expect(v1.x).toBe(4) 
+            expect(v1.y).toBe(6) 
         })
     })
 
@@ -65,10 +63,8 @@ describe('Vector2', () => {
             const v2 = new Vector2(2, 3)
             v1.subtractInPlace(v2)
             
-            // Note: There's a bug in the original code - it doesn't assign the result
-            // This test documents the current behavior
-            expect(v1.x).toBe(5) // Should be 3 when bug is fixed
-            expect(v1.y).toBe(7) // Should be 4 when bug is fixed
+            expect(v1.x).toBe(3) 
+            expect(v1.y).toBe(4) 
         })
     })
 

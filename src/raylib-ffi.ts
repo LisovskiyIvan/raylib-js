@@ -271,7 +271,7 @@ const wrapperSymbols = {
 const modelWrapperSymbols = {
   // Model management
   LoadModelToSlot: {
-    args: [FFIType.ptr],
+    args: [FFIType.ptr, FFIType.ptr],
     returns: FFIType.i32
   },
   GetModelMeshCountBySlot: {
@@ -336,6 +336,15 @@ const modelWrapperSymbols = {
   },
   GetRayCollisionModelMesh: {
     args: [FFIType.ptr, FFIType.i32, FFIType.i32, FFIType.ptr, FFIType.ptr],
+    returns: FFIType.void
+  },
+  // Optimized model functions - get multiple values in one call
+  GetModelDataBySlot: {
+    args: [FFIType.i32, FFIType.ptr],
+    returns: FFIType.void
+  },
+  GetModelBoundingBoxBySlot: {
+    args: [FFIType.i32, FFIType.ptr],
     returns: FFIType.void
   }
 };

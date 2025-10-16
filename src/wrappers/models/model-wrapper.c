@@ -26,7 +26,7 @@ int FindFreeModelSlot() {
 }
 
 // Load model and return slot index
-int LoadModelToSlot(const char* fileName) {
+int LoadModelToSlot(const char* fileName, int* outBuffer) {
     int slotIndex = FindFreeModelSlot();
     if (slotIndex == -1) {
         return -1; // No free slots
@@ -39,7 +39,6 @@ int LoadModelToSlot(const char* fileName) {
     if (model.meshCount == 0) {
         return -1; // Failed to load
     }
-    
     // Calculate and cache bounding box
     BoundingBox bbox = GetModelBoundingBox(model);
     
@@ -48,6 +47,10 @@ int LoadModelToSlot(const char* fileName) {
     modelSlots[slotIndex].boundingBox = bbox;
     strncpy(modelSlots[slotIndex].fileName, fileName, 255);
     modelSlots[slotIndex].fileName[255] = '\0';
+    
+    outBuffer[0] = slotIndex;
+    outBuffer[1] = model.meshCount;
+    outBuffer[2] = model.materialCount;
     
     return slotIndex;
 }
@@ -173,6 +176,45 @@ void UnloadAllModels() {
 // Check if model slot is valid and loaded
 bool IsModelSlotValid(int slotIndex) {
     return (slotIndex >= 0 && slotIndex < MAX_MODELS && modelSlots[slotIndex].isLoaded);
+}
+
+// Optimized: Get model data in one call (slotIndex, meshCount, materialCount)
+void GetModelDataBySlot(int slotIndex, int* outBuffer) {
+    // Initialize output buffer
+    outBuffer[0] = -1; // slotIndex (invalid by default)
+    outBuffer[1] = 0;  // meshCount
+    outBuffer[2] = 0;  // materialCount
+    
+    if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
+        return;
+    }
+    
+    outBuffer[0] = slotIndex;
+    outBuffer[1] = modelSlots[slotIndex].model.meshCount;
+    outBuffer[2] = modelSlots[slotIndex].model.materialCount;
+}
+
+// Optimized: Get bounding box in one call (min.x, min.y, min.z, max.x, max.y, max.z)
+void GetModelBoundingBoxBySlot(int slotIndex, float* outBuffer) {
+    // Initialize output buffer
+    outBuffer[0] = 0.0f; // min.x
+    outBuffer[1] = 0.0f; // min.y
+    outBuffer[2] = 0.0f; // min.z
+    outBuffer[3] = 0.0f; // max.x
+    outBuffer[4] = 0.0f; // max.y
+    outBuffer[5] = 0.0f; // max.z
+    
+    if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
+        return;
+    }
+    
+    BoundingBox bbox = modelSlots[slotIndex].boundingBox;
+    outBuffer[0] = bbox.min.x;
+    outBuffer[1] = bbox.min.y;
+    outBuffer[2] = bbox.min.z;
+    outBuffer[3] = bbox.max.x;
+    outBuffer[4] = bbox.max.y;
+    outBuffer[5] = bbox.max.z;
 }
 
 // Get ray collision with model mesh

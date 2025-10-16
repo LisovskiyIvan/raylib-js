@@ -819,7 +819,6 @@ export default class Raylib {
     }
 
     // Model loading/unloading functions
-    // TODO: optimize ffi calls
     public loadModel(fileName: string): RaylibResult<Model> {
         return this.requireInitialized()
             .andThen(() => validateNonEmptyString(fileName, 'fileName'))
@@ -827,17 +826,17 @@ export default class Raylib {
                 const fileNameBuffer = this.textEncoder.encode(fileName + '\0')
                 const fileNamePtr = ptr(fileNameBuffer)
 
-                const slotIndex = this.rl.LoadModelToSlot(fileNamePtr)
+                const dataBuffer = new Int32Array(3)
+                const slotIndex = this.rl.LoadModelToSlot(fileNamePtr, ptr(dataBuffer))
                 if (slotIndex < 0) {
                     throw new Error('Failed to load model or no free slots available')
                 }
 
                 const model: Model = {
-                    slotIndex,
-                    meshCount: this.rl.GetModelMeshCountBySlot(slotIndex),
-                    materialCount: this.rl.GetModelMaterialCountBySlot(slotIndex)
+                    slotIndex: dataBuffer[0]!,
+                    meshCount: dataBuffer[1]!,
+                    materialCount: dataBuffer[2]!
                 }
-
                 return model
             }))
     }
@@ -854,7 +853,6 @@ export default class Raylib {
             })
     }
 
-    // TODO: do just one ffi call
     public getModelBoundingBox(model: Model): RaylibResult<BoundingBox> {
         return this.requireInitialized()
             .andThen(() => {
@@ -862,16 +860,19 @@ export default class Raylib {
                     return new Err(validationError('Invalid model slot index'))
                 }
                 return this.safeFFICall('get model bounding box', () => {
+                    const bboxBuffer = new Float32Array(6)
+                    this.rl.GetModelBoundingBoxBySlot(model.slotIndex, ptr(bboxBuffer))
+
                     const boundingBox: BoundingBox = {
                         min: {
-                            x: this.rl.GetModelBoundingBoxMinXBySlot(model.slotIndex),
-                            y: this.rl.GetModelBoundingBoxMinYBySlot(model.slotIndex),
-                            z: this.rl.GetModelBoundingBoxMinZBySlot(model.slotIndex)
+                            x: bboxBuffer[0]!,
+                            y: bboxBuffer[1]!,
+                            z: bboxBuffer[2]!
                         },
                         max: {
-                            x: this.rl.GetModelBoundingBoxMaxXBySlot(model.slotIndex),
-                            y: this.rl.GetModelBoundingBoxMaxYBySlot(model.slotIndex),
-                            z: this.rl.GetModelBoundingBoxMaxZBySlot(model.slotIndex)
+                            x: bboxBuffer[3]!,
+                            y: bboxBuffer[4]!,
+                            z: bboxBuffer[5]!
                         }
                     }
 
