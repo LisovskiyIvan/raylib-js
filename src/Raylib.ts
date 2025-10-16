@@ -1193,5 +1193,78 @@ export default class Raylib {
             }))
     }
 
+    public getRayCollisionMesh(rayPosition: Vector3, rayDirection: Vector3, model: import('./types').Model, meshIndex: number, transform?: import('./types').Matrix): RaylibResult<import('./types').RayCollision> {
+        return this.requireInitialized()
+            .andThen(() => validateAll(
+                validateFinite(rayPosition.x, 'rayPosition.x'),
+                validateFinite(rayPosition.y, 'rayPosition.y'),
+                validateFinite(rayPosition.z, 'rayPosition.z'),
+                validateFinite(rayDirection.x, 'rayDirection.x'),
+                validateFinite(rayDirection.y, 'rayDirection.y'),
+                validateFinite(rayDirection.z, 'rayDirection.z'),
+                validateFinite(model.slotIndex, 'model.slotIndex'),
+                validateFinite(meshIndex, 'meshIndex')
+            ))
+            .andThen(() => this.safeFFICall('get ray collision mesh', () => {
+                // Create Ray structure as Float32Array
+                const rayArray = new Float32Array(6)
+                rayArray[0] = rayPosition.x
+                rayArray[1] = rayPosition.y
+                rayArray[2] = rayPosition.z
+                rayArray[3] = rayDirection.x
+                rayArray[4] = rayDirection.y
+                rayArray[5] = rayDirection.z
+
+                // Create transform matrix if provided, otherwise use identity
+                let transformArray: Float32Array | null = null
+                if (transform) {
+                    transformArray = new Float32Array(16)
+                    transformArray[0] = transform.m0
+                    transformArray[1] = transform.m1
+                    transformArray[2] = transform.m2
+                    transformArray[3] = transform.m3
+                    transformArray[4] = transform.m4
+                    transformArray[5] = transform.m5
+                    transformArray[6] = transform.m6
+                    transformArray[7] = transform.m7
+                    transformArray[8] = transform.m8
+                    transformArray[9] = transform.m9
+                    transformArray[10] = transform.m10
+                    transformArray[11] = transform.m11
+                    transformArray[12] = transform.m12
+                    transformArray[13] = transform.m13
+                    transformArray[14] = transform.m14
+                    transformArray[15] = transform.m15
+                }
+
+                // Output buffer for collision result
+                const outBuffer = new Float32Array(8)
+
+                // Call the wrapper function
+                this.rl.GetRayCollisionModelMesh(
+                    ptr(rayArray),
+                    model.slotIndex,
+                    meshIndex,
+                    transformArray ? ptr(transformArray) : null,
+                    ptr(outBuffer)
+                )
+
+                return {
+                    hit: outBuffer[0]! !== 0,
+                    distance: outBuffer[1]!,
+                    point: {
+                        x: outBuffer[2]!,
+                        y: outBuffer[3]!,
+                        z: outBuffer[4]!
+                    },
+                    normal: {
+                        x: outBuffer[5]!,
+                        y: outBuffer[6]!,
+                        z: outBuffer[7]!
+                    }
+                }
+            }))
+    }
+
 
 }

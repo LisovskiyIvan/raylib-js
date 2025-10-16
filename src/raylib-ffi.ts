@@ -333,6 +333,10 @@ const modelWrapperSymbols = {
   IsModelSlotValid: {
     args: [FFIType.i32],
     returns: FFIType.bool
+  },
+  GetRayCollisionModelMesh: {
+    args: [FFIType.ptr, FFIType.i32, FFIType.i32, FFIType.ptr, FFIType.ptr],
+    returns: FFIType.void
   }
 };
 

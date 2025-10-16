@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "raymath.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -172,4 +173,44 @@ void UnloadAllModels() {
 // Check if model slot is valid and loaded
 bool IsModelSlotValid(int slotIndex) {
     return (slotIndex >= 0 && slotIndex < MAX_MODELS && modelSlots[slotIndex].isLoaded);
+}
+
+// Get ray collision with model mesh
+void GetRayCollisionModelMesh(Ray* ray, int slotIndex, int meshIndex, Matrix* transform, float* outBuffer) {
+    // Initialize output buffer as no hit
+    outBuffer[0] = 0.0f; // hit
+    outBuffer[1] = 0.0f; // distance
+    outBuffer[2] = 0.0f; // point.x
+    outBuffer[3] = 0.0f; // point.y
+    outBuffer[4] = 0.0f; // point.z
+    outBuffer[5] = 0.0f; // normal.x
+    outBuffer[6] = 0.0f; // normal.y
+    outBuffer[7] = 0.0f; // normal.z
+    
+    // Validate slot and mesh index
+    if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
+        return;
+    }
+    
+    Model* model = &modelSlots[slotIndex].model;
+    if (meshIndex < 0 || meshIndex >= model->meshCount) {
+        return;
+    }
+    
+    // Get the mesh
+    Mesh mesh = model->meshes[meshIndex];
+    
+    // Use Raylib's built-in function
+    Matrix finalTransform = transform ? *transform : MatrixIdentity();
+    RayCollision collision = GetRayCollisionMesh(*ray, mesh, finalTransform);
+    
+    // Write collision data to output buffer
+    outBuffer[0] = collision.hit ? 1.0f : 0.0f;
+    outBuffer[1] = collision.distance;
+    outBuffer[2] = collision.point.x;
+    outBuffer[3] = collision.point.y;
+    outBuffer[4] = collision.point.z;
+    outBuffer[5] = collision.normal.x;
+    outBuffer[6] = collision.normal.y;
+    outBuffer[7] = collision.normal.z;
 }
