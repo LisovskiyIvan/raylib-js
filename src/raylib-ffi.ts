@@ -112,48 +112,52 @@ const symbolsDefinition = {
     returns: FFIType.void
   },
   DrawTriangle: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawTriangleLines: {
+    args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
   DrawRectanglePro: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
   CheckCollisionRecs: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.ptr],
     returns: FFIType.bool
   },
   CheckCollisionCircles: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.ptr, FFIType.f32],
     returns: FFIType.bool
   },
   CheckCollisionCircleRec: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.ptr],
     returns: FFIType.bool
   },
   CheckCollisionCircleLine: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.ptr, FFIType.ptr],
     returns: FFIType.bool
   },
   CheckCollisionPointRec: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.ptr],
     returns: FFIType.bool
   },
   CheckCollisionPointCircle: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.f32],
     returns: FFIType.bool
   },
   CheckCollisionPointTriangle: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.ptr, FFIType.ptr],
     returns: FFIType.bool
   },
   // 3D Drawing functions
   DrawLine3D: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.u32],
     returns: FFIType.void
   },
   DrawPoint3D: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.u32],
     returns: FFIType.void
   },
   DrawCircle3D: {
@@ -161,32 +165,32 @@ const symbolsDefinition = {
     returns: FFIType.void
   },
   DrawTriangle3D: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.ptr, FFIType.u32],
     returns: FFIType.void
   },
   // Additional 3D shapes
   DrawCube: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
   DrawCubeV: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.u32],
     returns: FFIType.void
   },
   DrawSphere: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
   DrawCylinder: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
   DrawCapsule: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32, FFIType.i32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.f32, FFIType.i32, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
   DrawPlane: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.u32],
     returns: FFIType.void
   },
   DrawRay: {
@@ -199,7 +203,7 @@ const symbolsDefinition = {
   },
   // 3D Collision detection functions
   CheckCollisionSpheres: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.ptr, FFIType.f32],
     returns: FFIType.bool
   },
   CheckCollisionBoxes: {
@@ -207,7 +211,7 @@ const symbolsDefinition = {
     returns: FFIType.bool
   },
   CheckCollisionBoxSphere: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    args: [FFIType.ptr, FFIType.ptr, FFIType.f32],
     returns: FFIType.bool
   },
 

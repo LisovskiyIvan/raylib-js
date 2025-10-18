@@ -141,29 +141,36 @@ EXPORT void UnloadModelBySlot(int slotIndex) {
 }
 
 // Draw model by slot index
-EXPORT void DrawModelBySlot(int slotIndex, Vector3 position, float scale, Color tint) {
+EXPORT void DrawModelBySlot(int slotIndex, float posX, float posY, float posZ, float scale, Color tint) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return;
     }
     
+    Vector3 position = {posX, posY, posZ};
     DrawModel(modelSlots[slotIndex].model, position, scale, tint);
 }
 
 // Draw model with extended parameters
-EXPORT void DrawModelExBySlot(int slotIndex, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) {
+EXPORT void DrawModelExBySlot(int slotIndex, float posX, float posY, float posZ, 
+                              float rotAxisX, float rotAxisY, float rotAxisZ, float rotationAngle, 
+                              float scaleX, float scaleY, float scaleZ, Color tint) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return;
     }
     
+    Vector3 position = {posX, posY, posZ};
+    Vector3 rotationAxis = {rotAxisX, rotAxisY, rotAxisZ};
+    Vector3 scale = {scaleX, scaleY, scaleZ};
     DrawModelEx(modelSlots[slotIndex].model, position, rotationAxis, rotationAngle, scale, tint);
 }
 
 // Draw model wires by slot index
-EXPORT void DrawModelWiresBySlot(int slotIndex, Vector3 position, float scale, Color tint) {
+EXPORT void DrawModelWiresBySlot(int slotIndex, float posX, float posY, float posZ, float scale, Color tint) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return;
     }
     
+    Vector3 position = {posX, posY, posZ};
     DrawModelWires(modelSlots[slotIndex].model, position, scale, tint);
 }
 
