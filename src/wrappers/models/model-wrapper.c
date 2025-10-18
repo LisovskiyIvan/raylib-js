@@ -1,8 +1,22 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <stdlib.h>
+
+// Export macro for Windows DLL
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT
+#endif
 #include <string.h>
 
+
+// Export macro for Windows DLL
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT
+#endif
 #define MAX_MODELS 64
 
 // Model storage with metadata
@@ -26,7 +40,7 @@ int FindFreeModelSlot() {
 }
 
 // Load model and return slot index
-int LoadModelToSlot(const char* fileName, int* outBuffer) {
+EXPORT int LoadModelToSlot(const char* fileName, int* outBuffer) {
     int slotIndex = FindFreeModelSlot();
     if (slotIndex == -1) {
         return -1; // No free slots
@@ -56,14 +70,14 @@ int LoadModelToSlot(const char* fileName, int* outBuffer) {
 }
 
 // Get model properties by slot index
-int GetModelMeshCountBySlot(int slotIndex) {
+EXPORT int GetModelMeshCountBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return 0;
     }
     return modelSlots[slotIndex].model.meshCount;
 }
 
-int GetModelMaterialCountBySlot(int slotIndex) {
+EXPORT int GetModelMaterialCountBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return 0;
     }
@@ -71,42 +85,42 @@ int GetModelMaterialCountBySlot(int slotIndex) {
 }
 
 // Get bounding box by slot index (returns individual components)
-float GetModelBoundingBoxMinXBySlot(int slotIndex) {
+EXPORT float GetModelBoundingBoxMinXBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return 0.0f;
     }
     return modelSlots[slotIndex].boundingBox.min.x;
 }
 
-float GetModelBoundingBoxMinYBySlot(int slotIndex) {
+EXPORT float GetModelBoundingBoxMinYBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return 0.0f;
     }
     return modelSlots[slotIndex].boundingBox.min.y;
 }
 
-float GetModelBoundingBoxMinZBySlot(int slotIndex) {
+EXPORT float GetModelBoundingBoxMinZBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return 0.0f;
     }
     return modelSlots[slotIndex].boundingBox.min.z;
 }
 
-float GetModelBoundingBoxMaxXBySlot(int slotIndex) {
+EXPORT float GetModelBoundingBoxMaxXBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return 0.0f;
     }
     return modelSlots[slotIndex].boundingBox.max.x;
 }
 
-float GetModelBoundingBoxMaxYBySlot(int slotIndex) {
+EXPORT float GetModelBoundingBoxMaxYBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return 0.0f;
     }
     return modelSlots[slotIndex].boundingBox.max.y;
 }
 
-float GetModelBoundingBoxMaxZBySlot(int slotIndex) {
+EXPORT float GetModelBoundingBoxMaxZBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return 0.0f;
     }
@@ -114,7 +128,7 @@ float GetModelBoundingBoxMaxZBySlot(int slotIndex) {
 }
 
 // Unload model by slot index
-void UnloadModelBySlot(int slotIndex) {
+EXPORT void UnloadModelBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return;
     }
@@ -127,7 +141,7 @@ void UnloadModelBySlot(int slotIndex) {
 }
 
 // Draw model by slot index
-void DrawModelBySlot(int slotIndex, Vector3 position, float scale, Color tint) {
+EXPORT void DrawModelBySlot(int slotIndex, Vector3 position, float scale, Color tint) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return;
     }
@@ -136,7 +150,7 @@ void DrawModelBySlot(int slotIndex, Vector3 position, float scale, Color tint) {
 }
 
 // Draw model with extended parameters
-void DrawModelExBySlot(int slotIndex, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) {
+EXPORT void DrawModelExBySlot(int slotIndex, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return;
     }
@@ -145,7 +159,7 @@ void DrawModelExBySlot(int slotIndex, Vector3 position, Vector3 rotationAxis, fl
 }
 
 // Draw model wires by slot index
-void DrawModelWiresBySlot(int slotIndex, Vector3 position, float scale, Color tint) {
+EXPORT void DrawModelWiresBySlot(int slotIndex, Vector3 position, float scale, Color tint) {
     if (slotIndex < 0 || slotIndex >= MAX_MODELS || !modelSlots[slotIndex].isLoaded) {
         return;
     }
@@ -154,7 +168,7 @@ void DrawModelWiresBySlot(int slotIndex, Vector3 position, float scale, Color ti
 }
 
 // Get number of loaded models
-int GetLoadedModelCount() {
+EXPORT int GetLoadedModelCount() {
     int count = 0;
     for (int i = 0; i < MAX_MODELS; i++) {
         if (modelSlots[i].isLoaded) {
@@ -165,7 +179,7 @@ int GetLoadedModelCount() {
 }
 
 // Unload all models
-void UnloadAllModels() {
+EXPORT void UnloadAllModels() {
     for (int i = 0; i < MAX_MODELS; i++) {
         if (modelSlots[i].isLoaded) {
             UnloadModelBySlot(i);
@@ -174,12 +188,12 @@ void UnloadAllModels() {
 }
 
 // Check if model slot is valid and loaded
-bool IsModelSlotValid(int slotIndex) {
+EXPORT bool IsModelSlotValid(int slotIndex) {
     return (slotIndex >= 0 && slotIndex < MAX_MODELS && modelSlots[slotIndex].isLoaded);
 }
 
 // Optimized: Get model data in one call (slotIndex, meshCount, materialCount)
-void GetModelDataBySlot(int slotIndex, int* outBuffer) {
+EXPORT void GetModelDataBySlot(int slotIndex, int* outBuffer) {
     // Initialize output buffer
     outBuffer[0] = -1; // slotIndex (invalid by default)
     outBuffer[1] = 0;  // meshCount
@@ -195,7 +209,7 @@ void GetModelDataBySlot(int slotIndex, int* outBuffer) {
 }
 
 // Optimized: Get bounding box in one call (min.x, min.y, min.z, max.x, max.y, max.z)
-void GetModelBoundingBoxBySlot(int slotIndex, float* outBuffer) {
+EXPORT void GetModelBoundingBoxBySlot(int slotIndex, float* outBuffer) {
     // Initialize output buffer
     outBuffer[0] = 0.0f; // min.x
     outBuffer[1] = 0.0f; // min.y
@@ -218,7 +232,7 @@ void GetModelBoundingBoxBySlot(int slotIndex, float* outBuffer) {
 }
 
 // Get ray collision with model mesh
-void GetRayCollisionModelMesh(Ray* ray, int slotIndex, int meshIndex, Matrix* transform, float* outBuffer) {
+EXPORT void GetRayCollisionModelMesh(Ray* ray, int slotIndex, int meshIndex, Matrix* transform, float* outBuffer) {
     // Initialize output buffer as no hit
     outBuffer[0] = 0.0f; // hit
     outBuffer[1] = 0.0f; // distance

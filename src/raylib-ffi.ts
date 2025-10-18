@@ -1,4 +1,6 @@
 import { dlopen, FFIType } from 'bun:ffi';
+import { PlatformManager, LibraryNotFoundError } from './platform/PlatformManager';
+import type { PlatformInfo, LibraryPaths } from './platform/PlatformManager';
 
 const symbolsDefinition = {
   InitWindow: {
@@ -466,13 +468,88 @@ const rayCollisionWrapperSymbols = {
   },
 };
 
-export const initRaylib = (libraryPath: string) => {
+export interface FFILoaderConfig {
+  platformInfo?: PlatformInfo;
+  libraryPaths?: LibraryPaths;
+  fallbackPaths?: string[];
+}
+
+/**
+ * Attempts to load a library with fallback paths
+ */
+function loadLibraryWithFallback(
+  primaryPath: string,
+  fallbackPaths: string[],
+  symbols: any,
+  libraryName: string
+): any {
+  const allPaths = [primaryPath, ...fallbackPaths];
+  const errors: string[] = [];
+
+  for (const path of allPaths) {
+    try {
+      if (PlatformManager.validateLibraryExists(path)) {
+        return dlopen(path, symbols);
+      } else {
+        errors.push(`${path}: File does not exist`);
+      }
+    } catch (error) {
+      errors.push(`${path}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // If all paths failed, throw comprehensive error
+  const platformInfo = PlatformManager.detectPlatform();
+  throw new LibraryNotFoundError(
+    primaryPath,
+    `${libraryName} library could not be loaded from any of the following paths:\n${errors.map(e => `  - ${e}`).join('\n')}\n\nPlatform: ${platformInfo.os}-${platformInfo.arch}\nInstallation instructions: ${PlatformManager.getInstallationInstructions(platformInfo.os)}`
+  );
+}
+
+export const initRaylib = (libraryPath: string, config?: FFILoaderConfig) => {
   try {
+    // Detect platform automatically if config is not provided
+    const platformInfo = config?.platformInfo || PlatformManager.detectPlatform();
+
+    // Generate platform-specific library paths if not provided
+    const libraryPaths = config?.libraryPaths || PlatformManager.getLibraryPaths();
+
+    // Generate fallback paths: prebuilt -> local compilation -> system
+    const prebuiltPaths = PlatformManager.getPrebuiltLibraryPaths();
+    const systemPaths = PlatformManager.getLibraryPaths('/usr/local/lib');
+    const customFallbacks = config?.fallbackPaths || [];
+
+    // Load main raylib library
     const lib = dlopen(libraryPath, symbolsDefinition);
-    const wrapperLib = dlopen('./assets/texture-wrapper.dylib', wrapperSymbols);
-    const renderTextureWrapperLib = dlopen('./assets/render-texture-wrapper.dylib', renderTextureWrapperSymbols);
-    const modelWrapperLib = dlopen('./assets/model-wrapper.dylib', modelWrapperSymbols);
-    const rayCollisionWrapperLib = dlopen('./assets/ray-collision-wrapper.dylib', rayCollisionWrapperSymbols);
+
+    // Load wrapper libraries with fallback mechanisms
+    const wrapperLib = loadLibraryWithFallback(
+      libraryPaths.textureWrapper,
+      [prebuiltPaths.textureWrapper, systemPaths.textureWrapper, ...customFallbacks],
+      wrapperSymbols,
+      'texture-wrapper'
+    );
+
+    const renderTextureWrapperLib = loadLibraryWithFallback(
+      libraryPaths.renderTextureWrapper,
+      [prebuiltPaths.renderTextureWrapper, systemPaths.renderTextureWrapper, ...customFallbacks],
+      renderTextureWrapperSymbols,
+      'render-texture-wrapper'
+    );
+
+    const modelWrapperLib = loadLibraryWithFallback(
+      libraryPaths.modelWrapper,
+      [prebuiltPaths.modelWrapper, systemPaths.modelWrapper, ...customFallbacks],
+      modelWrapperSymbols,
+      'model-wrapper'
+    );
+
+    const rayCollisionWrapperLib = loadLibraryWithFallback(
+      libraryPaths.rayCollisionWrapper,
+      [prebuiltPaths.rayCollisionWrapper, systemPaths.rayCollisionWrapper, ...customFallbacks],
+      rayCollisionWrapperSymbols,
+      'ray-collision-wrapper'
+    );
 
     return {
       ...lib.symbols,
@@ -482,8 +559,18 @@ export const initRaylib = (libraryPath: string) => {
       ...rayCollisionWrapperLib.symbols
     };
   } catch (error) {
+    // Enhanced error reporting with platform information
+    const platformInfo = PlatformManager.detectPlatform();
+
+    if (error instanceof LibraryNotFoundError) {
+      throw error; // Re-throw library-specific errors as-is
+    }
+
     throw new Error(
-      `Failed to load Raylib library from ${libraryPath}: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to initialize Raylib on ${platformInfo.os}-${platformInfo.arch}.\n` +
+      `Main library path: ${libraryPath}\n` +
+      `Error: ${error instanceof Error ? error.message : 'Unknown error'}\n` +
+      `Installation instructions: ${PlatformManager.getInstallationInstructions(platformInfo.os)}`
     );
   }
 };

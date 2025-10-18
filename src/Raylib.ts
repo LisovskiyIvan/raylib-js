@@ -2,7 +2,8 @@ import { initRaylib } from './raylib-ffi'
 import type { RaylibResult, Texture2D, RenderTexture2D, Model, BoundingBox } from './types'
 import { initError, ffiError, stateError, validationError } from './types'
 import { Ok, Err, tryFn } from './result'
-import { ptr, suffix } from 'bun:ffi'
+import { ptr } from 'bun:ffi'
+import { PlatformManager } from './platform/PlatformManager'
 import { validateAll, validateFinite, validateNonEmptyString, validateNonNegative, validatePositive, validateRange, validateColor } from './validation'
 import Vector2 from './math/Vector2'
 import Vector3 from './math/Vector3'
@@ -18,8 +19,8 @@ export default class Raylib {
     private rl: any
 
     constructor(libraryPath?: string) {
-        // Используем путь по умолчанию, если не передан
-        const defaultPath = `./assets/raylib/lib/libraylib.${suffix}`
+        // Используем платформо-зависимый путь по умолчанию, если не передан
+        const defaultPath = PlatformManager.getRaylibPath('./assets')
         const path = libraryPath || defaultPath
 
         try {

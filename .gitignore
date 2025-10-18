@@ -10,5 +10,7 @@ assets/raylib/
 assets/*.dylib
 assets/*.so
 assets/*.dll
+assets/*.exp
+assets/*.lib
 !assets/textures/
 *.tgz

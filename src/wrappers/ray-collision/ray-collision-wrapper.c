@@ -1,7 +1,21 @@
 #include "raylib.h"
 #include <stdlib.h>
+
+// Export macro for Windows DLL
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT
+#endif
 #include <string.h>
 
+
+// Export macro for Windows DLL
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT
+#endif
 // Wrapper functions for ray collision detection
 // These functions return collision data through individual component getters
 
@@ -9,7 +23,7 @@
 static RayCollision lastCollision = {0};
 
 // Get ray collision with sphere
-void GetRayCollisionSphereWrapper(Ray ray, Vector3 center, float radius, float* outBuffer) {
+EXPORT void GetRayCollisionSphereWrapper(Ray ray, Vector3 center, float radius, float* outBuffer) {
     if (outBuffer == NULL) return;
     lastCollision = GetRayCollisionSphere(ray, center, radius);
     
@@ -25,7 +39,7 @@ void GetRayCollisionSphereWrapper(Ray ray, Vector3 center, float radius, float* 
 }
 
 // Get ray collision with box
-void GetRayCollisionBoxWrapper(Ray ray, BoundingBox box, float* outBuffer) {
+EXPORT void GetRayCollisionBoxWrapper(Ray ray, BoundingBox box, float* outBuffer) {
     if (outBuffer == NULL) return;
     lastCollision = GetRayCollisionBox(ray, box);
     
@@ -41,7 +55,7 @@ void GetRayCollisionBoxWrapper(Ray ray, BoundingBox box, float* outBuffer) {
 }
 
 // Get ray collision with triangle
-void GetRayCollisionTriangleWrapper(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, float* outBuffer) {
+EXPORT void GetRayCollisionTriangleWrapper(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, float* outBuffer) {
     if (outBuffer == NULL) return;
     lastCollision = GetRayCollisionTriangle(ray, p1, p2, p3);
 
@@ -56,39 +70,39 @@ void GetRayCollisionTriangleWrapper(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3,
     outBuffer[7] = lastCollision.normal.z;
 }
 
-bool GetLastCollisionHit() {
+EXPORT bool GetLastCollisionHit() {
     return lastCollision.hit;
 }
 
-float GetLastCollisionDistance() {
+EXPORT float GetLastCollisionDistance() {
     return lastCollision.distance;
 }
 
-float GetLastCollisionPointX() {
+EXPORT float GetLastCollisionPointX() {
     return lastCollision.point.x;
 }
 
-float GetLastCollisionPointY() {
+EXPORT float GetLastCollisionPointY() {
     return lastCollision.point.y;
 }
 
-float GetLastCollisionPointZ() {
+EXPORT float GetLastCollisionPointZ() {
     return lastCollision.point.z;
 }
 
-float GetLastCollisionNormalX() {
+EXPORT float GetLastCollisionNormalX() {
     return lastCollision.normal.x;
 }
 
-float GetLastCollisionNormalY() {
+EXPORT float GetLastCollisionNormalY() {
     return lastCollision.normal.y;
 }
 
-float GetLastCollisionNormalZ() {
+EXPORT float GetLastCollisionNormalZ() {
     return lastCollision.normal.z;
 }
 
-void GetLastCollisionData(float* outBuffer) {
+EXPORT void GetLastCollisionData(float* outBuffer) {
     if (outBuffer == NULL) return;
     
     // Copy as floats (bool will be 0.0 or 1.0)

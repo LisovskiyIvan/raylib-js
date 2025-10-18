@@ -1,6 +1,13 @@
 #include "raylib.h"
 #include <stdlib.h>
 
+// Export macro for Windows DLL
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT
+#endif
+
 #define MAX_RENDER_TEXTURES 64
 
 // Render texture storage
@@ -22,7 +29,7 @@ int FindFreeRenderTextureSlot() {
 }
 
 // Load render texture and return slot index
-int LoadRenderTextureToSlot(int width, int height) {
+EXPORT int LoadRenderTextureToSlot(int width, int height) {
     int slotIndex = FindFreeRenderTextureSlot();
     if (slotIndex == -1) {
         return -1; // No free slots
@@ -40,7 +47,7 @@ int LoadRenderTextureToSlot(int width, int height) {
 }
 
 // Get render texture properties by slot index
-unsigned int GetRenderTextureIdBySlot(int slotIndex) {
+EXPORT unsigned int GetRenderTextureIdBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
@@ -48,35 +55,35 @@ unsigned int GetRenderTextureIdBySlot(int slotIndex) {
 }
 
 // Get color texture properties
-unsigned int GetRenderTextureColorIdBySlot(int slotIndex) {
+EXPORT unsigned int GetRenderTextureColorIdBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return renderTextureSlots[slotIndex].renderTexture.texture.id;
 }
 
-int GetRenderTextureColorWidthBySlot(int slotIndex) {
+EXPORT int GetRenderTextureColorWidthBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return renderTextureSlots[slotIndex].renderTexture.texture.width;
 }
 
-int GetRenderTextureColorHeightBySlot(int slotIndex) {
+EXPORT int GetRenderTextureColorHeightBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return renderTextureSlots[slotIndex].renderTexture.texture.height;
 }
 
-int GetRenderTextureColorMipmapsBySlot(int slotIndex) {
+EXPORT int GetRenderTextureColorMipmapsBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return renderTextureSlots[slotIndex].renderTexture.texture.mipmaps;
 }
 
-int GetRenderTextureColorFormatBySlot(int slotIndex) {
+EXPORT int GetRenderTextureColorFormatBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
@@ -84,35 +91,35 @@ int GetRenderTextureColorFormatBySlot(int slotIndex) {
 }
 
 // Get depth texture properties
-unsigned int GetRenderTextureDepthIdBySlot(int slotIndex) {
+EXPORT unsigned int GetRenderTextureDepthIdBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return renderTextureSlots[slotIndex].renderTexture.depth.id;
 }
 
-int GetRenderTextureDepthWidthBySlot(int slotIndex) {
+EXPORT int GetRenderTextureDepthWidthBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return renderTextureSlots[slotIndex].renderTexture.depth.width;
 }
 
-int GetRenderTextureDepthHeightBySlot(int slotIndex) {
+EXPORT int GetRenderTextureDepthHeightBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return renderTextureSlots[slotIndex].renderTexture.depth.height;
 }
 
-int GetRenderTextureDepthMipmapsBySlot(int slotIndex) {
+EXPORT int GetRenderTextureDepthMipmapsBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return renderTextureSlots[slotIndex].renderTexture.depth.mipmaps;
 }
 
-int GetRenderTextureDepthFormatBySlot(int slotIndex) {
+EXPORT int GetRenderTextureDepthFormatBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return 0;
     }
@@ -120,7 +127,7 @@ int GetRenderTextureDepthFormatBySlot(int slotIndex) {
 }
 
 // Unload render texture by slot index
-void UnloadRenderTextureBySlot(int slotIndex) {
+EXPORT void UnloadRenderTextureBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_RENDER_TEXTURES || !renderTextureSlots[slotIndex].isLoaded) {
         return;
     }
@@ -131,7 +138,7 @@ void UnloadRenderTextureBySlot(int slotIndex) {
 }
 
 // Get number of loaded render textures
-int GetLoadedRenderTextureCount() {
+EXPORT int GetLoadedRenderTextureCount() {
     int count = 0;
     for (int i = 0; i < MAX_RENDER_TEXTURES; i++) {
         if (renderTextureSlots[i].isLoaded) {
@@ -142,7 +149,7 @@ int GetLoadedRenderTextureCount() {
 }
 
 // Unload all render textures
-void UnloadAllRenderTextures() {
+EXPORT void UnloadAllRenderTextures() {
     for (int i = 0; i < MAX_RENDER_TEXTURES; i++) {
         if (renderTextureSlots[i].isLoaded) {
             UnloadRenderTextureBySlot(i);

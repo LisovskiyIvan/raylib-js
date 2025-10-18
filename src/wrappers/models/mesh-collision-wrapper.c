@@ -2,11 +2,18 @@
 #include "raymath.h"
 #include <stdlib.h>
 
+
+// Export macro for Windows DLL
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT
+#endif
 // Thread-local storage for last collision result
 static RayCollision lastCollision = {0};
 
 // Wrapper for GetRayCollisionMesh that stores result in thread-local storage
-void GetRayCollisionMeshWrapper(Ray* ray, int modelSlotIndex, int meshIndex, Matrix* transform) {
+EXPORT void GetRayCollisionMeshWrapper(Ray* ray, int modelSlotIndex, int meshIndex, Matrix* transform) {
     // This function needs access to the model slots from model-wrapper.c
     // We'll need to expose a function to get mesh data
     // For now, we'll implement a simpler version that works with the existing system
@@ -19,7 +26,7 @@ void GetRayCollisionMeshWrapper(Ray* ray, int modelSlotIndex, int meshIndex, Mat
 }
 
 // Alternative: Direct ray-mesh collision with explicit mesh data
-void GetRayCollisionMeshDirect(Ray* ray, float* vertices, int vertexCount, unsigned short* indices, int triangleCount, Matrix* transform, RayCollision* outCollision) {
+EXPORT void GetRayCollisionMeshDirect(Ray* ray, float* vertices, int vertexCount, unsigned short* indices, int triangleCount, Matrix* transform, RayCollision* outCollision) {
     RayCollision collision = {0};
     collision.distance = 10000.0f;
     collision.hit = false;
@@ -62,7 +69,7 @@ void GetRayCollisionMeshDirect(Ray* ray, float* vertices, int vertexCount, unsig
 }
 
 // Get last collision data (for compatibility with existing system)
-void GetLastMeshCollisionData(float* outBuffer) {
+EXPORT void GetLastMeshCollisionData(float* outBuffer) {
     outBuffer[0] = lastCollision.hit ? 1.0f : 0.0f;
     outBuffer[1] = lastCollision.distance;
     outBuffer[2] = lastCollision.point.x;

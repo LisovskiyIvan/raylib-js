@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Export macro for Windows DLL
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT
+#endif
+
 #define MAX_TEXTURES 256
 
 // Texture storage with metadata
@@ -25,7 +32,7 @@ int FindFreeTextureSlot() {
 }
 
 // Load texture and return slot index
-int LoadTextureToSlot(const char* fileName) {
+EXPORT int LoadTextureToSlot(const char* fileName) {
     int slotIndex = FindFreeTextureSlot();
     if (slotIndex == -1) {
         return -1; // No free slots
@@ -45,35 +52,35 @@ int LoadTextureToSlot(const char* fileName) {
 }
 
 // Get texture properties by slot index
-int GetTextureWidthBySlot(int slotIndex) {
+EXPORT int GetTextureWidthBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_TEXTURES || !textureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return textureSlots[slotIndex].texture.width;
 }
 
-int GetTextureHeightBySlot(int slotIndex) {
+EXPORT int GetTextureHeightBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_TEXTURES || !textureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return textureSlots[slotIndex].texture.height;
 }
 
-int GetTextureMipmapsBySlot(int slotIndex) {
+EXPORT int GetTextureMipmapsBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_TEXTURES || !textureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return textureSlots[slotIndex].texture.mipmaps;
 }
 
-int GetTextureFormatBySlot(int slotIndex) {
+EXPORT int GetTextureFormatBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_TEXTURES || !textureSlots[slotIndex].isLoaded) {
         return 0;
     }
     return textureSlots[slotIndex].texture.format;
 }
 
-unsigned int GetTextureIdBySlot(int slotIndex) {
+EXPORT unsigned int GetTextureIdBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_TEXTURES || !textureSlots[slotIndex].isLoaded) {
         return 0;
     }
@@ -81,7 +88,7 @@ unsigned int GetTextureIdBySlot(int slotIndex) {
 }
 
 // Unload texture by slot index
-void UnloadTextureBySlot(int slotIndex) {
+EXPORT void UnloadTextureBySlot(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= MAX_TEXTURES || !textureSlots[slotIndex].isLoaded) {
         return;
     }
@@ -93,7 +100,7 @@ void UnloadTextureBySlot(int slotIndex) {
 }
 
 // Draw texture by slot index
-void DrawTextureBySlot(int slotIndex, int posX, int posY, Color tint) {
+EXPORT void DrawTextureBySlot(int slotIndex, int posX, int posY, Color tint) {
     if (slotIndex < 0 || slotIndex >= MAX_TEXTURES || !textureSlots[slotIndex].isLoaded) {
         return;
     }
@@ -102,7 +109,7 @@ void DrawTextureBySlot(int slotIndex, int posX, int posY, Color tint) {
 }
 
 // Draw texture with rotation and scale
-void DrawTextureProBySlot(int slotIndex, float posX, float posY, float originX, float originY, float rotation, float scale, Color tint) {
+EXPORT void DrawTextureProBySlot(int slotIndex, float posX, float posY, float originX, float originY, float rotation, float scale, Color tint) {
     if (slotIndex < 0 || slotIndex >= MAX_TEXTURES || !textureSlots[slotIndex].isLoaded) {
         return;
     }
@@ -115,7 +122,7 @@ void DrawTextureProBySlot(int slotIndex, float posX, float posY, float originX, 
 }
 
 // Get number of loaded textures
-int GetLoadedTextureCount() {
+EXPORT int GetLoadedTextureCount() {
     int count = 0;
     for (int i = 0; i < MAX_TEXTURES; i++) {
         if (textureSlots[i].isLoaded) {
@@ -126,7 +133,7 @@ int GetLoadedTextureCount() {
 }
 
 // Unload all textures
-void UnloadAllTextures() {
+EXPORT void UnloadAllTextures() {
     for (int i = 0; i < MAX_TEXTURES; i++) {
         if (textureSlots[i].isLoaded) {
             UnloadTextureBySlot(i);
