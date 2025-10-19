@@ -23,9 +23,11 @@
 static RayCollision lastCollision = {0};
 
 // Get ray collision with sphere
-EXPORT void GetRayCollisionSphereWrapper(Ray ray, Vector3 center, float radius, float* outBuffer) {
-    if (outBuffer == NULL) return;
-    lastCollision = GetRayCollisionSphere(ray, center, radius);
+EXPORT void GetRayCollisionSphereWrapper(Ray* ray, float centerX, float centerY, float centerZ, float radius, float* outBuffer) {
+    if (outBuffer == NULL || ray == NULL) return;
+    
+    Vector3 center = {centerX, centerY, centerZ};
+    lastCollision = GetRayCollisionSphere(*ray, center, radius);
     
     // Copy as floats (bool will be 0.0 or 1.0)
     outBuffer[0] = lastCollision.hit ? 1.0f : 0.0f;
@@ -39,9 +41,18 @@ EXPORT void GetRayCollisionSphereWrapper(Ray ray, Vector3 center, float radius, 
 }
 
 // Get ray collision with box
-EXPORT void GetRayCollisionBoxWrapper(Ray ray, BoundingBox box, float* outBuffer) {
-    if (outBuffer == NULL) return;
-    lastCollision = GetRayCollisionBox(ray, box);
+EXPORT void GetRayCollisionBoxWrapper(Ray* ray, float* boxData, float* outBuffer) {
+    if (outBuffer == NULL || ray == NULL || boxData == NULL) return;
+    
+    BoundingBox box;
+    box.min.x = boxData[0];
+    box.min.y = boxData[1];
+    box.min.z = boxData[2];
+    box.max.x = boxData[3];
+    box.max.y = boxData[4];
+    box.max.z = boxData[5];
+    
+    lastCollision = GetRayCollisionBox(*ray, box);
     
     // Copy as floats (bool will be 0.0 or 1.0)
     outBuffer[0] = lastCollision.hit ? 1.0f : 0.0f;
@@ -55,9 +66,14 @@ EXPORT void GetRayCollisionBoxWrapper(Ray ray, BoundingBox box, float* outBuffer
 }
 
 // Get ray collision with triangle
-EXPORT void GetRayCollisionTriangleWrapper(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, float* outBuffer) {
-    if (outBuffer == NULL) return;
-    lastCollision = GetRayCollisionTriangle(ray, p1, p2, p3);
+EXPORT void GetRayCollisionTriangleWrapper(Ray* ray, float p1x, float p1y, float p1z, float p2x, float p2y, float p2z, float p3x, float p3y, float p3z, float* outBuffer) {
+    if (outBuffer == NULL || ray == NULL) return;
+    
+    Vector3 p1 = {p1x, p1y, p1z};
+    Vector3 p2 = {p2x, p2y, p2z};
+    Vector3 p3 = {p3x, p3y, p3z};
+    
+    lastCollision = GetRayCollisionTriangle(*ray, p1, p2, p3);
 
     // Copy as floats (bool will be 0.0 or 1.0)
     outBuffer[0] = lastCollision.hit ? 1.0f : 0.0f;

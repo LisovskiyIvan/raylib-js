@@ -111,12 +111,12 @@ const symbolsDefinition = {
     args: [FFIType.i16, FFIType.i16, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawTriangle: {
-    args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.u32],
+  DrawPoly: {
+    args: [FFIType.ptr, FFIType.i32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawTriangleLines: {
-    args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.u32],
+  DrawTriangleFan: {
+    args: [FFIType.ptr, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
   DrawRectanglePro: {
@@ -472,6 +472,18 @@ const rayCollisionWrapperSymbols = {
   },
 };
 
+const triangleWrapperSymbols = {
+  // Triangle drawing functions
+  DrawTriangleWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+  DrawTriangleFanWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+};
+
 export interface FFILoaderConfig {
   platformInfo?: PlatformInfo;
   libraryPaths?: LibraryPaths;
@@ -555,12 +567,20 @@ export const initRaylib = (libraryPath: string, config?: FFILoaderConfig) => {
       'ray-collision-wrapper'
     );
 
+    const triangleWrapperLib = loadLibraryWithFallback(
+        libraryPaths.triangleWrapper,
+        [prebuiltPaths.triangleWrapper, systemPaths.triangleWrapper, ...customFallbacks],
+        triangleWrapperSymbols,
+        'triangle-wrapper'
+      );
+
     return {
       ...lib.symbols,
       ...wrapperLib.symbols,
       ...renderTextureWrapperLib.symbols,
       ...modelWrapperLib.symbols,
-      ...rayCollisionWrapperLib.symbols
+      ...rayCollisionWrapperLib.symbols,
+      ...triangleWrapperLib.symbols
     };
   } catch (error) {
     // Enhanced error reporting with platform information

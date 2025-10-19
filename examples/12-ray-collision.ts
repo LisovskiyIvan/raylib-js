@@ -34,10 +34,10 @@ const box: BoundingBox = {
     max: { x: 1, y: 1, z: -1 }
 }
 
-// Triangle vertices
-const triangleP1 = new Vector3(-2, 0, 2)
-const triangleP2 = new Vector3(0, 2, 2)
-const triangleP3 = new Vector3(2, 0, 2)
+// Triangle vertices - make it larger and more visible
+const triangleP3 = new Vector3(-3, -1, 3)
+const triangleP2 = new Vector3(0, 3, 3)
+const triangleP1 = new Vector3(3, -1, 3)
 
 // Animation variables
 let time = 0
@@ -101,7 +101,7 @@ while (true) {
     // Draw ray - make it longer and more visible
     const rayEnd = rayPosition.add(animatedRayDirection.scale(15))
     rl.drawLine3D(rayPosition, rayEnd, Colors.BLUE)
-    
+
     // Draw ray origin point
     rl.drawSphere(rayPosition, 0.15, Colors.BLACK)
 
@@ -109,7 +109,7 @@ while (true) {
     if (sphereHit.hit) {
         const hitPoint = new Vector3(sphereHit.point.x, sphereHit.point.y, sphereHit.point.z)
         rl.drawSphere(hitPoint, 0.1, Colors.ORANGE)
-        
+
         // Draw normal
         const normalEnd = hitPoint.add(new Vector3(sphereHit.normal.x, sphereHit.normal.y, sphereHit.normal.z).scale(0.5))
         rl.drawLine3D(hitPoint, normalEnd, Colors.LIME)
@@ -118,7 +118,7 @@ while (true) {
     if (boxHit.hit) {
         const hitPoint = new Vector3(boxHit.point.x, boxHit.point.y, boxHit.point.z)
         rl.drawSphere(hitPoint, 0.1, Colors.ORANGE)
-        
+
         // Draw normal
         const normalEnd = hitPoint.add(new Vector3(boxHit.normal.x, boxHit.normal.y, boxHit.normal.z).scale(0.5))
         rl.drawLine3D(hitPoint, normalEnd, Colors.LIME)
@@ -127,7 +127,7 @@ while (true) {
     if (triangleHit.hit) {
         const hitPoint = new Vector3(triangleHit.point.x, triangleHit.point.y, triangleHit.point.z)
         rl.drawSphere(hitPoint, 0.1, Colors.ORANGE)
-        
+
         // Draw normal
         const normalEnd = hitPoint.add(new Vector3(triangleHit.normal.x, triangleHit.normal.y, triangleHit.normal.z).scale(0.5))
         rl.drawLine3D(hitPoint, normalEnd, Colors.LIME)
@@ -146,14 +146,14 @@ while (true) {
         yOffset += 20
         rl.drawText(`  Distance: ${sphereHit.distance.toFixed(2)}`, 10, yOffset, 14, Colors.DARKGRAY)
     }
-    
+
     yOffset += 25
     rl.drawText(`Ray-Box Collision: ${boxHit.hit ? "YES" : "NO"}`, 10, yOffset, 16, boxHit.hit ? Colors.RED : Colors.DARKGRAY)
     if (boxHit.hit) {
         yOffset += 20
         rl.drawText(`  Distance: ${boxHit.distance.toFixed(2)}`, 10, yOffset, 14, Colors.DARKGRAY)
     }
-    
+
     yOffset += 25
     rl.drawText(`Ray-Triangle Collision: ${triangleHit.hit ? "YES" : "NO"}`, 10, yOffset, 16, triangleHit.hit ? Colors.RED : Colors.DARKGRAY)
     if (triangleHit.hit) {

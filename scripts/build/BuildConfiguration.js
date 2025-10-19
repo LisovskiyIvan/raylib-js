@@ -155,7 +155,8 @@ export class BuildConfiguration {
             'textures/render-texture-wrapper.c',
             'models/model-wrapper.c',
             'models/mesh-collision-wrapper.c',
-            'ray-collision/ray-collision-wrapper.c'
+            'ray-collision/ray-collision-wrapper.c',
+            'shapes/triangle-wrapper.c'
         ];
 
         for (const wrapper of expectedWrappers) {
@@ -229,6 +230,12 @@ export class BuildConfiguration {
                 source: join(wrappersPath, 'ray-collision', 'ray-collision-wrapper.c'),
                 output: join(outputPath, `ray-collision-wrapper${libraryExtension}`),
                 category: 'ray-collision'
+            },
+            {
+                name: 'triangle-wrapper',
+                source: join(wrappersPath, 'shapes', 'triangle-wrapper.c'),
+                output: join(outputPath, `triangle-wrapper${libraryExtension}`),
+                category: 'shapes'
             }
         ];
     }
