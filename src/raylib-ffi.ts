@@ -161,7 +161,7 @@ const symbolsDefinition = {
     returns: FFIType.void
   },
   DrawCircle3D: {
-    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    args: [FFIType.ptr, FFIType.f32, FFIType.ptr, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
   DrawTriangle3D: {
