@@ -529,26 +529,50 @@ export const initRaylib = (libraryPath?: string, config?: FFILoaderConfig) => {
     // Detect platform automatically if config is not provided
     const platformInfo = config?.platformInfo || PlatformManager.detectPlatform();
 
-    // Use provided base path or default to 'assets'
-    const basePath = libraryPath || 'assets';
-
-    // On Windows, preload raylib.dll to ensure it's available for wrapper DLLs
-    if (platformInfo.os === 'windows') {
-      const raylibPath = require('path').join(basePath, 'raylib.dll');
+    // Use provided base path, or RAYLIB_PATH env var, or default to 'assets'
+    const basePath = libraryPath || process.env.RAYLIB_PATH || 'assets';
+    
+    // Preload raylib library to ensure it's available for wrapper libraries
+    const path = require('path');
+    const raylibLibPath = path.resolve(basePath, 'raylib', 'lib');
+    
+    if (platformInfo.os === 'darwin') {
+      const raylibPath = path.join(raylibLibPath, 'libraylib.dylib');
       if (PlatformManager.validateLibraryExists(raylibPath)) {
         try {
-          // Load raylib.dll with a dummy symbol just to get it into memory
-          dlopen(require('path').resolve(raylibPath), {
+          dlopen(raylibPath, {
             GetColor: { args: [FFIType.u32], returns: FFIType.void }
           });
         } catch (e) {
-          // Silently ignore - raylib.dll might already be loaded or in system path
-          console.log(e);
+          console.warn('Warning: Could not preload libraylib.dylib:', e);
+        }
+      }
+    } else if (platformInfo.os === 'linux') {
+      const raylibPath = path.join(raylibLibPath, 'libraylib.so');
+      if (PlatformManager.validateLibraryExists(raylibPath)) {
+        try {
+          dlopen(raylibPath, {
+            GetColor: { args: [FFIType.u32], returns: FFIType.void }
+          });
+        } catch (e) {
+          console.warn('Warning: Could not preload libraylib.so:', e);
+        }
+      }
+    } else if (platformInfo.os === 'windows') {
+      const raylibPath = path.join(raylibLibPath, 'raylib.dll');
+      if (PlatformManager.validateLibraryExists(raylibPath)) {
+        try {
+          dlopen(raylibPath, {
+            GetColor: { args: [FFIType.u32], returns: FFIType.void }
+          });
+        } catch (e) {
+          console.warn('Warning: Could not preload raylib.dll:', e);
         }
       }
     }
 
     // Generate platform-specific library paths if not provided
+    // Wrapper libraries are in basePath, raylib itself is in basePath/raylib/lib
     const libraryPaths = config?.libraryPaths || PlatformManager.getLibraryPaths(basePath);
 
     // Generate fallback paths: prebuilt -> local compilation -> system

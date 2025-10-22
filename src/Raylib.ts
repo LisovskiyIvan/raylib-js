@@ -31,8 +31,8 @@ export default class Raylib {
   private rl: any;
 
   constructor(libraryPath?: string) {
-    // Use provided base path or default to 'assets' (relative to cwd)
-    const basePath = libraryPath || 'assets';
+    // Use provided base path, or RAYLIB_PATH env var, or default to 'assets' (relative to cwd)
+    const basePath = libraryPath || process.env.RAYLIB_PATH || 'assets';
 
     try {
       this.rl = initRaylib(basePath);
