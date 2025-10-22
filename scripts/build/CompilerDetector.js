@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 
 import { spawn } from 'child_process';
-import { promisify } from 'util';
 
 /**
  * Utility class for detecting and validating available compilers
@@ -230,15 +229,6 @@ export class CompilerDetector {
         if (!compiler || !compiler.command) {
             return false;
         }
-
-        // Try to compile a simple C program
-        const testCode = `
-#include <stdio.h>
-int main() {
-    printf("Hello, World!\\n");
-    return 0;
-}`;
-
         // This is a basic validation - in a real implementation,
         // you might want to create a temporary file and compile it
         const result = await this.executeCommand(compiler.command, ['--help']);

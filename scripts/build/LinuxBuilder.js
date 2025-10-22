@@ -419,7 +419,7 @@ export class LinuxBuilder extends PlatformBuilder {
             const osRelease = await fs.readFile('/etc/os-release', 'utf8');
             return this.parseOSRelease(osRelease);
         } catch (error) {
-            return { name: 'Unknown', version: 'Unknown' };
+            return { name: 'Unknown', version: 'Unknown', error };
         }
     }
 

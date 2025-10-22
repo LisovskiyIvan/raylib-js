@@ -10,6 +10,7 @@ export interface PlatformInfo {
 }
 
 export interface LibraryPaths {
+    raylibWrapper: string;
     textureWrapper: string;
     renderTextureWrapper: string;
     modelWrapper: string;
@@ -115,6 +116,7 @@ export class PlatformManager {
         const ext = platformInfo.libraryExtension;
 
         return {
+            raylibWrapper: path.join(basePath, `raylib-wrapper${ext}`),
             textureWrapper: path.join(basePath, `texture-wrapper${ext}`),
             renderTextureWrapper: path.join(basePath, `render-texture-wrapper${ext}`),
             modelWrapper: path.join(basePath, `model-wrapper${ext}`),

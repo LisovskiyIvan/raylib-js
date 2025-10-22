@@ -9,7 +9,6 @@ import type {
 import { initError, ffiError, stateError, validationError } from "./types";
 import { Ok, Err, tryFn } from "./result";
 import { ptr } from "bun:ffi";
-import { PlatformManager } from "./platform/PlatformManager";
 import {
   validateAll,
   validateFinite,
@@ -32,12 +31,11 @@ export default class Raylib {
   private rl: any;
 
   constructor(libraryPath?: string) {
-    // Используем платформо-зависимый путь по умолчанию, если не передан
-    const defaultPath = PlatformManager.getRaylibPath("./assets");
-    const path = libraryPath || defaultPath;
+    // Use provided base path or default to 'assets' (relative to cwd)
+    const basePath = libraryPath || 'assets';
 
     try {
-      this.rl = initRaylib(path);
+      this.rl = initRaylib(basePath);
     } catch (error) {
       throw new Error(
         `Failed to initialize Raylib: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -90,7 +88,7 @@ export default class Raylib {
     // Try to initialize
     return this.safeFFICall("initialize window", () => {
       const titleBuffer = this.textEncoder.encode(title + "\0");
-      this.rl.InitWindow(width, height, ptr(titleBuffer));
+      this.rl.InitWindowWrapper(width, height, ptr(titleBuffer));
 
       this.isInitialized = true;
       this.windowWidth = width;
@@ -104,7 +102,7 @@ export default class Raylib {
     }
 
     return this.safeFFICall("close window", () => {
-      this.rl.CloseWindow();
+      this.rl.CloseWindowWrapper();
       this.isInitialized = false;
       this.windowWidth = 0;
       this.windowHeight = 0;
@@ -115,14 +113,14 @@ export default class Raylib {
     return this.requireInitialized()
       .andThen(() => validateRange(target, 1, 1000, "target FPS"))
       .andThen(() =>
-        this.safeFFICall("set target FPS", () => this.rl.SetTargetFPS(target)),
+        this.safeFFICall("set target FPS", () => this.rl.SetTargetFPSWrapper(target)),
       );
   }
 
   public windowShouldClose(): RaylibResult<boolean> {
     return this.requireInitialized().andThen(() =>
       this.safeFFICall("check window close state", () =>
-        this.rl.WindowShouldClose(),
+        this.rl.WindowShouldCloseWrapper(),
       ),
     );
   }
@@ -130,13 +128,13 @@ export default class Raylib {
   // Drawing
   public beginDrawing(): RaylibResult<void> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("begin drawing", () => this.rl.BeginDrawing()),
+      this.safeFFICall("begin drawing", () => this.rl.BeginDrawingWrapper()),
     );
   }
 
   public endDrawing(): RaylibResult<void> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("end drawing", () => this.rl.EndDrawing()),
+      this.safeFFICall("end drawing", () => this.rl.EndDrawingWrapper()),
     );
   }
 
@@ -145,7 +143,7 @@ export default class Raylib {
       .andThen(() => validateColor(color, "color"))
       .andThen(() =>
         this.safeFFICall("clear background", () =>
-          this.rl.ClearBackground(color),
+          this.rl.ClearBackgroundWrapper(color),
         ),
       );
   }
@@ -169,7 +167,7 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw rectangle", () =>
-          this.rl.DrawRectangle(posX, posY, width, height, color),
+          this.rl.DrawRectangleWrapper(posX, posY, width, height, color),
         ),
       );
   }
@@ -215,7 +213,7 @@ export default class Raylib {
         this.safeFFICall("draw text", () => {
           const textBuffer = this.textEncoder.encode(text + "\0");
           const textPtr = ptr(textBuffer);
-          this.rl.DrawText(textPtr, posX, posY, fontSize, color);
+          this.rl.DrawTextWrapper(textPtr, posX, posY, fontSize, color);
         }),
       );
   }
@@ -226,7 +224,7 @@ export default class Raylib {
         validateAll(validateFinite(posX, "posX"), validateFinite(posY, "posY")),
       )
       .andThen(() =>
-        this.safeFFICall("draw FPS", () => this.rl.DrawFPS(posX, posY)),
+        this.safeFFICall("draw FPS", () => this.rl.DrawFPSWrapper(posX, posY)),
       );
   }
 
@@ -235,7 +233,7 @@ export default class Raylib {
     return this.requireInitialized()
       .andThen(() => validateFinite(key, "key"))
       .andThen(() =>
-        this.safeFFICall("check key down", () => this.rl.IsKeyDown(key)),
+        this.safeFFICall("check key down", () => this.rl.IsKeyDownWrapper(key)),
       );
   }
 
@@ -243,13 +241,13 @@ export default class Raylib {
     return this.requireInitialized()
       .andThen(() => validateFinite(key, "key"))
       .andThen(() =>
-        this.safeFFICall("check key up", () => this.rl.IsKeyUp(key)),
+        this.safeFFICall("check key up", () => this.rl.IsKeyUpWrapper(key)),
       );
   }
 
   public getKeyPressed(): RaylibResult<number> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("get key pressed", () => this.rl.GetKeyPressed()),
+      this.safeFFICall("get key pressed", () => this.rl.GetKeyPressedWrapper()),
     );
   }
 
@@ -258,7 +256,7 @@ export default class Raylib {
       .andThen(() => validateFinite(button, "button"))
       .andThen(() =>
         this.safeFFICall("check mouse button down", () =>
-          this.rl.IsMouseButtonDown(button),
+          this.rl.IsMouseButtonDownWrapper(button),
         ),
       );
   }
@@ -267,7 +265,7 @@ export default class Raylib {
     return this.requireInitialized().andThen(() =>
       this.safeFFICall(
         "get mouse position",
-        () => new Vector2(this.rl.GetMouseX(), this.rl.GetMouseY()),
+        () => new Vector2(this.rl.GetMouseXWrapper(), this.rl.GetMouseYWrapper()),
       ),
     );
   }
@@ -286,44 +284,44 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("set mouse position", () =>
-          this.rl.SetMousePosition(x, y),
+          this.rl.SetMousePositionWrapper(x, y),
         ),
       );
   }
 
   public disableCursor(): RaylibResult<void> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("disable cursor", () => this.rl.DisableCursor()),
+      this.safeFFICall("disable cursor", () => this.rl.DisableCursorWrapper()),
     );
   }
 
   public enableCursor(): RaylibResult<void> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("enable cursor", () => this.rl.EnableCursor()),
+      this.safeFFICall("enable cursor", () => this.rl.EnableCursorWrapper()),
     );
   }
 
   public hideCursor(): RaylibResult<void> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("hide cursor", () => this.rl.HideCursor()),
+      this.safeFFICall("hide cursor", () => this.rl.HideCursorWrapper()),
     );
   }
 
   public showCursor(): RaylibResult<void> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("show cursor", () => this.rl.ShowCursor()),
+      this.safeFFICall("show cursor", () => this.rl.ShowCursorWrapper()),
     );
   }
 
   public isCursorHidden(): RaylibResult<boolean> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("check cursor hidden", () => this.rl.IsCursorHidden()),
+      this.safeFFICall("check cursor hidden", () => this.rl.IsCursorHiddenWrapper()),
     );
   }
 
   public getFrameTime(): RaylibResult<number> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("get frame time", () => this.rl.GetFrameTime()),
+      this.safeFFICall("get frame time", () => this.rl.GetFrameTimeWrapper()),
     );
   }
 
@@ -332,7 +330,7 @@ export default class Raylib {
       .andThen(() => validateColor(color, "color"))
       .andThen(() =>
         this.safeFFICall("draw a pixel", () =>
-          this.rl.DrawPixel(posX, posY, color),
+          this.rl.DrawPixelWrapper(posX, posY, color),
         ),
       );
   }
@@ -342,7 +340,7 @@ export default class Raylib {
       .andThen(() => validateColor(color, "color"))
       .andThen(() =>
         this.safeFFICall("draw a pixel", () =>
-          this.rl.DrawPixel(position.x, position.y, color),
+          this.rl.DrawPixelWrapper(position.x, position.y, color),
         ),
       );
   }
@@ -358,7 +356,7 @@ export default class Raylib {
       .andThen(() => validateColor(color, "color"))
       .andThen(() =>
         this.safeFFICall("draw a line", () =>
-          this.rl.DrawLine(startX, startY, endX, endY, color),
+          this.rl.DrawLineWrapper(startX, startY, endX, endY, color),
         ),
       );
   }
@@ -368,7 +366,7 @@ export default class Raylib {
       .andThen(() => validateColor(color, "color"))
       .andThen(() =>
         this.safeFFICall("draw a line", () =>
-          this.rl.DrawLine(start.x, start.y, end.x, end.y, color),
+          this.rl.DrawLineWrapper(start.x, start.y, end.x, end.y, color),
         ),
       );
   }
@@ -383,7 +381,7 @@ export default class Raylib {
       .andThen(() => validateColor(color, "color"))
       .andThen(() =>
         this.safeFFICall("draw a line", () =>
-          this.rl.DrawCircle(centerX, centerY, radius, color),
+          this.rl.DrawCircleWrapper(centerX, centerY, radius, color),
         ),
       );
   }
@@ -393,7 +391,7 @@ export default class Raylib {
       .andThen(() => validateColor(color, "color"))
       .andThen(() =>
         this.safeFFICall("draw a line", () =>
-          this.rl.DrawCircle(center.x, center.y, radius, color),
+          this.rl.DrawCircleWrapper(center.x, center.y, radius, color),
         ),
       );
   }
@@ -452,9 +450,9 @@ export default class Raylib {
       .andThen(() => {
         // Always use reliable line drawing for triangle outlines
         return this.safeFFICall("draw triangle lines", () => {
-          this.rl.DrawLine(v1.x, v1.y, v2.x, v2.y, color);
-          this.rl.DrawLine(v2.x, v2.y, v3.x, v3.y, color);
-          this.rl.DrawLine(v3.x, v3.y, v1.x, v1.y, color);
+          this.rl.DrawLineWrapper(v1.x, v1.y, v2.x, v2.y, color);
+          this.rl.DrawLineWrapper(v2.x, v2.y, v3.x, v3.y, color);
+          this.rl.DrawLineWrapper(v3.x, v3.y, v1.x, v1.y, color);
         });
       });
   }
@@ -480,23 +478,11 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw rectangle pro", () => {
-          // Create Rectangle structure as Float32Array
-          const recArray = new Float32Array(4);
-          recArray[0] = rec.x;
-          recArray[1] = rec.y;
-          recArray[2] = rec.width;
-          recArray[3] = rec.height;
-
-          // Create Vector2 structure as Float32Array
-          const originArray = new Float32Array(2);
-          originArray[0] = origin.x;
-          originArray[1] = origin.y;
-
-          this.rl.DrawRectanglePro(
-            ptr(recArray),
-            ptr(originArray),
+          this.rl.DrawRectangleProWrapper(
+            rec.x, rec.y, rec.width, rec.height,
+            origin.x, origin.y,
             rotation,
-            color,
+            color
           );
         }),
       );
@@ -522,22 +508,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision rectangles", () => {
-          // Create properly aligned structs using ArrayBuffer
-          const rec1Buffer = new ArrayBuffer(16); // 4 floats * 4 bytes
-          const rec1View = new Float32Array(rec1Buffer);
-          rec1View[0] = rec1.x;
-          rec1View[1] = rec1.y;
-          rec1View[2] = rec1.width;
-          rec1View[3] = rec1.height;
-
-          const rec2Buffer = new ArrayBuffer(16);
-          const rec2View = new Float32Array(rec2Buffer);
-          rec2View[0] = rec2.x;
-          rec2View[1] = rec2.y;
-          rec2View[2] = rec2.width;
-          rec2View[3] = rec2.height;
-
-          return this.rl.CheckCollisionRecs(ptr(rec1Buffer), ptr(rec2Buffer));
+          return this.rl.CheckCollisionRecsWrapper(
+            rec1.x, rec1.y, rec1.width, rec1.height,
+            rec2.x, rec2.y, rec2.width, rec2.height
+          );
         }),
       );
   }
@@ -561,42 +535,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision circles", () => {
-          try {
-            const center1Buffer = new ArrayBuffer(8);
-            const center1View = new DataView(center1Buffer);
-            center1View.setFloat32(0, center1.x, true);
-            center1View.setFloat32(4, center1.y, true);
-
-            const center2Buffer = new ArrayBuffer(8);
-            const center2View = new DataView(center2Buffer);
-            center2View.setFloat32(0, center2.x, true);
-            center2View.setFloat32(4, center2.y, true);
-
-            const result = this.rl.CheckCollisionCircles(
-              ptr(center1Buffer),
-              radius1,
-              ptr(center2Buffer),
-              radius2,
-            );
-
-            // If native function returns false, use fallback implementation
-            if (!result) {
-              return this.checkCollisionCirclesFallback(
-                center1,
-                radius1,
-                center2,
-                radius2,
-              );
-            }
-            return result;
-          } catch (error) {
-            return this.checkCollisionCirclesFallback(
-              center1,
-              radius1,
-              center2,
-              radius2,
-            );
-          }
+          return this.rl.CheckCollisionCirclesWrapper(
+            center1.x, center1.y, radius1,
+            center2.x, center2.y, radius2
+          );
         }),
       );
   }
@@ -633,37 +575,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision circle rectangle", () => {
-          // Try the native function first
-          try {
-            // Create Vector2 struct (8 bytes: 2 floats)
-            const centerBuffer = new ArrayBuffer(8);
-            const centerView = new DataView(centerBuffer);
-            centerView.setFloat32(0, center.x, true); // little-endian
-            centerView.setFloat32(4, center.y, true);
-
-            // Create Rectangle struct (16 bytes: 4 floats)
-            const recBuffer = new ArrayBuffer(16);
-            const recView = new DataView(recBuffer);
-            recView.setFloat32(0, rec.x, true);
-            recView.setFloat32(4, rec.y, true);
-            recView.setFloat32(8, rec.width, true);
-            recView.setFloat32(12, rec.height, true);
-
-            const result = this.rl.CheckCollisionCircleRec(
-              ptr(centerBuffer),
-              radius,
-              ptr(recBuffer),
-            );
-
-            // If native function returns false, use fallback implementation
-            if (!result) {
-              return this.checkCollisionCircleRecFallback(center, radius, rec);
-            }
-            return result;
-          } catch (error) {
-            // If native function fails, use fallback implementation
-            return this.checkCollisionCircleRecFallback(center, radius, rec);
-          }
+          return this.rl.CheckCollisionCircleRecWrapper(
+            center.x, center.y, radius,
+            rec.x, rec.y, rec.width, rec.height
+          );
         }),
       );
   }
@@ -706,26 +621,9 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision circle line", () => {
-          const centerBuffer = new ArrayBuffer(8);
-          const centerView = new Float32Array(centerBuffer);
-          centerView[0] = center.x;
-          centerView[1] = center.y;
-
-          const p1Buffer = new ArrayBuffer(8);
-          const p1View = new Float32Array(p1Buffer);
-          p1View[0] = p1.x;
-          p1View[1] = p1.y;
-
-          const p2Buffer = new ArrayBuffer(8);
-          const p2View = new Float32Array(p2Buffer);
-          p2View[0] = p2.x;
-          p2View[1] = p2.y;
-
-          return this.rl.CheckCollisionCircleLine(
-            ptr(centerBuffer),
-            radius,
-            ptr(p1Buffer),
-            ptr(p2Buffer),
+          return this.rl.CheckCollisionCircleLineWrapper(
+            center.x, center.y, radius,
+            p1.x, p1.y, p2.x, p2.y
           );
         }),
       );
@@ -748,31 +646,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision point rectangle", () => {
-          try {
-            const pointBuffer = new ArrayBuffer(8);
-            const pointView = new DataView(pointBuffer);
-            pointView.setFloat32(0, point.x, true);
-            pointView.setFloat32(4, point.y, true);
-
-            const recBuffer = new ArrayBuffer(16);
-            const recView = new DataView(recBuffer);
-            recView.setFloat32(0, rec.x, true);
-            recView.setFloat32(4, rec.y, true);
-            recView.setFloat32(8, rec.width, true);
-            recView.setFloat32(12, rec.height, true);
-
-            const result = this.rl.CheckCollisionPointRec(
-              ptr(pointBuffer),
-              ptr(recBuffer),
-            );
-
-            if (!result) {
-              return this.checkCollisionPointRecFallback(point, rec);
-            }
-            return result;
-          } catch (error) {
-            return this.checkCollisionPointRecFallback(point, rec);
-          }
+          return this.rl.CheckCollisionPointRecWrapper(
+            point.x, point.y,
+            rec.x, rec.y, rec.width, rec.height
+          );
         }),
       );
   }
@@ -806,38 +683,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision point circle", () => {
-          try {
-            const pointBuffer = new ArrayBuffer(8);
-            const pointView = new DataView(pointBuffer);
-            pointView.setFloat32(0, point.x, true);
-            pointView.setFloat32(4, point.y, true);
-
-            const centerBuffer = new ArrayBuffer(8);
-            const centerView = new DataView(centerBuffer);
-            centerView.setFloat32(0, center.x, true);
-            centerView.setFloat32(4, center.y, true);
-
-            const result = this.rl.CheckCollisionPointCircle(
-              ptr(pointBuffer),
-              ptr(centerBuffer),
-              radius,
-            );
-
-            if (!result) {
-              return this.checkCollisionPointCircleFallback(
-                point,
-                center,
-                radius,
-              );
-            }
-            return result;
-          } catch (error) {
-            return this.checkCollisionPointCircleFallback(
-              point,
-              center,
-              radius,
-            );
-          }
+          return this.rl.CheckCollisionPointCircleWrapper(
+            point.x, point.y,
+            center.x, center.y, radius
+          );
         }),
       );
   }
@@ -874,31 +723,9 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision point triangle", () => {
-          const pointBuffer = new ArrayBuffer(8);
-          const pointView = new Float32Array(pointBuffer);
-          pointView[0] = point.x;
-          pointView[1] = point.y;
-
-          const p1Buffer = new ArrayBuffer(8);
-          const p1View = new Float32Array(p1Buffer);
-          p1View[0] = p1.x;
-          p1View[1] = p1.y;
-
-          const p2Buffer = new ArrayBuffer(8);
-          const p2View = new Float32Array(p2Buffer);
-          p2View[0] = p2.x;
-          p2View[1] = p2.y;
-
-          const p3Buffer = new ArrayBuffer(8);
-          const p3View = new Float32Array(p3Buffer);
-          p3View[0] = p3.x;
-          p3View[1] = p3.y;
-
-          return this.rl.CheckCollisionPointTriangle(
-            ptr(pointBuffer),
-            ptr(p1Buffer),
-            ptr(p2Buffer),
-            ptr(p3Buffer),
+          return this.rl.CheckCollisionPointTriangleWrapper(
+            point.x, point.y,
+            p1.x, p1.y, p2.x, p2.y, p3.x, p3.y
           );
         }),
       );
@@ -1152,29 +979,19 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("begin mode 3D", () => {
-          // Create Camera3D structure as Float32Array
-          // Camera3D: position(3f) + target(3f) + up(3f) + fovy(1f) + projection(1i)
-          const camera = new Float32Array(11);
-          camera[0] = cameraPosition.x;
-          camera[1] = cameraPosition.y;
-          camera[2] = cameraPosition.z;
-          camera[3] = cameraTarget.x;
-          camera[4] = cameraTarget.y;
-          camera[5] = cameraTarget.z;
-          camera[6] = cameraUp.x;
-          camera[7] = cameraUp.y;
-          camera[8] = cameraUp.z;
-          camera[9] = fovy;
-          camera[10] = projection;
-
-          this.rl.BeginMode3D(ptr(camera));
+          this.rl.BeginMode3DWrapper(
+            cameraPosition.x, cameraPosition.y, cameraPosition.z,
+            cameraTarget.x, cameraTarget.y, cameraTarget.z,
+            cameraUp.x, cameraUp.y, cameraUp.z,
+            fovy, projection
+          );
         }),
       );
   }
 
   public endMode3D(): RaylibResult<void> {
     return this.requireInitialized().andThen(() =>
-      this.safeFFICall("end mode 3D", () => this.rl.EndMode3D()),
+      this.safeFFICall("end mode 3D", () => this.rl.EndMode3DWrapper()),
     );
   }
 
@@ -1198,18 +1015,11 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw line 3D", () => {
-          // Create Vector3 structures as Float32Array
-          const startArray = new Float32Array(3);
-          startArray[0] = startPos.x;
-          startArray[1] = startPos.y;
-          startArray[2] = startPos.z;
-
-          const endArray = new Float32Array(3);
-          endArray[0] = endPos.x;
-          endArray[1] = endPos.y;
-          endArray[2] = endPos.z;
-
-          this.rl.DrawLine3D(ptr(startArray), ptr(endArray), color);
+          this.rl.DrawLine3DWrapper(
+            startPos.x, startPos.y, startPos.z,
+            endPos.x, endPos.y, endPos.z,
+            color
+          );
         }),
       );
   }
@@ -1226,13 +1036,7 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw point 3D", () => {
-          // Create Vector3 structure as Float32Array
-          const posArray = new Float32Array(3);
-          posArray[0] = position.x;
-          posArray[1] = position.y;
-          posArray[2] = position.z;
-
-          this.rl.DrawPoint3D(ptr(posArray), color);
+          this.rl.DrawPoint3DWrapper(position.x, position.y, position.z, color);
         }),
       );
   }
@@ -1260,21 +1064,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw circle 3D", () => {
-          const posArray = new Float32Array(3);
-          posArray[0] = center.x;
-          posArray[1] = center.y;
-          posArray[2] = center.z;
-
-          const axisArray = new Float32Array(3);
-          axisArray[0] = rotationAxis.x;
-          axisArray[1] = rotationAxis.y;
-          axisArray[2] = rotationAxis.z;
-          this.rl.DrawCircle3D(
-            ptr(posArray),
-            radius,
-            ptr(axisArray),
-            rotationAngle,
-            color,
+          this.rl.DrawCircle3DWrapper(
+            center.x, center.y, center.z, radius,
+            rotationAxis.x, rotationAxis.y, rotationAxis.z, rotationAngle,
+            color
           );
         }),
       );
@@ -1303,28 +1096,11 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw triangle 3D", () => {
-          // Use native Raylib DrawTriangle3D function directly
-          const v1Array = new Float32Array(3);
-          v1Array[0] = v1.x;
-          v1Array[1] = v1.y;
-          v1Array[2] = v1.z;
-
-          const v2Array = new Float32Array(3);
-          v2Array[0] = v2.x;
-          v2Array[1] = v2.y;
-          v2Array[2] = v2.z;
-
-          const v3Array = new Float32Array(3);
-          v3Array[0] = v3.x;
-          v3Array[1] = v3.y;
-          v3Array[2] = v3.z;
-
-          // Use native Raylib function with proper Vector3 structures
-          this.rl.DrawTriangle3D(
-            ptr(v1Array),
-            ptr(v2Array),
-            ptr(v3Array),
-            color,
+          this.rl.DrawTriangle3DWrapper(
+            v1.x, v1.y, v1.z,
+            v2.x, v2.y, v2.z,
+            v3.x, v3.y, v3.z,
+            color
           );
         }),
       );
@@ -1352,13 +1128,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw cube", () => {
-          // Create Vector3 structure as Float32Array
-          const posArray = new Float32Array(3);
-          posArray[0] = position.x;
-          posArray[1] = position.y;
-          posArray[2] = position.z;
-
-          this.rl.DrawCube(ptr(posArray), width, height, length, color);
+          this.rl.DrawCubeWrapper(
+            position.x, position.y, position.z,
+            width, height, length, color
+          );
         }),
       );
   }
@@ -1382,18 +1155,11 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw cube V", () => {
-          // Create Vector3 structures as Float32Array
-          const posArray = new Float32Array(3);
-          posArray[0] = position.x;
-          posArray[1] = position.y;
-          posArray[2] = position.z;
-
-          const sizeArray = new Float32Array(3);
-          sizeArray[0] = size.x;
-          sizeArray[1] = size.y;
-          sizeArray[2] = size.z;
-
-          this.rl.DrawCubeV(ptr(posArray), ptr(sizeArray), color);
+          this.rl.DrawCubeVWrapper(
+            position.x, position.y, position.z,
+            size.x, size.y, size.z,
+            color
+          );
         }),
       );
   }
@@ -1415,13 +1181,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw sphere", () => {
-          // Create Vector3 structure as Float32Array
-          const posArray = new Float32Array(3);
-          posArray[0] = centerPos.x;
-          posArray[1] = centerPos.y;
-          posArray[2] = centerPos.z;
-
-          this.rl.DrawSphere(ptr(posArray), radius, color);
+          this.rl.DrawSphereWrapper(
+            centerPos.x, centerPos.y, centerPos.z,
+            radius, color
+          );
         }),
       );
   }
@@ -1449,14 +1212,10 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw cylinder", () => {
-          // Create Vector3 structure as Float32Array
-          const posArray = new Float32Array(3);
-          posArray[0] = position.x;
-          posArray[1] = position.y;
-          posArray[2] = position.z;
-
-          this.rl.DrawCylinder(
-            ptr(posArray),
+          this.rl.DrawCylinderWrapper(
+            position.x,
+            position.y,
+            position.z,
             radiusTop,
             radiusBottom,
             height,
@@ -1492,20 +1251,13 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw capsule", () => {
-          // Create Vector3 structures as Float32Array
-          const startArray = new Float32Array(3);
-          startArray[0] = startPos.x;
-          startArray[1] = startPos.y;
-          startArray[2] = startPos.z;
-
-          const endArray = new Float32Array(3);
-          endArray[0] = endPos.x;
-          endArray[1] = endPos.y;
-          endArray[2] = endPos.z;
-
-          this.rl.DrawCapsule(
-            ptr(startArray),
-            ptr(endArray),
+          this.rl.DrawCapsuleWrapper(
+            startPos.x,
+            startPos.y,
+            startPos.z,
+            endPos.x,
+            endPos.y,
+            endPos.z,
             radius,
             slices,
             rings,
@@ -1533,17 +1285,7 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw plane", () => {
-          // Create Vector3 and Vector2 structures as Float32Array
-          const posArray = new Float32Array(3);
-          posArray[0] = centerPos.x;
-          posArray[1] = centerPos.y;
-          posArray[2] = centerPos.z;
-
-          const sizeArray = new Float32Array(2);
-          sizeArray[0] = size.x;
-          sizeArray[1] = size.y;
-
-          this.rl.DrawPlane(ptr(posArray), ptr(sizeArray), color);
+          this.rl.DrawPlaneWrapper(centerPos.x, centerPos.y, centerPos.z, size.x, size.y, color);
         }),
       );
   }
@@ -1567,17 +1309,7 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("draw ray", () => {
-          // Create Ray structure as Float32Array
-          // Ray: position(3f) + direction(3f)
-          const ray = new Float32Array(6);
-          ray[0] = rayPosition.x;
-          ray[1] = rayPosition.y;
-          ray[2] = rayPosition.z;
-          ray[3] = rayDirection.x;
-          ray[4] = rayDirection.y;
-          ray[5] = rayDirection.z;
-
-          this.rl.DrawRay(ptr(ray), color);
+          this.rl.DrawRayWrapper(rayPosition.x, rayPosition.y, rayPosition.z, rayDirection.x, rayDirection.y, rayDirection.z, color);
         }),
       );
   }
@@ -1591,7 +1323,7 @@ export default class Raylib {
         ),
       )
       .andThen(() =>
-        this.safeFFICall("draw grid", () => this.rl.DrawGrid(slices, spacing)),
+        this.safeFFICall("draw grid", () => this.rl.DrawGridWrapper(slices, spacing)),
       );
   }
 
@@ -1975,22 +1707,14 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision spheres", () => {
-          const center1Buffer = new ArrayBuffer(12); // 3 floats * 4 bytes
-          const center1View = new Float32Array(center1Buffer);
-          center1View[0] = center1.x;
-          center1View[1] = center1.y;
-          center1View[2] = center1.z;
-
-          const center2Buffer = new ArrayBuffer(12);
-          const center2View = new Float32Array(center2Buffer);
-          center2View[0] = center2.x;
-          center2View[1] = center2.y;
-          center2View[2] = center2.z;
-
-          return this.rl.CheckCollisionSpheres(
-            ptr(center1Buffer),
+          return this.rl.CheckCollisionSpheresWrapper(
+            center1.x,
+            center1.y,
+            center1.z,
             radius1,
-            ptr(center2Buffer),
+            center2.x,
+            center2.y,
+            center2.z,
             radius2,
           );
         }),
@@ -2020,24 +1744,18 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision boxes", () => {
-          // Create BoundingBox structures as Float32Array
-          const box1Array = new Float32Array(6);
-          box1Array[0] = box1.min.x;
-          box1Array[1] = box1.min.y;
-          box1Array[2] = box1.min.z;
-          box1Array[3] = box1.max.x;
-          box1Array[4] = box1.max.y;
-          box1Array[5] = box1.max.z;
-
-          const box2Array = new Float32Array(6);
-          box2Array[0] = box2.min.x;
-          box2Array[1] = box2.min.y;
-          box2Array[2] = box2.min.z;
-          box2Array[3] = box2.max.x;
-          box2Array[4] = box2.max.y;
-          box2Array[5] = box2.max.z;
-
-          return this.rl.CheckCollisionBoxes(ptr(box1Array), ptr(box2Array));
+          return this.rl.CheckCollisionBoxesWrapper(box1.min.x,
+            box1.min.y,
+            box1.min.z,
+            box1.max.x,
+            box1.max.y,
+            box1.max.z,
+            box2.min.x,
+            box2.min.y,
+            box2.min.z,
+            box2.max.x,
+            box2.max.y,
+            box2.max.z);
         }),
       );
   }
@@ -2064,24 +1782,16 @@ export default class Raylib {
       )
       .andThen(() =>
         this.safeFFICall("check collision box sphere", () => {
-          // Create BoundingBox structure as Float32Array
-          const boxArray = new Float32Array(6);
-          boxArray[0] = box.min.x;
-          boxArray[1] = box.min.y;
-          boxArray[2] = box.min.z;
-          boxArray[3] = box.max.x;
-          boxArray[4] = box.max.y;
-          boxArray[5] = box.max.z;
-
-          const centerBuffer = new ArrayBuffer(12); // 3 floats * 4 bytes
-          const centerView = new Float32Array(centerBuffer);
-          centerView[0] = center.x;
-          centerView[1] = center.y;
-          centerView[2] = center.z;
-
-          return this.rl.CheckCollisionBoxSphere(
-            ptr(boxArray),
-            ptr(centerBuffer),
+          return this.rl.CheckCollisionBoxSphereWrapper(
+            box.min.x,
+            box.min.y,
+            box.min.z,
+            box.max.x,
+            box.max.y,
+            box.max.z,
+            center.x,
+            center.y,
+            center.z,
             radius,
           );
         }),

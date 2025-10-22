@@ -2,225 +2,224 @@ import { dlopen, FFIType } from 'bun:ffi';
 import { PlatformManager, LibraryNotFoundError } from './platform/PlatformManager';
 import type { PlatformInfo, LibraryPaths } from './platform/PlatformManager';
 
-const symbolsDefinition = {
-  InitWindow: {
+const raylibWrapperSymbols = {
+  InitWindowWrapper: {
     args: [FFIType.i32, FFIType.i32, FFIType.ptr],
     returns: FFIType.void
   },
-  CloseWindow: {
+  CloseWindowWrapper: {
     args: [],
     returns: FFIType.void
   },
-  WindowShouldClose: {
+  WindowShouldCloseWrapper: {
     args: [],
     returns: FFIType.bool
   },
-  BeginDrawing: {
+  BeginDrawingWrapper: {
     args: [],
     returns: FFIType.void
   },
-  EndDrawing: {
+  EndDrawingWrapper: {
     args: [],
     returns: FFIType.void
   },
-  ClearBackground: {
-    args: [FFIType.u32], // Color как 32-битное значение
+  ClearBackgroundWrapper: {
+    args: [FFIType.u32],
     returns: FFIType.void
   },
-  DrawText: {
+  DrawTextWrapper: {
     args: [FFIType.ptr, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawRectangle: {
+  DrawRectangleWrapper: {
     args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
-  SetTargetFPS: {
+  SetTargetFPSWrapper: {
     args: [FFIType.i32],
     returns: FFIType.void
   },
-  DrawFPS: {
+  DrawFPSWrapper: {
     args: [FFIType.i32, FFIType.i32],
     returns: FFIType.void
   },
-  GetFrameTime: {
+  GetFrameTimeWrapper: {
     args: [],
     returns: FFIType.f32
   },
-  IsKeyDown: {
+  IsKeyDownWrapper: {
     args: [FFIType.i16],
     returns: FFIType.bool
   },
-  IsKeyUp: {
+  IsKeyUpWrapper: {
     args: [FFIType.i16],
     returns: FFIType.bool
   },
-  GetKeyPressed: {
+  GetKeyPressedWrapper: {
     args: [],
     returns: FFIType.i8
   },
-  IsMouseButtonDown: {
+  IsMouseButtonDownWrapper: {
     args: [FFIType.i32],
     returns: FFIType.bool
   },
-  IsMouseButtonUp: {
+  IsMouseButtonUpWrapper: {
     args: [FFIType.i32],
     returns: FFIType.bool
   },
-  GetMouseX: {
+  GetMouseXWrapper: {
     args: [],
     returns: FFIType.i32
   },
-  GetMouseY: {
+  GetMouseYWrapper: {
     args: [],
     returns: FFIType.i32
   },
-  SetMousePosition: {
+  SetMousePositionWrapper: {
     args: [FFIType.i32, FFIType.i32],
     returns: FFIType.void
   },
-  DisableCursor: {
+  DisableCursorWrapper: {
     args: [],
     returns: FFIType.void
   },
-  EnableCursor: {
+  EnableCursorWrapper: {
     args: [],
     returns: FFIType.void
   },
-  HideCursor: {
+  HideCursorWrapper: {
     args: [],
     returns: FFIType.void
   },
-  ShowCursor: {
+  ShowCursorWrapper: {
     args: [],
     returns: FFIType.void
   },
-  IsCursorHidden: {
+  IsCursorHiddenWrapper: {
     args: [],
     returns: FFIType.bool
   },
-  DrawPixel: {
+  DrawPixelWrapper: {
     args: [FFIType.i16, FFIType.i16, FFIType.u32],
     returns: FFIType.void
   },
-  DrawLine: {
+  DrawLineWrapper: {
     args: [FFIType.i16, FFIType.i16, FFIType.i16, FFIType.i16, FFIType.u32],
     returns: FFIType.void
   },
-  DrawCircle: {
+  DrawCircleWrapper: {
     args: [FFIType.i16, FFIType.i16, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawPoly: {
-    args: [FFIType.ptr, FFIType.i32, FFIType.f32, FFIType.f32, FFIType.u32],
+  DrawPolyWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.i32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawTriangleFan: {
+  DrawTriangleFanWrapper: {
     args: [FFIType.ptr, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawRectanglePro: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.f32, FFIType.u32],
+  DrawRectangleProWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  CheckCollisionRecs: {
-    args: [FFIType.ptr, FFIType.ptr],
+  CheckCollisionRecsWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-  CheckCollisionCircles: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.ptr, FFIType.f32],
+  CheckCollisionCirclesWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-  CheckCollisionCircleRec: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.ptr],
+  CheckCollisionCircleRecWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-  CheckCollisionCircleLine: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.ptr, FFIType.ptr],
+  CheckCollisionCircleLineWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-  CheckCollisionPointRec: {
-    args: [FFIType.ptr, FFIType.ptr],
+  CheckCollisionPointRecWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-  CheckCollisionPointCircle: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.f32],
+  CheckCollisionPointCircleWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-  CheckCollisionPointTriangle: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.ptr, FFIType.ptr],
+  CheckCollisionPointTriangleWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
   // 3D Drawing functions
-  DrawLine3D: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.u32],
+  DrawLine3DWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawPoint3D: {
-    args: [FFIType.ptr, FFIType.u32],
+  DrawPoint3DWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawCircle3D: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.ptr, FFIType.f32, FFIType.u32],
+  DrawCircle3DWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawTriangle3D: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.ptr, FFIType.u32],
+  DrawTriangle3DWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
   // Additional 3D shapes
-  DrawCube: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+  DrawCubeWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawCubeV: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.u32],
+  DrawCubeVWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawSphere: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.u32],
+  DrawSphereWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawCylinder: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32, FFIType.u32],
+  DrawCylinderWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawCapsule: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.f32, FFIType.i32, FFIType.i32, FFIType.u32],
+  DrawCapsuleWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32, FFIType.i32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawPlane: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.u32],
+  DrawPlaneWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawRay: {
-    args: [FFIType.ptr, FFIType.u32],
+  DrawRayWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
     returns: FFIType.void
   },
-  DrawGrid: {
+  DrawGridWrapper: {
     args: [FFIType.i32, FFIType.f32],
     returns: FFIType.void
   },
   // 3D Collision detection functions
-  CheckCollisionSpheres: {
-    args: [FFIType.ptr, FFIType.f32, FFIType.ptr, FFIType.f32],
+  CheckCollisionSpheresWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-  CheckCollisionBoxes: {
-    args: [FFIType.ptr, FFIType.ptr],
+  CheckCollisionBoxesWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-  CheckCollisionBoxSphere: {
-    args: [FFIType.ptr, FFIType.ptr, FFIType.f32],
+  CheckCollisionBoxSphereWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
     returns: FFIType.bool
   },
-
-  // 3D Camera and mode functions - Camera3D struct should be passed as pointer
-  BeginMode3D: {
-    args: [FFIType.ptr],
+  // 3D Camera and mode functions
+  BeginMode3DWrapper: {
+    args: [FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.i32],
     returns: FFIType.void
   },
-  EndMode3D: {
+  EndMode3DWrapper: {
     args: [],
     returns: FFIType.void
   },
@@ -505,7 +504,10 @@ function loadLibraryWithFallback(
   for (const path of allPaths) {
     try {
       if (PlatformManager.validateLibraryExists(path)) {
-        return dlopen(path, symbols);
+        // Convert to absolute path to help Windows find dependencies
+        const absolutePath = require('path').resolve(path);
+        const lib = dlopen(absolutePath, symbols);
+        return lib;
       } else {
         errors.push(`${path}: File does not exist`);
       }
@@ -522,23 +524,47 @@ function loadLibraryWithFallback(
   );
 }
 
-export const initRaylib = (libraryPath: string, config?: FFILoaderConfig) => {
+export const initRaylib = (libraryPath?: string, config?: FFILoaderConfig) => {
   try {
     // Detect platform automatically if config is not provided
     const platformInfo = config?.platformInfo || PlatformManager.detectPlatform();
 
+    // Use provided base path or default to 'assets'
+    const basePath = libraryPath || 'assets';
+
+    // On Windows, preload raylib.dll to ensure it's available for wrapper DLLs
+    if (platformInfo.os === 'windows') {
+      const raylibPath = require('path').join(basePath, 'raylib.dll');
+      if (PlatformManager.validateLibraryExists(raylibPath)) {
+        try {
+          // Load raylib.dll with a dummy symbol just to get it into memory
+          dlopen(require('path').resolve(raylibPath), {
+            GetColor: { args: [FFIType.u32], returns: FFIType.void }
+          });
+        } catch (e) {
+          // Silently ignore - raylib.dll might already be loaded or in system path
+          console.log(e);
+        }
+      }
+    }
+
     // Generate platform-specific library paths if not provided
-    const libraryPaths = config?.libraryPaths || PlatformManager.getLibraryPaths();
+    const libraryPaths = config?.libraryPaths || PlatformManager.getLibraryPaths(basePath);
 
     // Generate fallback paths: prebuilt -> local compilation -> system
-    const prebuiltPaths = PlatformManager.getPrebuiltLibraryPaths();
+    const prebuiltPaths = PlatformManager.getPrebuiltLibraryPaths(basePath);
     const systemPaths = PlatformManager.getLibraryPaths('/usr/local/lib');
     const customFallbacks = config?.fallbackPaths || [];
 
-    // Load main raylib library
-    const lib = dlopen(libraryPath, symbolsDefinition);
+    // Load raylib wrapper library
+    const raylibWrapperLib = loadLibraryWithFallback(
+      libraryPaths.raylibWrapper,
+      [prebuiltPaths.raylibWrapper, systemPaths.raylibWrapper, ...customFallbacks],
+      raylibWrapperSymbols,
+      'raylib-wrapper'
+    );
 
-    // Load wrapper libraries with fallback mechanisms
+    // Load other wrapper libraries with fallback mechanisms
     const wrapperLib = loadLibraryWithFallback(
       libraryPaths.textureWrapper,
       [prebuiltPaths.textureWrapper, systemPaths.textureWrapper, ...customFallbacks],
@@ -568,14 +594,14 @@ export const initRaylib = (libraryPath: string, config?: FFILoaderConfig) => {
     );
 
     const triangleWrapperLib = loadLibraryWithFallback(
-        libraryPaths.triangleWrapper,
-        [prebuiltPaths.triangleWrapper, systemPaths.triangleWrapper, ...customFallbacks],
-        triangleWrapperSymbols,
-        'triangle-wrapper'
-      );
+      libraryPaths.triangleWrapper,
+      [prebuiltPaths.triangleWrapper, systemPaths.triangleWrapper, ...customFallbacks],
+      triangleWrapperSymbols,
+      'triangle-wrapper'
+    );
 
     return {
-      ...lib.symbols,
+      ...raylibWrapperLib.symbols,
       ...wrapperLib.symbols,
       ...renderTextureWrapperLib.symbols,
       ...modelWrapperLib.symbols,

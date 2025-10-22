@@ -133,6 +133,11 @@ export class PlatformBuilder {
 
         return [
             {
+                name: 'raylib-wrapper',
+                source: join(wrappersBase, 'raylib-wrapper.c'),
+                output: join(this.config.assetsDir, `raylib-wrapper${this.platform.libraryExtension}`)
+            },
+            {
                 name: 'texture-wrapper',
                 source: join(wrappersBase, 'textures', 'texture-wrapper.c'),
                 output: join(this.config.assetsDir, `texture-wrapper${this.platform.libraryExtension}`)

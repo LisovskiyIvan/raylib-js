@@ -1,19 +1,20 @@
-// Raylib цвета в формате ABGR (little-endian)
+// Raylib цвета в формате 0xAABBGGRR (как ожидает GetColor в raylib)
+// GetColor читает байты: R (младший), G, B, A (старший)
 export const Colors = {
-  WHITE: 0xFFFFFFFF,     // Белый
-  BLACK: 0xFF000000,     // Черный (исправлено)
-  RED: 0xFF0000FF,       // Красный  
-  GREEN: 0xFF00FF00,     // Зеленый (исправлено)
-  BLUE: 0xFFFF0000,      // Синий (исправлено)
-  YELLOW: 0xFF00FFFF,    // Желтый (исправлено)
-  GRAY: 0xFF808080,      // Серый (исправлено)
-  RAYWHITE: 0xFFF5F5F5,  // Raylib стандартный белый
-  DARKGRAY: 0xFF505050,   // Темно-серый
-  PURPLE: 0xFFFF00FF,    // Фиолетовый
-  ORANGE: 0xFF0080FF,    // Оранжевый
-  LIME: 0xFF00FF80,      // Лайм
-  CYAN: 0xFFFFFF00,      // Циан
-  MAGENTA: 0xFFFF00FF    // Маджента (то же что PURPLE)
+  WHITE: 0xFFFFFFFF,     // Белый (R=255, G=255, B=255, A=255)
+  BLACK: 0xFF000000,     // Черный (R=0, G=0, B=0, A=255)
+  RED: 0xFF0000FF,       // Красный (R=255, G=0, B=0, A=255)
+  GREEN: 0xFF00FF00,     // Зеленый (R=0, G=255, B=0, A=255)
+  BLUE: 0xFFFF0000,      // Синий (R=0, G=0, B=255, A=255)
+  YELLOW: 0xFF00FFFF,    // Желтый (R=255, G=255, B=0, A=255)
+  GRAY: 0xFF808080,      // Серый (R=128, G=128, B=128, A=255)
+  RAYWHITE: 0xFFF5F5F5,  // Raylib стандартный белый (R=245, G=245, B=245, A=255)
+  DARKGRAY: 0xFF505050,  // Темно-серый (R=80, G=80, B=80, A=255)
+  PURPLE: 0xFFC800C8,    // Фиолетовый (R=200, G=0, B=200, A=255)
+  ORANGE: 0xFF0080FF,    // Оранжевый (R=255, G=128, B=0, A=255)
+  LIME: 0xFF80FF00,      // Лайм (R=0, G=255, B=128, A=255)
+  CYAN: 0xFFFFFF00,      // Циан (R=0, G=255, B=255, A=255)
+  MAGENTA: 0xFFFF00FF    // Маджента (R=255, G=0,  255)
 };
 
 

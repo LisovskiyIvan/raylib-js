@@ -9,7 +9,7 @@ if (initResult.isErr()) {
     process.exit(1)
 }
 
-rl.setTargetFPS(60)
+// rl.setTargetFPS(60)
 
 // Camera settings
 let cameraPosition = new Vector3(0, 2, 5)
