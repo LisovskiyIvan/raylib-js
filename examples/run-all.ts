@@ -61,6 +61,16 @@ const examples = [
         title: "Простые 3D коллизии",
         description: "Базовые 3D коллизии с анимацией"
     },
+    {
+        name: "13-mesh-ray-collision.ts",
+        title: "рейкаст мешей",
+        description: "Попадане по мешам с помощью рейкастов"
+    },
+    {
+        name: "14-shader-demo.ts",
+        title: "Shader Demo",
+        description: "Custom shaders, blend modes, and scissor mode"
+    }
 ]
 
 console.log("🎮 Raylib TypeScript - Примеры")

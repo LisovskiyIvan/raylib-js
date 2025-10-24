@@ -166,6 +166,11 @@ export class PlatformBuilder {
                 name: 'triangle-wrapper',
                 source: join(wrappersBase, 'shapes', 'triangle-wrapper.c'),
                 output: join(this.config.assetsDir, `triangle-wrapper${this.platform.libraryExtension}`)
+            },
+            {
+                name: 'shader-wrapper',
+                source: join(wrappersBase, 'shaders', 'shader-wrapper.c'),
+                output: join(this.config.assetsDir, `shader-wrapper${this.platform.libraryExtension}`)
             }
         ];
     }

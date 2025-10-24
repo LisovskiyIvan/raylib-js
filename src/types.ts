@@ -18,9 +18,9 @@ export interface RaylibError {
 
 // Helper functions для создания ошибок
 export const createError = (
-    kind: RaylibErrorKind, 
-    message: string, 
-    context?: string, 
+    kind: RaylibErrorKind,
+    message: string,
+    context?: string,
     source?: Error
 ): RaylibError => ({
     kind,
@@ -96,10 +96,27 @@ export interface Mesh {
 
 // Matrix structure matching Raylib's Matrix (4x4 matrix)
 export interface Matrix {
-    m0: number; m4: number; m8: number;  m12: number  // Matrix first row (4 components)
-    m1: number; m5: number; m9: number;  m13: number  // Matrix second row (4 components)
+    m0: number; m4: number; m8: number; m12: number  // Matrix first row (4 components)
+    m1: number; m5: number; m9: number; m13: number  // Matrix second row (4 components)
     m2: number; m6: number; m10: number; m14: number  // Matrix third row (4 components)
     m3: number; m7: number; m11: number; m15: number  // Matrix fourth row (4 components)
+}
+
+// Shader structure using slot-based approach
+export interface Shader {
+    slotIndex: number  // Index in the shader wrapper's slot array
+}
+
+// BlendMode enum matching Raylib's BlendMode constants
+export enum BlendMode {
+    ALPHA = 0,              // Blend textures considering alpha (default)
+    ADDITIVE = 1,           // Blend textures adding colors
+    MULTIPLIED = 2,         // Blend textures multiplying colors
+    ADD_COLORS = 3,         // Blend textures adding colors (alternative)
+    SUBTRACT_COLORS = 4,    // Blend textures subtracting colors
+    ALPHA_PREMULTIPLY = 5,  // Blend premultiplied textures
+    CUSTOM = 6,             // Blend textures using custom src/dst factors
+    CUSTOM_SEPARATE = 7     // Blend textures using custom rgb/alpha factors
 }
 
 // Type aliases для Result types

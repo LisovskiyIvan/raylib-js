@@ -483,6 +483,96 @@ const triangleWrapperSymbols = {
   },
 };
 
+const shaderWrapperSymbols = {
+  // Shader loading
+  LoadShaderToSlot: {
+    args: [FFIType.ptr, FFIType.ptr],
+    returns: FFIType.i32
+  },
+  LoadShaderFromMemoryToSlot: {
+    args: [FFIType.ptr, FFIType.ptr],
+    returns: FFIType.i32
+  },
+  UnloadShaderBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.void
+  },
+  UnloadAllShaders: {
+    args: [],
+    returns: FFIType.void
+  },
+
+  // Shader validation
+  IsShaderSlotValid: {
+    args: [FFIType.i32],
+    returns: FFIType.bool
+  },
+  GetLoadedShaderCount: {
+    args: [],
+    returns: FFIType.i32
+  },
+
+  // Shader mode
+  BeginShaderModeBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.void
+  },
+  EndShaderModeWrapper: {
+    args: [],
+    returns: FFIType.void
+  },
+
+  // Uniform management
+  GetShaderLocationBySlot: {
+    args: [FFIType.i32, FFIType.ptr],
+    returns: FFIType.i32
+  },
+  SetShaderValueFloatBySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.f32],
+    returns: FFIType.void
+  },
+  SetShaderValueIntBySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.i32],
+    returns: FFIType.void
+  },
+  SetShaderValueVec2BySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.f32, FFIType.f32],
+    returns: FFIType.void
+  },
+  SetShaderValueVec3BySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.void
+  },
+  SetShaderValueVec4BySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32],
+    returns: FFIType.void
+  },
+  SetShaderValueTextureBySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.i32],
+    returns: FFIType.void
+  },
+
+  // Blend mode
+  BeginBlendModeWrapper: {
+    args: [FFIType.i32],
+    returns: FFIType.void
+  },
+  EndBlendModeWrapper: {
+    args: [],
+    returns: FFIType.void
+  },
+
+  // Scissor mode
+  BeginScissorModeWrapper: {
+    args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32],
+    returns: FFIType.void
+  },
+  EndScissorModeWrapper: {
+    args: [],
+    returns: FFIType.void
+  }
+};
+
 export interface FFILoaderConfig {
   platformInfo?: PlatformInfo;
   libraryPaths?: LibraryPaths;
@@ -531,11 +621,11 @@ export const initRaylib = (libraryPath?: string, config?: FFILoaderConfig) => {
 
     // Use provided base path, or RAYLIB_PATH env var, or default to 'assets'
     const basePath = libraryPath || process.env.RAYLIB_PATH || 'assets';
-    
+
     // Preload raylib library to ensure it's available for wrapper libraries
     const path = require('path');
     const raylibLibPath = path.resolve(basePath, 'raylib', 'lib');
-    
+
     if (platformInfo.os === 'darwin') {
       const raylibPath = path.join(raylibLibPath, 'libraylib.dylib');
       if (PlatformManager.validateLibraryExists(raylibPath)) {
@@ -624,13 +714,21 @@ export const initRaylib = (libraryPath?: string, config?: FFILoaderConfig) => {
       'triangle-wrapper'
     );
 
+    const shaderWrapperLib = loadLibraryWithFallback(
+      libraryPaths.shaderWrapper,
+      [prebuiltPaths.shaderWrapper, systemPaths.shaderWrapper, ...customFallbacks],
+      shaderWrapperSymbols,
+      'shader-wrapper'
+    );
+
     return {
       ...raylibWrapperLib.symbols,
       ...wrapperLib.symbols,
       ...renderTextureWrapperLib.symbols,
       ...modelWrapperLib.symbols,
       ...rayCollisionWrapperLib.symbols,
-      ...triangleWrapperLib.symbols
+      ...triangleWrapperLib.symbols,
+      ...shaderWrapperLib.symbols
     };
   } catch (error) {
     // Enhanced error reporting with platform information

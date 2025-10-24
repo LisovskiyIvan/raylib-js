@@ -6,6 +6,7 @@ import type {
   Model,
   BoundingBox,
 } from "./types";
+import { BlendMode } from "./types";
 import { initError, ffiError, stateError, validationError } from "./types";
 import { Ok, Err, tryFn } from "./result";
 import { ptr } from "bun:ffi";
@@ -1923,6 +1924,318 @@ export default class Raylib {
           };
         }),
       );
+  }
+
+  // Shader loading and management
+  public loadShader(vsFileName: string, fsFileName: string): RaylibResult<import("./types").Shader> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateNonEmptyString(vsFileName, "vsFileName"),
+          validateNonEmptyString(fsFileName, "fsFileName"),
+        ),
+      )
+      .andThen(() =>
+        this.safeFFICall("load shader to slot", () => {
+          const vsFileNameBuffer = this.textEncoder.encode(vsFileName + "\0");
+          const fsFileNameBuffer = this.textEncoder.encode(fsFileName + "\0");
+          const vsFileNamePtr = ptr(vsFileNameBuffer);
+          const fsFileNamePtr = ptr(fsFileNameBuffer);
+
+          const slotIndex = this.rl.LoadShaderToSlot(vsFileNamePtr, fsFileNamePtr);
+
+          if (slotIndex < 0) {
+            throw new Error(
+              "Failed to load shader or no free slots available",
+            );
+          }
+
+          return { slotIndex };
+        }),
+      );
+  }
+
+  public loadShaderFromMemory(vsCode: string, fsCode: string): RaylibResult<import("./types").Shader> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateNonEmptyString(vsCode, "vsCode"),
+          validateNonEmptyString(fsCode, "fsCode"),
+        ),
+      )
+      .andThen(() =>
+        this.safeFFICall("load shader from memory to slot", () => {
+          const vsCodeBuffer = this.textEncoder.encode(vsCode + "\0");
+          const fsCodeBuffer = this.textEncoder.encode(fsCode + "\0");
+          const vsCodePtr = ptr(vsCodeBuffer);
+          const fsCodePtr = ptr(fsCodeBuffer);
+
+          const slotIndex = this.rl.LoadShaderFromMemoryToSlot(vsCodePtr, fsCodePtr);
+
+          if (slotIndex < 0) {
+            throw new Error(
+              "Failed to compile shader or no free slots available",
+            );
+          }
+
+          return { slotIndex };
+        }),
+      );
+  }
+
+  public unloadShader(shader: import("./types").Shader): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(shader.slotIndex, "shader.slotIndex"))
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        return this.safeFFICall("unload shader from slot", () => {
+          this.rl.UnloadShaderBySlot(shader.slotIndex);
+        });
+      });
+  }
+
+  public unloadAllShaders(): RaylibResult<void> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("unload all shaders", () => {
+        this.rl.UnloadAllShaders();
+      }),
+    );
+  }
+
+  public isShaderValid(shader: import("./types").Shader): RaylibResult<boolean> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(shader.slotIndex, "shader.slotIndex"))
+      .andThen(() =>
+        this.safeFFICall("check shader slot validity", () => {
+          return this.rl.IsShaderSlotValid(shader.slotIndex);
+        }),
+      );
+  }
+
+  public getLoadedShaderCount(): RaylibResult<number> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("get loaded shader count", () => {
+        return this.rl.GetLoadedShaderCount();
+      }),
+    );
+  }
+
+  // Shader mode control
+  public beginShaderMode(shader: import("./types").Shader): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(shader.slotIndex, "shader.slotIndex"))
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        return this.safeFFICall("begin shader mode", () => {
+          this.rl.BeginShaderModeBySlot(shader.slotIndex);
+        });
+      });
+  }
+
+  public endShaderMode(): RaylibResult<void> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("end shader mode", () => {
+        this.rl.EndShaderModeWrapper();
+      }),
+    );
+  }
+
+  // Uniform management
+  public getShaderLocation(shader: import("./types").Shader, uniformName: string): RaylibResult<number> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(shader.slotIndex, "shader.slotIndex"),
+          validateNonEmptyString(uniformName, "uniformName"),
+        ),
+      )
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        return this.safeFFICall("get shader location", () => {
+          const uniformNameBuffer = this.textEncoder.encode(uniformName + "\0");
+          const uniformNamePtr = ptr(uniformNameBuffer);
+          const location = this.rl.GetShaderLocationBySlot(shader.slotIndex, uniformNamePtr);
+          return location;
+        });
+      });
+  }
+
+  public setShaderValueFloat(shader: import("./types").Shader, locIndex: number, value: number): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(shader.slotIndex, "shader.slotIndex"),
+          validateFinite(locIndex, "locIndex"),
+          validateFinite(value, "value"),
+        ),
+      )
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        return this.safeFFICall("set shader value float", () => {
+          this.rl.SetShaderValueFloatBySlot(shader.slotIndex, locIndex, value);
+        });
+      });
+  }
+
+  public setShaderValueInt(shader: import("./types").Shader, locIndex: number, value: number): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(shader.slotIndex, "shader.slotIndex"),
+          validateFinite(locIndex, "locIndex"),
+          validateFinite(value, "value"),
+        ),
+      )
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        return this.safeFFICall("set shader value int", () => {
+          this.rl.SetShaderValueIntBySlot(shader.slotIndex, locIndex, Math.floor(value));
+        });
+      });
+  }
+
+  public setShaderValueVec2(shader: import("./types").Shader, locIndex: number, value: Vector2): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(shader.slotIndex, "shader.slotIndex"),
+          validateFinite(locIndex, "locIndex"),
+          validateFinite(value.x, "value.x"),
+          validateFinite(value.y, "value.y"),
+        ),
+      )
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        return this.safeFFICall("set shader value vec2", () => {
+          this.rl.SetShaderValueVec2BySlot(shader.slotIndex, locIndex, value.x, value.y);
+        });
+      });
+  }
+
+  public setShaderValueVec3(shader: import("./types").Shader, locIndex: number, value: Vector3): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(shader.slotIndex, "shader.slotIndex"),
+          validateFinite(locIndex, "locIndex"),
+          validateFinite(value.x, "value.x"),
+          validateFinite(value.y, "value.y"),
+          validateFinite(value.z, "value.z"),
+        ),
+      )
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        return this.safeFFICall("set shader value vec3", () => {
+          this.rl.SetShaderValueVec3BySlot(shader.slotIndex, locIndex, value.x, value.y, value.z);
+        });
+      });
+  }
+
+  public setShaderValueVec4(shader: import("./types").Shader, locIndex: number, x: number, y: number, z: number, w: number): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(shader.slotIndex, "shader.slotIndex"),
+          validateFinite(locIndex, "locIndex"),
+          validateFinite(x, "x"),
+          validateFinite(y, "y"),
+          validateFinite(z, "z"),
+          validateFinite(w, "w"),
+        ),
+      )
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        return this.safeFFICall("set shader value vec4", () => {
+          this.rl.SetShaderValueVec4BySlot(shader.slotIndex, locIndex, x, y, z, w);
+        });
+      });
+  }
+
+  public setShaderValueTexture(shader: import("./types").Shader, locIndex: number, textureSlot: number): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(shader.slotIndex, "shader.slotIndex"),
+          validateFinite(locIndex, "locIndex"),
+          validateFinite(textureSlot, "textureSlot"),
+        ),
+      )
+      .andThen(() => {
+        if (shader.slotIndex < 0) {
+          return new Err(validationError("Invalid shader slot index"));
+        }
+        if (textureSlot < 0) {
+          return new Err(validationError("Invalid texture slot index"));
+        }
+        return this.safeFFICall("set shader value texture", () => {
+          this.rl.SetShaderValueTextureBySlot(shader.slotIndex, locIndex, textureSlot);
+        });
+      });
+  }
+
+  // Blend mode control
+  public beginBlendMode(mode: BlendMode): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(mode, "mode"))
+      .andThen(() => {
+        // Validate blend mode is within valid range
+        if (mode < BlendMode.ALPHA || mode > BlendMode.CUSTOM_SEPARATE) {
+          return new Err(validationError("Invalid blend mode value"));
+        }
+        return this.safeFFICall("begin blend mode", () => {
+          this.rl.BeginBlendModeWrapper(mode);
+        });
+      });
+  }
+
+  public endBlendMode(): RaylibResult<void> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("end blend mode", () => {
+        this.rl.EndBlendModeWrapper();
+      }),
+    );
+  }
+
+  // Scissor mode control
+  public beginScissorMode(x: number, y: number, width: number, height: number): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(x, "x"),
+          validateFinite(y, "y"),
+          validateNonNegative(width, "width"),
+          validateNonNegative(height, "height"),
+        ),
+      )
+      .andThen(() =>
+        this.safeFFICall("begin scissor mode", () => {
+          this.rl.BeginScissorModeWrapper(Math.floor(x), Math.floor(y), Math.floor(width), Math.floor(height));
+        }),
+      );
+  }
+
+  public endScissorMode(): RaylibResult<void> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("end scissor mode", () => {
+        this.rl.EndScissorModeWrapper();
+      }),
+    );
   }
 
   public getRayCollisionTriangle(

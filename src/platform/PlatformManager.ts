@@ -17,6 +17,7 @@ export interface LibraryPaths {
     rayCollisionWrapper: string;
     meshCollisionWrapper: string;
     triangleWrapper: string;
+    shaderWrapper: string;
 }
 
 export class PlatformNotSupportedError extends Error {
@@ -123,6 +124,7 @@ export class PlatformManager {
             rayCollisionWrapper: path.join(basePath, `ray-collision-wrapper${ext}`),
             meshCollisionWrapper: path.join(basePath, `mesh-collision-wrapper${ext}`),
             triangleWrapper: path.join(basePath, `triangle-wrapper${ext}`),
+            shaderWrapper: path.join(basePath, `shader-wrapper${ext}`),
         };
     }
 
