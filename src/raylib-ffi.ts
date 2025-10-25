@@ -351,6 +351,44 @@ const modelWrapperSymbols = {
   GetModelBoundingBoxBySlot: {
     args: [FFIType.i32, FFIType.ptr],
     returns: FFIType.void
+  },
+
+  // Animation functions (integrated into model wrapper)
+  LoadModelAnimationsToSlot: {
+    args: [FFIType.ptr, FFIType.ptr],
+    returns: FFIType.i32
+  },
+  UnloadModelAnimationBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.void
+  },
+  UnloadAllAnimations: {
+    args: [],
+    returns: FFIType.void
+  },
+  UpdateModelAnimationBySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32],
+    returns: FFIType.void
+  },
+  UpdateModelAnimationBonesBySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.i32, FFIType.i32],
+    returns: FFIType.void
+  },
+  IsModelAnimationValidBySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.i32],
+    returns: FFIType.bool
+  },
+  GetAnimationDataBySlot: {
+    args: [FFIType.i32, FFIType.i32, FFIType.ptr],
+    returns: FFIType.void
+  },
+  GetLoadedAnimationCount: {
+    args: [],
+    returns: FFIType.i32
+  },
+  IsAnimationSlotValid: {
+    args: [FFIType.i32],
+    returns: FFIType.bool
   }
 };
 
@@ -775,6 +813,9 @@ export const initRaylib = (libraryPath?: string, config?: FFILoaderConfig) => {
       fontWrapperSymbols,
       'font-wrapper'
     );
+
+    // Animation functions are now integrated into model-wrapper
+    // No separate animation-wrapper library needed
 
     return {
       ...raylibWrapperLib.symbols,

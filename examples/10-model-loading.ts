@@ -13,10 +13,9 @@ if (initResult.isErr()) {
 }
 
 rl.setTargetFPS(60)
-
-// Camera setup
 const cameraPosition = new Vector3(10, 10, 10)
 const cameraTarget = new Vector3(0, 0, 0)
+
 const cameraUp = new Vector3(0, 1, 0)
 const fovy = 45.0
 const projection = 0 // CAMERA_PERSPECTIVE
@@ -40,7 +39,8 @@ if (testRes.isErr()) {
 
 // Now try the GLTF model
 console.log("\n2. Attempting to load GLTF model: assets/frog_tamagotchi/scene.gltf")
-const gltfRes = rl.loadModel("assets/frog_tamagotchi/scene.gltf")
+// const gltfRes = rl.loadModel("assets/frog_tamagotchi/scene.gltf")
+const gltfRes = rl.loadModel("assets/models/phoenix_bird.glb")
 if (gltfRes.isOk()) {
     loadedModel = gltfRes.unwrap()
     console.log("✅ GLTF Model loaded successfully!")
@@ -90,10 +90,10 @@ while (true) {
 
     if (loadedModel) {
         // Draw the loaded model
-        rl.drawModel(loadedModel, new Vector3(0, 0, 0), 1.0, Colors.WHITE)
+        rl.drawModel(loadedModel, new Vector3(0, 0, 0), 0.01, Colors.WHITE)
         
         // Also draw wireframe version offset to the side
-        rl.drawModelWires(loadedModel, new Vector3(5, 0, 0), 1.0, Colors.GREEN)
+        // rl.drawModelWires(loadedModel, new Vector3(10, 0, 0), 0.01, Colors.GREEN)
     } else {
         // Draw fallback 3D shapes
         rl.drawCube(new Vector3(0, 0, 0), 2, 2, 2, Colors.RED)

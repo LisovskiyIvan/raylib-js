@@ -177,7 +177,7 @@ export class PlatformBuilder {
                 name: 'font-wrapper',
                 source: join(wrappersBase, 'fonts', 'font-wrapper.c'),
                 output: join(outputDir, `font-wrapper${this.platform.libraryExtension}`)
-            }
+            },
         ];
     }
 

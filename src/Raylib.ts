@@ -4,6 +4,7 @@ import type {
   Texture2D,
   RenderTexture2D,
   Model,
+  ModelAnimation,
   BoundingBox,
   Shader,
   RayCollision,
@@ -1675,6 +1676,172 @@ export default class Raylib {
     return this.requireInitialized().andThen(() =>
       this.safeFFICall("unload all models", () => {
         this.rl.UnloadAllModels();
+      }),
+    );
+  }
+
+  // Animation loading and management
+  public loadModelAnimations(fileName: string): RaylibResult<ModelAnimation[]> {
+    return this.requireInitialized()
+      .andThen(() => validateNonEmptyString(fileName, "fileName"))
+      .andThen(() =>
+        this.safeFFICall("load model animations to slot", () => {
+          const fileNameBuffer = this.textEncoder.encode(fileName + "\0");
+          const fileNamePtr = ptr(fileNameBuffer);
+
+          const animCountBuffer = new Int32Array(1);
+          const slotIndex = this.rl.LoadModelAnimationsToSlot(
+            fileNamePtr,
+            ptr(animCountBuffer),
+          );
+
+          if (slotIndex < 0) {
+            throw new Error(
+              "Failed to load animations or no free slots available",
+            );
+          }
+
+          const animCount = animCountBuffer[0]!;
+          const animations: ModelAnimation[] = [];
+
+          // Get data for each animation in the slot
+          for (let i = 0; i < animCount; i++) {
+            const dataBuffer = new Int32Array(2);
+            this.rl.GetAnimationDataBySlot(slotIndex, i, ptr(dataBuffer));
+
+            animations.push({
+              slotIndex,
+              frameCount: dataBuffer[0]!,
+              boneCount: dataBuffer[1]!,
+            });
+          }
+
+          return animations;
+        }),
+      );
+  }
+
+  public updateModelAnimation(
+    model: Model,
+    animation: ModelAnimation,
+    animIndex: number,
+    frame: number,
+  ): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(model.slotIndex, "model.slotIndex"),
+          validateFinite(animation.slotIndex, "animation.slotIndex"),
+          validateNonNegative(animIndex, "animIndex"),
+          validateFinite(frame, "frame"),
+        ),
+      )
+      .andThen(() => {
+        if (model.slotIndex < 0) {
+          return new Err(validationError("Invalid model slot index"));
+        }
+        if (animation.slotIndex < 0) {
+          return new Err(validationError("Invalid animation slot index"));
+        }
+        return this.safeFFICall("update model animation", () => {
+          this.rl.UpdateModelAnimationBySlot(
+            model.slotIndex,
+            animation.slotIndex,
+            animIndex,
+            Math.floor(frame),
+          );
+        });
+      });
+  }
+
+  public updateModelAnimationBones(
+    model: Model,
+    animation: ModelAnimation,
+    animIndex: number,
+    frame: number,
+  ): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(model.slotIndex, "model.slotIndex"),
+          validateFinite(animation.slotIndex, "animation.slotIndex"),
+          validateNonNegative(animIndex, "animIndex"),
+          validateFinite(frame, "frame"),
+        ),
+      )
+      .andThen(() => {
+        if (model.slotIndex < 0) {
+          return new Err(validationError("Invalid model slot index"));
+        }
+        if (animation.slotIndex < 0) {
+          return new Err(validationError("Invalid animation slot index"));
+        }
+        return this.safeFFICall("update model animation bones", () => {
+          this.rl.UpdateModelAnimationBonesBySlot(
+            model.slotIndex,
+            animation.slotIndex,
+            animIndex,
+            Math.floor(frame),
+          );
+        });
+      });
+  }
+
+  public isModelAnimationValid(
+    model: Model,
+    animation: ModelAnimation,
+    animIndex: number,
+  ): RaylibResult<boolean> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(model.slotIndex, "model.slotIndex"),
+          validateFinite(animation.slotIndex, "animation.slotIndex"),
+          validateNonNegative(animIndex, "animIndex"),
+        ),
+      )
+      .andThen(() => {
+        if (model.slotIndex < 0) {
+          return new Err(validationError("Invalid model slot index"));
+        }
+        if (animation.slotIndex < 0) {
+          return new Err(validationError("Invalid animation slot index"));
+        }
+        return this.safeFFICall("check animation validity", () => {
+          return this.rl.IsModelAnimationValidBySlot(
+            model.slotIndex,
+            animation.slotIndex,
+            animIndex,
+          );
+        });
+      });
+  }
+
+  public unloadModelAnimation(animation: ModelAnimation): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(animation.slotIndex, "animation.slotIndex"))
+      .andThen(() => {
+        if (animation.slotIndex < 0) {
+          return new Err(validationError("Invalid animation slot index"));
+        }
+        return this.safeFFICall("unload model animation", () => {
+          this.rl.UnloadModelAnimationBySlot(animation.slotIndex);
+        });
+      });
+  }
+
+  public unloadAllAnimations(): RaylibResult<void> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("unload all animations", () => {
+        this.rl.UnloadAllAnimations();
+      }),
+    );
+  }
+
+  public getLoadedAnimationCount(): RaylibResult<number> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("get loaded animation count", () => {
+        return this.rl.GetLoadedAnimationCount();
       }),
     );
   }

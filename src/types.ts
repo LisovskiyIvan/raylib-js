@@ -68,6 +68,23 @@ export interface Model {
     materialCount: number  // Number of materials in the model
 }
 
+// ModelAnimation structure using slot-based approach
+export interface ModelAnimation {
+    slotIndex: number      // Index in the animation wrapper's slot array
+    frameCount: number     // Number of animation frames
+    boneCount: number      // Number of bones in the animation
+    name?: string          // Optional animation name
+}
+
+// AnimationState helper interface for playback state management
+export interface AnimationState {
+    animation: ModelAnimation  // The animation being played
+    currentFrame: number       // Current frame in the animation
+    isPlaying: boolean         // Whether the animation is currently playing
+    loop: boolean              // Whether the animation should loop
+    speed: number              // Playback speed multiplier
+}
+
 // BoundingBox structure matching Raylib's BoundingBox
 export interface BoundingBox {
     min: { x: number; y: number; z: number }  // Minimum vertex box-corner
