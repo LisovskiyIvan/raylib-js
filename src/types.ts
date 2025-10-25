@@ -1,3 +1,4 @@
+import type { Result } from "./result"
 
 // Rust-style error types
 export enum RaylibErrorKind {
@@ -120,4 +121,4 @@ export enum BlendMode {
 }
 
 // Type aliases для Result types
-export type RaylibResult<T> = import('./result').Result<T, RaylibError>
+export type RaylibResult<T> = Result<T, RaylibError>

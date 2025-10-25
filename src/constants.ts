@@ -12,9 +12,15 @@ export const Colors = {
   DARKGRAY: 0xFF505050,  // Темно-серый (R=80, G=80, B=80, A=255)
   PURPLE: 0xFFC800C8,    // Фиолетовый (R=200, G=0, B=200, A=255)
   ORANGE: 0xFF0080FF,    // Оранжевый (R=255, G=128, B=0, A=255)
-  LIME: 0xFF80FF00,      // Лайм (R=0, G=255, B=128, A=255)
   CYAN: 0xFFFFFF00,      // Циан (R=0, G=255, B=255, A=255)
-  MAGENTA: 0xFFFF00FF    // Маджента (R=255, G=0,  255)
+  MAGENTA: 0xFFFF00FF,   // Маджента (R=255, G=0, B=255, A=255)
+  LIGHTGRAY: 0xFFC0C0C0,  // Светло-серый (R=192, G=192, B=192, A=255)
+  DARKBLUE: 0xFF8B0000,     // Темно-синий (R=0, G=0, B=139, A=255)
+  DARKGREEN: 0xFF006400,    // Темно-зеленый (R=0, G=100, B=0, A=255)
+  MAROON: 0xFF000080,       // Бордовый (R=128, G=0, B=0, A=255)
+  PINK: 0xFFCBC0FF,         // Розовый (R=255, G=192, B=203, A=255)
+  BROWN: 0xFF2F4F4F,        // Коричневый (R=165, G=42, B=42, A=255)
+  LIME: 0xFF00FF00,         // Лайм (R=0, G=255, B=0, A=255)
 };
 
 

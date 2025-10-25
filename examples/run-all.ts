@@ -70,6 +70,11 @@ const examples = [
         name: "14-shader-demo.ts",
         title: "Shader Demo",
         description: "Custom shaders, blend modes, and scissor mode"
+    },
+    {
+        name: "15-ui-componets.ts",
+        title: "Ready ui components",
+        description: "Готовые ui компоненты"
     }
 ]
 
