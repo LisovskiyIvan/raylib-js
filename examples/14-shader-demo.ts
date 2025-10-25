@@ -102,8 +102,9 @@ void main()
     // Pixelate effect
     vec2 pixelated = floor(uv * resolution / pixelSize) * pixelSize / resolution;
     
-    // Create checkerboard pattern
-    float checker = mod(floor(pixelated.x * 20.0) + floor(pixelated.y * 20.0), 2.0);
+    // Create smooth checkerboard pattern
+    float checker = sin(pixelated.x * 20.0) * sin(pixelated.y * 20.0);
+    checker = smoothstep(-0.5, 0.5, checker);
     vec3 color = mix(vec3(0.2, 0.3, 0.8), vec3(0.8, 0.3, 0.2), checker);
     
     finalColor = vec4(color, 1.0) * fragColor;

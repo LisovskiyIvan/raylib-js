@@ -115,16 +115,17 @@ export class PlatformManager {
     static getLibraryPaths(basePath: string = 'assets'): LibraryPaths {
         const platformInfo = this.detectPlatform();
         const ext = platformInfo.libraryExtension;
+        const libPath = path.join(basePath, 'lib');
 
         return {
-            raylibWrapper: path.join(basePath, `raylib-wrapper${ext}`),
-            textureWrapper: path.join(basePath, `texture-wrapper${ext}`),
-            renderTextureWrapper: path.join(basePath, `render-texture-wrapper${ext}`),
-            modelWrapper: path.join(basePath, `model-wrapper${ext}`),
-            rayCollisionWrapper: path.join(basePath, `ray-collision-wrapper${ext}`),
-            meshCollisionWrapper: path.join(basePath, `mesh-collision-wrapper${ext}`),
-            triangleWrapper: path.join(basePath, `triangle-wrapper${ext}`),
-            shaderWrapper: path.join(basePath, `shader-wrapper${ext}`),
+            raylibWrapper: path.join(libPath, `raylib-wrapper${ext}`),
+            textureWrapper: path.join(libPath, `texture-wrapper${ext}`),
+            renderTextureWrapper: path.join(libPath, `render-texture-wrapper${ext}`),
+            modelWrapper: path.join(libPath, `model-wrapper${ext}`),
+            rayCollisionWrapper: path.join(libPath, `ray-collision-wrapper${ext}`),
+            meshCollisionWrapper: path.join(libPath, `mesh-collision-wrapper${ext}`),
+            triangleWrapper: path.join(libPath, `triangle-wrapper${ext}`),
+            shaderWrapper: path.join(libPath, `shader-wrapper${ext}`),
         };
     }
 

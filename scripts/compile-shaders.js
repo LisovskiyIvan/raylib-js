@@ -150,7 +150,7 @@ async function compileLegacy() {
 
     // Compile shader-wrapper.c
     const sourceFile = join(WRAPPERS_DIR, "shader-wrapper.c");
-    const outputFile = join(ASSETS_DIR, "shader-wrapper.dylib");
+    const outputFile = join(ASSETS_DIR, "lib", "shader-wrapper.dylib");
 
     console.log("🔨 Compiling shader wrappers...");
 

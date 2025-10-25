@@ -150,7 +150,7 @@ async function compileLegacy() {
 
   // Compile render-texture-wrapper.c
   const sourceFile = join(WRAPPERS_DIR, "render-texture-wrapper.c");
-  const outputFile = join(ASSETS_DIR, "render-texture-wrapper.dylib");
+  const outputFile = join(ASSETS_DIR, "lib", "render-texture-wrapper.dylib");
 
   console.log("🔨 Compiling render texture wrapper...");
 

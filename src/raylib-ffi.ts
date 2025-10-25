@@ -662,7 +662,7 @@ export const initRaylib = (libraryPath?: string, config?: FFILoaderConfig) => {
     }
 
     // Generate platform-specific library paths if not provided
-    // Wrapper libraries are in basePath, raylib itself is in basePath/raylib/lib
+    // Wrapper libraries are in basePath/lib, raylib itself is in basePath/raylib/lib
     const libraryPaths = config?.libraryPaths || PlatformManager.getLibraryPaths(basePath);
 
     // Generate fallback paths: prebuilt -> local compilation -> system

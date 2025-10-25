@@ -130,47 +130,48 @@ export class PlatformBuilder {
      */
     getWrapperConfigurations() {
         const wrappersBase = join(this.config.packageRoot, this.config.wrappersDir);
+        const outputDir = join(this.config.assetsDir, 'lib');
 
         return [
             {
                 name: 'raylib-wrapper',
                 source: join(wrappersBase, 'raylib-wrapper.c'),
-                output: join(this.config.assetsDir, `raylib-wrapper${this.platform.libraryExtension}`)
+                output: join(outputDir, `raylib-wrapper${this.platform.libraryExtension}`)
             },
             {
                 name: 'texture-wrapper',
                 source: join(wrappersBase, 'textures', 'texture-wrapper.c'),
-                output: join(this.config.assetsDir, `texture-wrapper${this.platform.libraryExtension}`)
+                output: join(outputDir, `texture-wrapper${this.platform.libraryExtension}`)
             },
             {
                 name: 'render-texture-wrapper',
                 source: join(wrappersBase, 'textures', 'render-texture-wrapper.c'),
-                output: join(this.config.assetsDir, `render-texture-wrapper${this.platform.libraryExtension}`)
+                output: join(outputDir, `render-texture-wrapper${this.platform.libraryExtension}`)
             },
             {
                 name: 'model-wrapper',
                 source: join(wrappersBase, 'models', 'model-wrapper.c'),
-                output: join(this.config.assetsDir, `model-wrapper${this.platform.libraryExtension}`)
+                output: join(outputDir, `model-wrapper${this.platform.libraryExtension}`)
             },
             {
                 name: 'mesh-collision-wrapper',
                 source: join(wrappersBase, 'models', 'mesh-collision-wrapper.c'),
-                output: join(this.config.assetsDir, `mesh-collision-wrapper${this.platform.libraryExtension}`)
+                output: join(outputDir, `mesh-collision-wrapper${this.platform.libraryExtension}`)
             },
             {
                 name: 'ray-collision-wrapper',
                 source: join(wrappersBase, 'ray-collision', 'ray-collision-wrapper.c'),
-                output: join(this.config.assetsDir, `ray-collision-wrapper${this.platform.libraryExtension}`)
+                output: join(outputDir, `ray-collision-wrapper${this.platform.libraryExtension}`)
             },
             {
                 name: 'triangle-wrapper',
                 source: join(wrappersBase, 'shapes', 'triangle-wrapper.c'),
-                output: join(this.config.assetsDir, `triangle-wrapper${this.platform.libraryExtension}`)
+                output: join(outputDir, `triangle-wrapper${this.platform.libraryExtension}`)
             },
             {
                 name: 'shader-wrapper',
                 source: join(wrappersBase, 'shaders', 'shader-wrapper.c'),
-                output: join(this.config.assetsDir, `shader-wrapper${this.platform.libraryExtension}`)
+                output: join(outputDir, `shader-wrapper${this.platform.libraryExtension}`)
             }
         ];
     }

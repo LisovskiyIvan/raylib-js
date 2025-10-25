@@ -141,7 +141,7 @@ async function compileLegacy() {
 
     const RAYLIB_PATH = join(packageRoot, 'assets', 'raylib');
     const WRAPPER_SOURCE = join(packageRoot, 'src', 'wrappers', 'ray-collision', 'ray-collision-wrapper.c');
-    const OUTPUT_PATH = join(packageRoot, 'assets', 'ray-collision-wrapper.dylib');
+    const OUTPUT_PATH = join(packageRoot, 'assets', 'lib', 'ray-collision-wrapper.dylib');
 
     console.log('🔨 Compiling ray collision wrapper...');
 

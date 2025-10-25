@@ -35,7 +35,7 @@ async function compileLegacy() {
 
     const platform = process.platform;
     const sourceFile = path.join(__dirname, '..', 'src', 'wrappers', 'raylib-wrapper.c');
-    const outputDir = path.join(__dirname, '..', 'lib');
+    const outputDir = path.join(__dirname, '..', 'assets', 'lib');
     const raylibInclude = process.env.RAYLIB_INCLUDE_PATH || 'C:\\raylib\\raylib\\src';
     const raylibLib = process.env.RAYLIB_LIB_PATH || 'C:\\raylib\\raylib\\src';
 

@@ -52,7 +52,7 @@ async function compileTriangleWrapper() {
         const triangleWrapper = {
             name: 'triangle-wrapper',
             source: join(packageRoot, 'src/wrappers/shapes/triangle-wrapper.c'),
-            output: join(packageRoot, 'assets', `triangle-wrapper${builder.platform.os === 'windows' ? '.dll' : builder.platform.os === 'macos' ? '.dylib' : '.so'}`)
+            output: join(packageRoot, 'assets', 'lib', `triangle-wrapper${builder.platform.os === 'windows' ? '.dll' : builder.platform.os === 'macos' ? '.dylib' : '.so'}`)
         };
 
         console.log(`🔍 Platform: ${builder.platform.os} (${builder.platform.arch})`);
@@ -149,7 +149,7 @@ async function compileLegacy() {
 
     // Compile triangle-wrapper.c
     const sourceFile = join(WRAPPERS_DIR, "triangle-wrapper.c");
-    const outputFile = join(ASSETS_DIR, "triangle-wrapper.dylib");
+    const outputFile = join(ASSETS_DIR, "lib", "triangle-wrapper.dylib");
 
     console.log("🔺 Compiling triangle wrapper...");
 

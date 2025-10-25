@@ -149,7 +149,7 @@ async function compileLegacy() {
 
   // Compile model-wrapper.c
   const sourceFile = join(WRAPPERS_DIR, "model-wrapper.c");
-  const outputFile = join(ASSETS_DIR, "model-wrapper.dylib");
+  const outputFile = join(ASSETS_DIR, "lib", "model-wrapper.dylib");
 
   console.log("🔨 Compiling model wrappers...");
 

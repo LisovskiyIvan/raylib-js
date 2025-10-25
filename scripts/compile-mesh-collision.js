@@ -141,7 +141,7 @@ async function compileLegacy() {
 
     const RAYLIB_PATH = join(packageRoot, 'assets', 'raylib');
     const WRAPPER_SOURCE = join(packageRoot, 'src', 'wrappers', 'models', 'mesh-collision-wrapper.c');
-    const OUTPUT_PATH = join(packageRoot, 'assets', 'mesh-collision-wrapper.dylib');
+    const OUTPUT_PATH = join(packageRoot, 'assets', 'lib', 'mesh-collision-wrapper.dylib');
 
     console.log('🔨 Compiling mesh collision wrapper...');
     console.log(`   Source: ${WRAPPER_SOURCE}`);

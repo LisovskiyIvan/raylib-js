@@ -5,6 +5,9 @@ import type {
   RenderTexture2D,
   Model,
   BoundingBox,
+  Shader,
+  RayCollision,
+  Matrix,
 } from "./types";
 import { BlendMode } from "./types";
 import { initError, ffiError, stateError, validationError } from "./types";
@@ -1804,7 +1807,7 @@ export default class Raylib {
     rayDirection: Vector3,
     center: Vector3,
     radius: number,
-  ): RaylibResult<import("./types").RayCollision> {
+  ): RaylibResult<RayCollision> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -1863,7 +1866,7 @@ export default class Raylib {
     rayPosition: Vector3,
     rayDirection: Vector3,
     box: BoundingBox,
-  ): RaylibResult<import("./types").RayCollision> {
+  ): RaylibResult<RayCollision> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -1927,7 +1930,7 @@ export default class Raylib {
   }
 
   // Shader loading and management
-  public loadShader(vsFileName: string, fsFileName: string): RaylibResult<import("./types").Shader> {
+  public loadShader(vsFileName: string, fsFileName: string): RaylibResult<Shader> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -1955,7 +1958,7 @@ export default class Raylib {
       );
   }
 
-  public loadShaderFromMemory(vsCode: string, fsCode: string): RaylibResult<import("./types").Shader> {
+  public loadShaderFromMemory(vsCode: string, fsCode: string): RaylibResult<Shader> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -1983,7 +1986,7 @@ export default class Raylib {
       );
   }
 
-  public unloadShader(shader: import("./types").Shader): RaylibResult<void> {
+  public unloadShader(shader: Shader): RaylibResult<void> {
     return this.requireInitialized()
       .andThen(() => validateFinite(shader.slotIndex, "shader.slotIndex"))
       .andThen(() => {
@@ -2004,7 +2007,7 @@ export default class Raylib {
     );
   }
 
-  public isShaderValid(shader: import("./types").Shader): RaylibResult<boolean> {
+  public isShaderValid(shader: Shader): RaylibResult<boolean> {
     return this.requireInitialized()
       .andThen(() => validateFinite(shader.slotIndex, "shader.slotIndex"))
       .andThen(() =>
@@ -2023,7 +2026,7 @@ export default class Raylib {
   }
 
   // Shader mode control
-  public beginShaderMode(shader: import("./types").Shader): RaylibResult<void> {
+  public beginShaderMode(shader: Shader): RaylibResult<void> {
     return this.requireInitialized()
       .andThen(() => validateFinite(shader.slotIndex, "shader.slotIndex"))
       .andThen(() => {
@@ -2045,7 +2048,7 @@ export default class Raylib {
   }
 
   // Uniform management
-  public getShaderLocation(shader: import("./types").Shader, uniformName: string): RaylibResult<number> {
+  public getShaderLocation(shader: Shader, uniformName: string): RaylibResult<number> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -2066,7 +2069,7 @@ export default class Raylib {
       });
   }
 
-  public setShaderValueFloat(shader: import("./types").Shader, locIndex: number, value: number): RaylibResult<void> {
+  public setShaderValueFloat(shader: Shader, locIndex: number, value: number): RaylibResult<void> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -2085,7 +2088,7 @@ export default class Raylib {
       });
   }
 
-  public setShaderValueInt(shader: import("./types").Shader, locIndex: number, value: number): RaylibResult<void> {
+  public setShaderValueInt(shader: Shader, locIndex: number, value: number): RaylibResult<void> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -2104,7 +2107,7 @@ export default class Raylib {
       });
   }
 
-  public setShaderValueVec2(shader: import("./types").Shader, locIndex: number, value: Vector2): RaylibResult<void> {
+  public setShaderValueVec2(shader: Shader, locIndex: number, value: Vector2): RaylibResult<void> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -2124,7 +2127,7 @@ export default class Raylib {
       });
   }
 
-  public setShaderValueVec3(shader: import("./types").Shader, locIndex: number, value: Vector3): RaylibResult<void> {
+  public setShaderValueVec3(shader: Shader, locIndex: number, value: Vector3): RaylibResult<void> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -2145,7 +2148,7 @@ export default class Raylib {
       });
   }
 
-  public setShaderValueVec4(shader: import("./types").Shader, locIndex: number, x: number, y: number, z: number, w: number): RaylibResult<void> {
+  public setShaderValueVec4(shader: Shader, locIndex: number, x: number, y: number, z: number, w: number): RaylibResult<void> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -2167,7 +2170,7 @@ export default class Raylib {
       });
   }
 
-  public setShaderValueTexture(shader: import("./types").Shader, locIndex: number, textureSlot: number): RaylibResult<void> {
+  public setShaderValueTexture(shader: Shader, locIndex: number, textureSlot: number): RaylibResult<void> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -2244,7 +2247,7 @@ export default class Raylib {
     p1: Vector3,
     p2: Vector3,
     p3: Vector3,
-  ): RaylibResult<import("./types").RayCollision> {
+  ): RaylibResult<RayCollision> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
@@ -2312,10 +2315,10 @@ export default class Raylib {
   public getRayCollisionMesh(
     rayPosition: Vector3,
     rayDirection: Vector3,
-    model: import("./types").Model,
+    model: Model,
     meshIndex: number,
-    transform?: import("./types").Matrix,
-  ): RaylibResult<import("./types").RayCollision> {
+    transform?: Matrix,
+  ): RaylibResult<RayCollision> {
     return this.requireInitialized()
       .andThen(() =>
         validateAll(
