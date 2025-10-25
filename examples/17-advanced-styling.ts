@@ -7,6 +7,7 @@ import {
     UIThemes,
     UIStyleHelper,
     UIRenderer,
+    Color3,
 } from "../src/index";
 
 const rl = new Raylib();
@@ -16,225 +17,328 @@ const result = rl
     .initWindow(1000, 700, "Advanced UI Styling Demo")
     .andThen(() => rl.setTargetFPS(60))
     .andThen(() => {
-        // Example 1: Button with custom CSS-like styling
-        const styledButton = new Button(50, 50, 200, 60, "Styled Button");
-        styledButton.setStyle({
-            padding: 15,
-            border: {
-                width: 3,
-                color: Colors.BLUE,
-            },
-            background: {
-                color: Colors.SKYBLUE,
-            },
-            text: {
-                fontSize: 22,
-                color: Colors.DARKBLUE,
-                textAlign: "center",
-            },
-            shadow: {
-                offsetX: 3,
-                offsetY: 3,
-                blur: 5,
-                color: Colors.GRAY,
-            },
+        // Define modern color palette
+        const accent = Color3.fromRGB(99, 102, 241); // Indigo
+        const accentHover = Color3.fromRGB(79, 70, 229);
+        const success = Color3.fromRGB(34, 197, 94); // Green
+        const warning = Color3.fromRGB(251, 146, 60); // Orange
+        const danger = Color3.fromRGB(239, 68, 68); // Red
+        const dark = Color3.fromRGB(30, 30, 46);
+        const cardBg = Color3.fromRGB(45, 45, 68);
+        const cardBg2 = Color3.fromRGB(55, 55, 78);
+        const textPrimary = Color3.fromRGB(255, 255, 255);
+        const textSecondary = Color3.fromRGB(156, 163, 175);
+        const borderColor = Color3.fromRGB(75, 85, 99);
+        const transparent = Color3.fromRGB(0, 0, 0, 0);
+        const shadowDark = Color3.fromRGB(0, 0, 0, 100);
+        const accentShadow = Color3.fromRGB(99, 102, 241, 120);
+        const successShadow = Color3.fromRGB(34, 197, 94, 100);
+        const warningShadow = Color3.fromRGB(251, 146, 60, 100);
+        const dangerShadow = Color3.fromRGB(239, 68, 68, 100);
+        const accentLight = Color3.fromRGB(99, 102, 241, 30);
+        const accentBorder = Color3.fromRGB(99, 102, 241, 100);
+        const successLight = Color3.fromRGB(34, 197, 94, 30);
+        const successBorder = Color3.fromRGB(34, 197, 94, 100);
+        const warningLight = Color3.fromRGB(251, 146, 60, 30);
+        const warningBorder = Color3.fromRGB(251, 146, 60, 100);
+        const purple = Color3.fromRGB(168, 85, 247);
+        const purpleLight = Color3.fromRGB(168, 85, 247, 30);
+        const purpleBorder = Color3.fromRGB(168, 85, 247, 100);
+
+        // Hero Section
+        const heroPanel = new Panel(40, 60, 920, 140, "");
+        heroPanel.setStyle({
+            padding: 30,
+            background: { color: cardBg },
+            border: { width: 0, color: Colors.BLANK },
+            shadow: { offsetX: 0, offsetY: 4, blur: 12, color: shadowDark },
         });
 
-        // Example 2: Simple styled button
-        const gradientButton = new Button(270, 50, 200, 60, "Purple Button");
-        gradientButton.setStyle({
+        const titleLabel = new Label(40 + 30, 60 + 20, "Modern UI Design System");
+        titleLabel.setStyle({
+            text: { fontSize: 32, color: textPrimary, textAlign: "left" },
+            margin: { top: 0, right: 0, bottom: 8, left: 0 },
+        });
+
+        const subtitleLabel = new Label(40 + 30, 60 + 60, "Beautiful, responsive components with modern styling");
+        subtitleLabel.setStyle({
+            text: { fontSize: 16, color: textSecondary, textAlign: "left" },
+        });
+
+        const primaryBtn = new Button(40 + 30, 60 + 95, 140, 45, "Get Started");
+        primaryBtn.setStyle({
             padding: 12,
-            border: { width: 2, color: Colors.VIOLET },
-            background: { color: Colors.PURPLE },
-            text: {
-                fontSize: 20,
-                color: Colors.WHITE,
-                textAlign: "center",
-            },
+            background: { color: accent },
+            border: { width: 0, color: Colors.BLANK },
+            text: { fontSize: 16, color: textPrimary, textAlign: "center" },
+            shadow: { offsetX: 0, offsetY: 2, blur: 8, color: accentShadow },
         });
 
-        // Example 3: Panel with modern theme
-        const modernPanel = new Panel(50, 140, 440, 250, "Modern Panel");
-        modernPanel.applyStyle(UIThemes.modern.panel);
-
-        // Example 4: Label with custom spacing and borders
-        const fancyLabel = new Label(70, 180, "Fancy Label with Styling");
-        fancyLabel.setStyle({
-            padding: { top: 10, right: 20, bottom: 10, left: 20 },
-            margin: 5,
-            border: {
-                width: 2,
-                color: Colors.ORANGE,
-            },
-            background: {
-                color: Colors.GOLD,
-            },
-            text: {
-                fontSize: 18,
-                color: Colors.DARKBROWN,
-                textDecoration: "underline",
-                textAlign: "left",
-            },
+        const secondaryBtn = new Button(40 + 185, 60 + 95, 140, 45, "Learn More");
+        secondaryBtn.setStyle({
+            padding: 12,
+            background: { color: cardBg2 },
+            border: { width: 1, color: borderColor },
+            text: { fontSize: 16, color: textPrimary, textAlign: "center" },
         });
 
-        // Example 5: Buttons with different border styles
-        const topBorderButton = new Button(70, 240, 150, 40, "Top Border");
-        topBorderButton.setStyle({
-            borderTop: { width: 4, color: Colors.RED },
-            background: { color: Colors.LIGHTGRAY },
-            text: { fontSize: 16, color: Colors.BLACK, textAlign: "center" },
+        heroPanel.addChild(titleLabel);
+        heroPanel.addChild(subtitleLabel);
+        heroPanel.addChild(primaryBtn);
+        heroPanel.addChild(secondaryBtn);
+
+        // Action Buttons Section
+        const buttonsPanel = new Panel(40, 220, 450, 200, "");
+        buttonsPanel.setStyle({
+            padding: 25,
+            background: { color: cardBg },
+            border: { width: 0, color: Colors.BLANK },
+            shadow: { offsetX: 0, offsetY: 4, blur: 12, color: shadowDark },
         });
 
-        const bottomBorderButton = new Button(240, 240, 150, 40, "Bottom Border");
-        bottomBorderButton.setStyle({
-            borderBottom: { width: 4, color: Colors.GREEN },
-            background: { color: Colors.LIGHTGRAY },
-            text: { fontSize: 16, color: Colors.BLACK, textAlign: "center" },
+        const sectionTitle1 = new Label(40 + 25, 220 + 15, "Action Buttons");
+        sectionTitle1.setStyle({
+            text: { fontSize: 20, color: textPrimary, textAlign: "left" },
+            margin: { top: 0, right: 0, bottom: 15, left: 0 },
         });
 
-        const leftBorderButton = new Button(70, 300, 150, 40, "Left Border");
-        leftBorderButton.setStyle({
-            borderLeft: { width: 4, color: Colors.BLUE },
-            background: { color: Colors.LIGHTGRAY },
-            text: { fontSize: 16, color: Colors.BLACK, textAlign: "center" },
+        const successBtn = new Button(40 + 25, 220 + 50, 130, 42, "Success");
+        successBtn.setStyle({
+            padding: 10,
+            background: { color: success },
+            border: { width: 0, color: Colors.BLANK },
+            text: { fontSize: 15, color: textPrimary, textAlign: "center" },
+            shadow: { offsetX: 0, offsetY: 2, blur: 6, color: successShadow },
         });
 
-        const rightBorderButton = new Button(240, 300, 150, 40, "Right Border");
-        rightBorderButton.setStyle({
-            borderRight: { width: 4, color: Colors.YELLOW },
-            background: { color: Colors.LIGHTGRAY },
-            text: { fontSize: 16, color: Colors.BLACK, textAlign: "center" },
+        const warningBtn = new Button(40 + 170, 220 + 50, 130, 42, "Warning");
+        warningBtn.setStyle({
+            padding: 10,
+            background: { color: warning },
+            border: { width: 0, color: Colors.BLANK },
+            text: { fontSize: 15, color: textPrimary, textAlign: "center" },
+            shadow: { offsetX: 0, offsetY: 2, blur: 6, color: warningShadow },
         });
 
-        // Example 6: Dark theme panel
-        const darkPanel = new Panel(520, 50, 440, 340, "Dark Theme Panel");
-        darkPanel.applyStyle(UIThemes.dark.panel);
-
-        const darkLabel1 = new Label(540, 90, "Dark theme is enabled");
-        darkLabel1.applyStyle(UIThemes.dark.label);
-
-        const darkButton1 = new Button(540, 130, 180, 50, "Dark Button 1");
-        darkButton1.applyStyle(UIThemes.dark.button);
-
-        const darkButton2 = new Button(740, 130, 180, 50, "Dark Button 2");
-        darkButton2.applyStyle(UIThemes.dark.button);
-
-        // Example 7: Transform demonstration
-        const transformLabel = new Label(540, 200, "Transformed Text");
-        transformLabel.setStyle({
-            text: { fontSize: 24, color: Colors.RAYWHITE, textAlign: "left" },
-            transform: {
-                translateX: 10,
-                translateY: 5,
-                scaleX: 1.2,
-                scaleY: 1.0,
-            },
+        const dangerBtn = new Button(40 + 315, 220 + 50, 130, 42, "Danger");
+        dangerBtn.setStyle({
+            padding: 10,
+            background: { color: danger },
+            border: { width: 0, color: Colors.BLANK },
+            text: { fontSize: 15, color: textPrimary, textAlign: "center" },
+            shadow: { offsetX: 0, offsetY: 2, blur: 6, color: dangerShadow },
         });
 
-        // Example 8: Opacity demonstration
-        const colorPanel1 = new Panel(540, 260, 120, 100);
-        colorPanel1.setStyle({
-            background: { color: Colors.RED },
-            border: { width: 1, color: Colors.BLACK },
+        const outlineBtn = new Button(40 + 25, 220 + 110, 195, 42, "Outline Style");
+        outlineBtn.setStyle({
+            padding: 10,
+            background: { color: transparent },
+            border: { width: 2, color: accent },
+            text: { fontSize: 15, color: accent, textAlign: "center" },
         });
 
-        const colorPanel2 = new Panel(680, 260, 120, 100);
-        colorPanel2.setStyle({
-            background: { color: Colors.GREEN },
-            border: { width: 1, color: Colors.BLACK },
+        const ghostBtn = new Button(40 + 235, 220 + 110, 195, 42, "Ghost Style");
+        ghostBtn.setStyle({
+            padding: 10,
+            background: { color: transparent },
+            border: { width: 0, color: Colors.BLANK },
+            text: { fontSize: 15, color: textSecondary, textAlign: "center" },
         });
 
-        const colorPanel3 = new Panel(820, 260, 120, 100);
-        colorPanel3.setStyle({
-            background: { color: Colors.BLUE },
-            border: { width: 1, color: Colors.BLACK },
+        buttonsPanel.addChild(sectionTitle1);
+        buttonsPanel.addChild(successBtn);
+        buttonsPanel.addChild(warningBtn);
+        buttonsPanel.addChild(dangerBtn);
+        buttonsPanel.addChild(outlineBtn);
+        buttonsPanel.addChild(ghostBtn);
+
+        // Info Cards Section
+        const cardsPanel = new Panel(510, 220, 450, 200, "");
+        cardsPanel.setStyle({
+            padding: 25,
+            background: { color: cardBg },
+            border: { width: 0, color: Colors.BLANK },
+            shadow: { offsetX: 0, offsetY: 4, blur: 12, color: shadowDark },
         });
 
-        const colorLabel = new Label(540, 370, "Colors: Red  Green  Blue");
-        colorLabel.setStyle({
-            text: { fontSize: 16, color: Colors.RAYWHITE, textAlign: "left" },
+        const sectionTitle2 = new Label(510 + 25, 220 + 15, "Information Cards");
+        sectionTitle2.setStyle({
+            text: { fontSize: 20, color: textPrimary, textAlign: "left" },
+            margin: { top: 0, right: 0, bottom: 15, left: 0 },
         });
 
-        // Example 9: Spacing demonstration
-        const spacingPanel = new Panel(50, 420, 910, 250, "Spacing & Padding Demo");
-        spacingPanel.setStyle({
-            padding: 20,
-            border: { width: 2, color: Colors.DARKGRAY },
-            background: { color: Colors.BEIGE },
-        });
-
-        const innerPanel1 = new Panel(70, 460, 150, 80);
-        innerPanel1.setStyle({
-            padding: 5,
-            margin: 10,
-            background: { color: Colors.SKYBLUE },
-            border: { width: 2, color: Colors.BLUE },
-        });
-
-        const innerPanel2 = new Panel(240, 460, 150, 80);
-        innerPanel2.setStyle({
+        const card1 = new Panel(510 + 25, 220 + 50, 130, 100);
+        card1.setStyle({
             padding: 15,
-            margin: 5,
-            background: { color: Colors.LIME },
-            border: { width: 2, color: Colors.GREEN },
+            background: { color: cardBg2 },
+            border: { width: 0, color: Colors.BLANK },
+            borderLeft: { width: 4, color: accent },
         });
 
-        const innerPanel3 = new Panel(410, 460, 150, 80);
-        innerPanel3.setStyle({
-            padding: { top: 5, right: 20, bottom: 5, left: 20 },
-            margin: { top: 10, right: 5, bottom: 10, left: 5 },
-            background: { color: Colors.PINK },
-            border: { width: 2, color: Colors.MAROON },
+        const card1Label = new Label(510 + 25 + 15, 220 + 50 + 15, "Feature 1");
+        card1Label.setStyle({
+            text: { fontSize: 16, color: textPrimary, textAlign: "left" },
         });
 
-        const spacingLabel1 = new Label(70, 560, "Padding: 5, Margin: 10");
-        spacingLabel1.setStyle({ text: { fontSize: 14, color: Colors.DARKGRAY, textAlign: "left" } });
+        const card1Desc = new Label(510 + 25 + 15, 220 + 50 + 40, "Modern design");
+        card1Desc.setStyle({
+            text: { fontSize: 13, color: textSecondary, textAlign: "left" },
+        });
 
-        const spacingLabel2 = new Label(240, 560, "Padding: 15, Margin: 5");
-        spacingLabel2.setStyle({ text: { fontSize: 14, color: Colors.DARKGRAY, textAlign: "left" } });
+        const card2 = new Panel(510 + 170, 220 + 50, 130, 100);
+        card2.setStyle({
+            padding: 15,
+            background: { color: cardBg2 },
+            border: { width: 0, color: Colors.BLANK },
+            borderLeft: { width: 4, color: success },
+        });
 
-        const spacingLabel3 = new Label(410, 560, "Custom P & M");
-        spacingLabel3.setStyle({ text: { fontSize: 14, color: Colors.DARKGRAY, textAlign: "left" } });
+        const card2Label = new Label(510 + 170 + 15, 220 + 50 + 15, "Feature 2");
+        card2Label.setStyle({
+            text: { fontSize: 16, color: textPrimary, textAlign: "left" },
+        });
 
-        // Style merging example
-        const mergeButton = new Button(590, 460, 180, 50, "Merge Styles");
-        const baseStyle = UIThemes.modern.button;
-        const customStyle = {
-            background: { color: Colors.ORANGE },
-            text: { fontSize: 18, color: Colors.WHITE, textAlign: "center" as const },
-        };
-        mergeButton.applyStyle(UIStyleHelper.mergeStyles(baseStyle, customStyle));
+        const card2Desc = new Label(510 + 170 + 15, 220 + 50 + 40, "Fast & smooth");
+        card2Desc.setStyle({
+            text: { fontSize: 13, color: textSecondary, textAlign: "left" },
+        });
+
+        const card3 = new Panel(510 + 315, 220 + 50, 130, 100);
+        card3.setStyle({
+            padding: 15,
+            background: { color: cardBg2 },
+            border: { width: 0, color: Colors.BLANK },
+            borderLeft: { width: 4, color: warning },
+        });
+
+        const card3Label = new Label(510 + 315 + 15, 220 + 50 + 15, "Feature 3");
+        card3Label.setStyle({
+            text: { fontSize: 16, color: textPrimary, textAlign: "left" },
+        });
+
+        const card3Desc = new Label(510 + 315 + 15, 220 + 50 + 40, "Customizable");
+        card3Desc.setStyle({
+            text: { fontSize: 13, color: textSecondary, textAlign: "left" },
+        });
+
+        card1.addChild(card1Label);
+        card1.addChild(card1Desc);
+        card2.addChild(card2Label);
+        card2.addChild(card2Desc);
+        card3.addChild(card3Label);
+        card3.addChild(card3Desc);
+
+        cardsPanel.addChild(sectionTitle2);
+        cardsPanel.addChild(card1);
+        cardsPanel.addChild(card2);
+        cardsPanel.addChild(card3);
+
+        // Stats Section
+        const statsPanel = new Panel(40, 440, 920, 220, "");
+        statsPanel.setStyle({
+            padding: 30,
+            background: { color: cardBg },
+            border: { width: 0, color: Colors.BLANK },
+            shadow: { offsetX: 0, offsetY: 4, blur: 12, color: shadowDark },
+        });
+
+        const sectionTitle3 = new Label(40 + 30, 440 + 15, "Component Showcase");
+        sectionTitle3.setStyle({
+            text: { fontSize: 20, color: textPrimary, textAlign: "left" },
+            margin: { top: 0, right: 0, bottom: 20, left: 0 },
+        });
+
+        const stat1Panel = new Panel(40 + 30, 440 + 55, 200, 130);
+        stat1Panel.setStyle({
+            padding: 20,
+            background: { color: accentLight },
+            border: { width: 1, color: accentBorder },
+        });
+
+        const stat1Value = new Label(40 + 30 + 20, 440 + 55 + 15, "2.5K+");
+        stat1Value.setStyle({
+            text: { fontSize: 28, color: accent, textAlign: "left" },
+        });
+
+        const stat1Label = new Label(40 + 30 + 20, 440 + 55 + 50, "Components");
+        stat1Label.setStyle({
+            text: { fontSize: 14, color: textSecondary, textAlign: "left" },
+        });
+
+        const stat2Panel = new Panel(40 + 250, 440 + 55, 200, 130);
+        stat2Panel.setStyle({
+            padding: 20,
+            background: { color: successLight },
+            border: { width: 1, color: successBorder },
+        });
+
+        const stat2Value = new Label(40 + 250 + 20, 440 + 55 + 15, "99.9%");
+        stat2Value.setStyle({
+            text: { fontSize: 28, color: success, textAlign: "left" },
+        });
+
+        const stat2Label = new Label(40 + 250 + 20, 440 + 55 + 50, "Uptime");
+        stat2Label.setStyle({
+            text: { fontSize: 14, color: textSecondary, textAlign: "left" },
+        });
+
+        const stat3Panel = new Panel(40 + 470, 440 + 55, 200, 130);
+        stat3Panel.setStyle({
+            padding: 20,
+            background: { color: warningLight },
+            border: { width: 1, color: warningBorder },
+        });
+
+        const stat3Value = new Label(40 + 470 + 20, 440 + 55 + 15, "< 50ms");
+        stat3Value.setStyle({
+            text: { fontSize: 28, color: warning, textAlign: "left" },
+        });
+
+        const stat3Label = new Label(40 + 470 + 20, 440 + 55 + 50, "Response Time");
+        stat3Label.setStyle({
+            text: { fontSize: 14, color: textSecondary, textAlign: "left" },
+        });
+
+        const stat4Panel = new Panel(40 + 690, 440 + 55, 200, 130);
+        stat4Panel.setStyle({
+            padding: 20,
+            background: { color: purpleLight },
+            border: { width: 1, color: purpleBorder },
+        });
+
+        const stat4Value = new Label(40 + 690 + 20, 440 + 55 + 15, "24/7");
+        stat4Value.setStyle({
+            text: { fontSize: 28, color: purple, textAlign: "left" },
+        });
+
+        const stat4Label = new Label(40 + 690 + 20, 440 + 55 + 50, "Support");
+        stat4Label.setStyle({
+            text: { fontSize: 14, color: textSecondary, textAlign: "left" },
+        });
+
+        stat1Panel.addChild(stat1Value);
+        stat1Panel.addChild(stat1Label);
+        stat2Panel.addChild(stat2Value);
+        stat2Panel.addChild(stat2Label);
+        stat3Panel.addChild(stat3Value);
+        stat3Panel.addChild(stat3Label);
+        stat4Panel.addChild(stat4Value);
+        stat4Panel.addChild(stat4Label);
+
+        statsPanel.addChild(sectionTitle3);
+        statsPanel.addChild(stat1Panel);
+        statsPanel.addChild(stat2Panel);
+        statsPanel.addChild(stat3Panel);
+        statsPanel.addChild(stat4Panel);
 
         // Add click handlers
-        styledButton.setOnClick(() => console.log("Styled button clicked!"));
-        gradientButton.setOnClick(() => console.log("Gradient button clicked!"));
-        darkButton1.setOnClick(() => console.log("Dark button 1 clicked!"));
-        darkButton2.setOnClick(() => console.log("Dark button 2 clicked!"));
-        mergeButton.setOnClick(() => console.log("Merged style button clicked!"));
-
-        // Add components to panels
-        modernPanel.addChild(fancyLabel);
-        modernPanel.addChild(topBorderButton);
-        modernPanel.addChild(bottomBorderButton);
-        modernPanel.addChild(leftBorderButton);
-        modernPanel.addChild(rightBorderButton);
-
-        darkPanel.addChild(darkLabel1);
-        darkPanel.addChild(darkButton1);
-        darkPanel.addChild(darkButton2);
-        darkPanel.addChild(transformLabel);
-        darkPanel.addChild(colorPanel1);
-        darkPanel.addChild(colorPanel2);
-        darkPanel.addChild(colorPanel3);
-        darkPanel.addChild(colorLabel);
-
-        spacingPanel.addChild(innerPanel1);
-        spacingPanel.addChild(innerPanel2);
-        spacingPanel.addChild(innerPanel3);
-        spacingPanel.addChild(spacingLabel1);
-        spacingPanel.addChild(spacingLabel2);
-        spacingPanel.addChild(spacingLabel3);
-        spacingPanel.addChild(mergeButton);
+        primaryBtn.setOnClick(() => console.log("Get Started clicked!"));
+        secondaryBtn.setOnClick(() => console.log("Learn More clicked!"));
+        successBtn.setOnClick(() => console.log("Success action!"));
+        warningBtn.setOnClick(() => console.log("Warning action!"));
+        dangerBtn.setOnClick(() => console.log("Danger action!"));
+        outlineBtn.setOnClick(() => console.log("Outline clicked!"));
+        ghostBtn.setOnClick(() => console.log("Ghost clicked!"));
 
         // Game loop
         while (true) {
@@ -242,30 +346,31 @@ const result = rl
             if (shouldClose) break;
 
             // Update
-            styledButton.update(rl);
-            gradientButton.update(rl);
-            modernPanel.update(rl);
-            darkPanel.update(rl);
-            spacingPanel.update(rl);
+            heroPanel.update(rl);
+            buttonsPanel.update(rl);
+            cardsPanel.update(rl);
+            statsPanel.update(rl);
 
             // Draw
             rl.beginDrawing()
-                .andThen(() => rl.clearBackground(Colors.DARKGRAY))
-                .andThen(() => styledButton.draw(rl))
-                .andThen(() => gradientButton.draw(rl))
-                .andThen(() => modernPanel.draw(rl))
-                .andThen(() => darkPanel.draw(rl))
-                .andThen(() => spacingPanel.draw(rl))
+                .andThen(() => rl.clearBackground(Colors.BLACK))
+                .andThen(() =>
+                    rl.drawRectangle(0, 0, 1000, 700, dark)
+                )
+                .andThen(() => heroPanel.draw(rl))
+                .andThen(() => buttonsPanel.draw(rl))
+                .andThen(() => cardsPanel.draw(rl))
+                .andThen(() => statsPanel.draw(rl))
                 .andThen(() =>
                     rl.drawText(
-                        "Advanced CSS-like Styling System",
-                        10,
-                        10,
+                        "Modern UI Styling Demo",
+                        40,
                         20,
-                        Colors.RAYWHITE
+                        24,
+                        Colors.WHITE
                     )
                 )
-                .andThen(() => rl.drawFPS(900, 10))
+                .andThen(() => rl.drawFPS(900, 20))
                 .andThen(() => rl.endDrawing())
                 .match(
                     () => { },

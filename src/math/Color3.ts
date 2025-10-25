@@ -14,7 +14,7 @@ export default class Color3 {
         return this.toHex(r, g, b, a)
     }
 
-     private static toHex(r: number, g: number, b: number, a: number): number {
-        return (a << 24) | (b << 16) | (g << 8) | r;
+    private static toHex(r: number, g: number, b: number, a: number): number {
+        return ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;
     }
 }

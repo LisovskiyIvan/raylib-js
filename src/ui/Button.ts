@@ -4,6 +4,8 @@ import type { RaylibResult } from "../types";
 import { Colors } from "../constants";
 import { Ok } from "../result";
 import { UIRenderer } from "./UIRenderer";
+import Rectangle from "../math/Rectangle";
+import Vector2 from "../math/Vector2";
 
 export interface ButtonStyle {
     normalColor: number;
@@ -14,6 +16,7 @@ export interface ButtonStyle {
     fontSize: number;
     borderWidth: number;
     borderColor: number;
+    borderRadius: number;
 }
 
 export const DefaultButtonStyle: ButtonStyle = {
@@ -25,6 +28,7 @@ export const DefaultButtonStyle: ButtonStyle = {
     fontSize: 20,
     borderWidth: 2,
     borderColor: Colors.BLACK,
+    borderRadius: 0,
 };
 
 export class Button extends UIComponent {
@@ -32,6 +36,13 @@ export class Button extends UIComponent {
     private buttonStyle: ButtonStyle;
     private onClick?: () => void;
     private wasPressed: boolean = false;
+
+    // Hover animation properties
+    private hoverScale: number = 1.0;
+    private targetHoverScale: number = 1.0;
+    private hoverAnimationSpeed: number = 0.15;
+    private maxHoverScale: number = 1.1;
+    private colorTransition: number = 0.0; // 0 to 1
 
     constructor(
         x: number,
@@ -69,6 +80,23 @@ export class Button extends UIComponent {
         }
 
         this.wasPressed = this.state.isPressed;
+
+        // Update hover animation
+        this.updateHoverAnimation();
+    }
+
+    private updateHoverAnimation(): void {
+        // Update target scale based on hover state
+        if (this.state.isHovered && !this.state.isDisabled) {
+            this.targetHoverScale = this.maxHoverScale;
+            this.colorTransition = Math.min(1.0, this.colorTransition + this.hoverAnimationSpeed);
+        } else {
+            this.targetHoverScale = 1.0;
+            this.colorTransition = Math.max(0.0, this.colorTransition - this.hoverAnimationSpeed);
+        }
+
+        // Smoothly interpolate current scale towards target
+        this.hoverScale += (this.targetHoverScale - this.hoverScale) * this.hoverAnimationSpeed;
     }
 
     public draw(rl: Raylib): RaylibResult<void> {
@@ -79,37 +107,66 @@ export class Button extends UIComponent {
             return this.drawWithNewStyle(rl);
         }
 
-        // Legacy rendering
-        // Determine color based on state
+        // Legacy rendering with hover animation
+        // Determine base color based on state with smooth transition
         let bgColor = this.buttonStyle.normalColor;
         if (this.state.isDisabled) {
             bgColor = this.buttonStyle.disabledColor;
         } else if (this.state.isPressed) {
             bgColor = this.buttonStyle.pressedColor;
-        } else if (this.state.isHovered) {
+        } else if (this.colorTransition > 0.5) {
+            // Use hover color when transition is more than halfway
             bgColor = this.buttonStyle.hoverColor;
         }
 
-        // Draw button background
-        const result = rl.drawRectangleRec(this.bounds, bgColor);
+        // Calculate scaled bounds for hover effect
+        const scaledBounds = this.getScaledBounds();
+
+        // Draw button background with scale and border radius
+        const scaledRadius = this.buttonStyle.borderRadius * this.hoverScale;
+        let result: RaylibResult<void>;
+
+        if (scaledRadius > 0) {
+            result = this.drawRoundedRectangle(rl, scaledBounds, scaledRadius, bgColor);
+        } else {
+            result = rl.drawRectangleRec(scaledBounds, bgColor);
+        }
         if (result.isErr()) return result;
 
         // Draw border
         if (this.buttonStyle.borderWidth > 0) {
-            const borderResult = this.drawBorder(rl);
+            const borderResult = scaledRadius > 0
+                ? this.drawRoundedBorder(rl, scaledBounds, scaledRadius)
+                : this.drawBorderScaled(rl, scaledBounds);
             if (borderResult.isErr()) return borderResult;
         }
 
-        // Draw text centered
-        const textX = this.bounds.x + this.bounds.width / 2 - (this.text.length * this.buttonStyle.fontSize) / 4;
-        const textY = this.bounds.y + this.bounds.height / 2 - this.buttonStyle.fontSize / 2;
+        // Draw text centered with scale
+        const scaledFontSize = this.buttonStyle.fontSize * this.hoverScale;
+        const textX = scaledBounds.x + scaledBounds.width / 2 - (this.text.length * scaledFontSize) / 4;
+        const textY = scaledBounds.y + scaledBounds.height / 2 - scaledFontSize / 2;
 
         return rl.drawText(
             this.text,
             textX,
             textY,
-            this.buttonStyle.fontSize,
+            scaledFontSize,
             this.buttonStyle.textColor
+        );
+    }
+
+    private getScaledBounds(): Rectangle {
+        const centerX = this.bounds.x + this.bounds.width / 2;
+        const centerY = this.bounds.y + this.bounds.height / 2;
+
+        const scaledWidth = this.bounds.width * this.hoverScale;
+        const scaledHeight = this.bounds.height * this.hoverScale;
+
+        return new Rectangle(
+            centerX - scaledWidth / 2,
+            centerY - scaledHeight / 2,
+            scaledWidth,
+            scaledHeight
         );
     }
 
@@ -131,14 +188,14 @@ export class Button extends UIComponent {
         return rl.drawText(this.text, textX, textY, 20, Colors.BLACK);
     }
 
-    private drawBorder(rl: Raylib): RaylibResult<void> {
-        const w = this.buttonStyle.borderWidth;
+    private drawBorderScaled(rl: Raylib, bounds: Rectangle): RaylibResult<void> {
+        const w = this.buttonStyle.borderWidth * this.hoverScale;
 
         // Top
         let result = rl.drawRectangle(
-            this.bounds.x,
-            this.bounds.y,
-            this.bounds.width,
+            bounds.x,
+            bounds.y,
+            bounds.width,
             w,
             this.buttonStyle.borderColor
         );
@@ -146,9 +203,9 @@ export class Button extends UIComponent {
 
         // Bottom
         result = rl.drawRectangle(
-            this.bounds.x,
-            this.bounds.y + this.bounds.height - w,
-            this.bounds.width,
+            bounds.x,
+            bounds.y + bounds.height - w,
+            bounds.width,
             w,
             this.buttonStyle.borderColor
         );
@@ -156,21 +213,227 @@ export class Button extends UIComponent {
 
         // Left
         result = rl.drawRectangle(
-            this.bounds.x,
-            this.bounds.y,
+            bounds.x,
+            bounds.y,
             w,
-            this.bounds.height,
+            bounds.height,
             this.buttonStyle.borderColor
         );
         if (result.isErr()) return result;
 
         // Right
         return rl.drawRectangle(
-            this.bounds.x + this.bounds.width - w,
-            this.bounds.y,
+            bounds.x + bounds.width - w,
+            bounds.y,
             w,
-            this.bounds.height,
+            bounds.height,
             this.buttonStyle.borderColor
         );
+    }
+
+    private drawRoundedRectangle(rl: Raylib, bounds: Rectangle, radius: number, color: number): RaylibResult<void> {
+        const r = Math.min(radius, Math.min(bounds.width, bounds.height) / 2);
+
+        // Draw main rectangles (center cross)
+        // Center horizontal rectangle
+        let result = rl.drawRectangle(
+            bounds.x + r,
+            bounds.y,
+            bounds.width - 2 * r,
+            bounds.height,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Left vertical rectangle
+        result = rl.drawRectangle(
+            bounds.x,
+            bounds.y + r,
+            r,
+            bounds.height - 2 * r,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Right vertical rectangle
+        result = rl.drawRectangle(
+            bounds.x + bounds.width - r,
+            bounds.y + r,
+            r,
+            bounds.height - 2 * r,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Draw filled circles at corners for smooth rounded edges
+        // Top-left corner
+        result = rl.drawCircle(bounds.x + r, bounds.y + r, r, color);
+        if (result.isErr()) return result;
+
+        // Top-right corner
+        result = rl.drawCircle(bounds.x + bounds.width - r, bounds.y + r, r, color);
+        if (result.isErr()) return result;
+
+        // Bottom-right corner
+        result = rl.drawCircle(bounds.x + bounds.width - r, bounds.y + bounds.height - r, r, color);
+        if (result.isErr()) return result;
+
+        // Bottom-left corner
+        return rl.drawCircle(bounds.x + r, bounds.y + bounds.height - r, r, color);
+    }
+
+    private drawRoundedBorder(rl: Raylib, bounds: Rectangle, radius: number): RaylibResult<void> {
+        const w = this.buttonStyle.borderWidth * this.hoverScale;
+        const r = Math.min(radius, Math.min(bounds.width, bounds.height) / 2);
+        const color = this.buttonStyle.borderColor;
+
+        // Draw border lines
+        // Top line
+        let result = rl.drawRectangle(
+            bounds.x + r,
+            bounds.y,
+            bounds.width - 2 * r,
+            w,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Bottom line
+        result = rl.drawRectangle(
+            bounds.x + r,
+            bounds.y + bounds.height - w,
+            bounds.width - 2 * r,
+            w,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Left line
+        result = rl.drawRectangle(
+            bounds.x,
+            bounds.y + r,
+            w,
+            bounds.height - 2 * r,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Right line
+        result = rl.drawRectangle(
+            bounds.x + bounds.width - w,
+            bounds.y + r,
+            w,
+            bounds.height - 2 * r,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Draw corner arcs
+        const segments = 8;
+        const arcThickness = w;
+
+        // Top-left corner
+        result = this.drawCircleArc(
+            rl,
+            bounds.x + r,
+            bounds.y + r,
+            r,
+            180,
+            270,
+            segments,
+            arcThickness,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Top-right corner
+        result = this.drawCircleArc(
+            rl,
+            bounds.x + bounds.width - r,
+            bounds.y + r,
+            r,
+            270,
+            360,
+            segments,
+            arcThickness,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Bottom-right corner
+        result = this.drawCircleArc(
+            rl,
+            bounds.x + bounds.width - r,
+            bounds.y + bounds.height - r,
+            r,
+            0,
+            90,
+            segments,
+            arcThickness,
+            color
+        );
+        if (result.isErr()) return result;
+
+        // Bottom-left corner
+        return this.drawCircleArc(
+            rl,
+            bounds.x + r,
+            bounds.y + bounds.height - r,
+            r,
+            90,
+            180,
+            segments,
+            arcThickness,
+            color
+        );
+    }
+
+    private drawCircleArc(
+        rl: Raylib,
+        centerX: number,
+        centerY: number,
+        radius: number,
+        startAngle: number,
+        endAngle: number,
+        segments: number,
+        thickness: number,
+        color: number
+    ): RaylibResult<void> {
+        const angleStep = (endAngle - startAngle) / segments;
+        const innerRadius = radius - thickness;
+
+        for (let i = 0; i < segments; i++) {
+            const angle1 = (startAngle + i * angleStep) * (Math.PI / 180);
+            const angle2 = (startAngle + (i + 1) * angleStep) * (Math.PI / 180);
+
+            const outerX1 = centerX + Math.cos(angle1) * radius;
+            const outerY1 = centerY + Math.sin(angle1) * radius;
+            const outerX2 = centerX + Math.cos(angle2) * radius;
+            const outerY2 = centerY + Math.sin(angle2) * radius;
+
+            const innerX1 = centerX + Math.cos(angle1) * innerRadius;
+            const innerY1 = centerY + Math.sin(angle1) * innerRadius;
+            const innerX2 = centerX + Math.cos(angle2) * innerRadius;
+            const innerY2 = centerY + Math.sin(angle2) * innerRadius;
+
+            // Draw two triangles to form a quad
+            let result = rl.drawTriangle(
+                new Vector2(outerX1, outerY1),
+                new Vector2(innerX1, innerY1),
+                new Vector2(outerX2, outerY2),
+                color
+            );
+            if (result.isErr()) return result;
+
+            result = rl.drawTriangle(
+                new Vector2(innerX1, innerY1),
+                new Vector2(innerX2, innerY2),
+                new Vector2(outerX2, outerY2),
+                color
+            );
+            if (result.isErr()) return result;
+        }
+
+        return new Ok(undefined);
     }
 }
