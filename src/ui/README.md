@@ -1,236 +1,259 @@
 # UI Components System
 
-A simple, extensible UI component system for Raylib-JS with built-in components for common UI elements.
+Система UI компонентов для Raylib с расширенной поддержкой CSS-подобного стайлинга.
 
-## Features
+## Компоненты
 
-- **Component-based architecture** - Easy to extend and customize
-- **Event-driven** - Callbacks for user interactions
-- **Styleable** - Customize colors, sizes, and appearance
-- **State management** - Automatic hover, press, and focus states
-- **Composable** - Nest components inside panels
+- **Button** - Интерактивная кнопка
+- **Label** - Текстовая метка
+- **Panel** - Контейнер для других компонентов
+- **Slider** - Ползунок для выбора значения
+- **Checkbox** - Флажок
 
-## Available Components
+## Новая система стайлинга
+
+### Быстрый старт
+
+```typescript
+import { Button, UIThemes } from "raylib-js";
+
+const button = new Button(100, 100, 200, 50, "Click Me");
+
+// Применить готовую тему
+button.applyStyle(UIThemes.modern.button);
+
+// Или настроить свой стиль
+button.setStyle({
+    padding: 15,
+    border: { width: 2, color: Colors.BLUE, radius: 8 },
+    background: { color: Colors.SKYBLUE },
+    text: { fontSize: 20, color: Colors.WHITE, textAlign: "center" },
+    shadow: { offsetX: 2, offsetY: 2, blur: 4, color: Colors.GRAY }
+});
+```
+
+### Основные возможности
+
+#### 1. Spacing (Отступы)
+```typescript
+component.setStyle({
+    padding: 10,  // Одинаковый отступ со всех сторон
+    margin: { top: 5, right: 10, bottom: 5, left: 10 }  // Разные отступы
+});
+```
+
+#### 2. Borders (Границы)
+```typescript
+component.setStyle({
+    border: { width: 2, color: Colors.BLACK, radius: 5 },
+    borderTop: { width: 4, color: Colors.RED },  // Только верхняя граница
+});
+```
+
+#### 3. Background (Фон)
+```typescript
+// Сплошной цвет
+component.setStyle({
+    background: { color: Colors.BLUE, opacity: 0.8 }
+});
+
+// Градиент
+component.setStyle({
+    background: {
+        gradient: {
+            type: "linear",
+            startColor: Colors.PURPLE,
+            endColor: Colors.VIOLET
+        }
+    }
+});
+```
+
+#### 4. Text Styling (Стилизация текста)
+```typescript
+label.setStyle({
+    text: {
+        fontSize: 24,
+        color: Colors.BLACK,
+        textAlign: "center",  // "left" | "center" | "right"
+        textDecoration: "underline"  // "none" | "underline" | "line-through"
+    }
+});
+```
+
+#### 5. Shadow (Тени)
+```typescript
+component.setStyle({
+    shadow: {
+        offsetX: 3,
+        offsetY: 3,
+        blur: 5,
+        color: Colors.GRAY
+    }
+});
+```
+
+#### 6. Transform (Трансформации)
+```typescript
+component.setStyle({
+    transform: {
+        translateX: 10,
+        translateY: 5,
+        scaleX: 1.2,
+        scaleY: 1.0,
+        rotation: 45
+    }
+});
+```
+
+### Готовые темы
+
+```typescript
+import { UIThemes } from "raylib-js";
+
+// Default theme
+button.applyStyle(UIThemes.default.button);
+
+// Dark theme
+button.applyStyle(UIThemes.dark.button);
+panel.applyStyle(UIThemes.dark.panel);
+
+// Modern theme (с тенями и скругленными углами)
+button.applyStyle(UIThemes.modern.button);
+```
+
+### Слияние стилей
+
+```typescript
+import { UIStyleHelper } from "raylib-js";
+
+const baseStyle = UIThemes.modern.button;
+const customStyle = {
+    background: { color: Colors.ORANGE },
+    text: { fontSize: 22, color: Colors.WHITE, textAlign: "center" }
+};
+
+button.applyStyle(UIStyleHelper.mergeStyles(baseStyle, customStyle));
+```
+
+### Обратная совместимость
+
+Старый API продолжает работать:
+
+```typescript
+// Старый способ (ButtonStyle)
+button.setButtonStyle({
+    normalColor: Colors.BLUE,
+    hoverColor: Colors.DARKBLUE,
+    fontSize: 20
+});
+
+// Новый способ (UIStyleProperties)
+button.setStyle({
+    background: { color: Colors.BLUE },
+    text: { fontSize: 20, color: Colors.WHITE, textAlign: "center" }
+});
+```
+
+## Примеры
+
+- `examples/15-ui-components.ts` - Базовые UI компоненты
+- `examples/17-advanced-styling.ts` - Расширенная система стайлинга
+
+## Документация
+
+Подробная документация по стайлингу: [STYLING.md](./STYLING.md)
+
+## API Reference
+
+### UIComponent (базовый класс)
+
+```typescript
+// Управление видимостью
+setVisible(visible: boolean): void
+isVisible(): boolean
+
+// Управление состоянием
+setDisabled(disabled: boolean): void
+isDisabled(): boolean
+
+// Границы
+setBounds(x: number, y: number, width: number, height: number): void
+getBounds(): Rectangle
+getComputedBounds(): Rectangle  // С учетом margin/padding
+
+// Стилизация
+setStyle(style: Partial<UIStyleProperties>): void
+applyStyle(style: Partial<UIStyleProperties>): void
+getStyle(): Partial<UIStyleProperties>
+```
 
 ### Button
-Interactive button with click events.
 
 ```typescript
-import { Button, Colors } from "raylib-js";
+constructor(x: number, y: number, width: number, height: number, text: string, style?: Partial<ButtonStyle>)
 
-const button = new Button(100, 100, 200, 50, "Click Me!");
-
-button.setOnClick(() => {
-  console.log("Button clicked!");
-});
-
-// Custom styling
-button.setStyle({
-  normalColor: Colors.BLUE,
-  hoverColor: Colors.DARKBLUE,
-  pressedColor: Colors.SKYBLUE,
-  textColor: Colors.WHITE,
-  fontSize: 24,
-});
-
-// In your game loop
-button.update(rl);
-button.draw(rl);
-```
-
-### Slider
-Draggable slider for numeric values.
-
-```typescript
-import { Slider } from "raylib-js";
-
-const slider = new Slider(100, 100, 300, 0, 100, 50);
-
-slider.setOnChange((value) => {
-  console.log("Value:", value);
-});
-
-// Get current value
-const currentValue = slider.getValue();
-
-// Set value programmatically
-slider.setValue(75);
-
-// In your game loop
-slider.update(rl);
-slider.draw(rl);
-```
-
-### Checkbox
-Toggle checkbox with label.
-
-```typescript
-import { Checkbox } from "raylib-js";
-
-const checkbox = new Checkbox(100, 100, "Enable Sound", true);
-
-checkbox.setOnChange((checked) => {
-  console.log("Checked:", checked);
-});
-
-// Check state
-if (checkbox.isChecked()) {
-  // Do something
-}
-
-// Toggle programmatically
-checkbox.toggle();
-
-// In your game loop
-checkbox.update(rl);
-checkbox.draw(rl);
+setText(text: string): void
+setOnClick(callback: () => void): void
+setButtonStyle(style: Partial<ButtonStyle>): void  // Старый API
 ```
 
 ### Label
-Static or dynamic text display.
 
 ```typescript
-import { Label, Colors } from "raylib-js";
+constructor(x: number, y: number, text: string, style?: Partial<LabelStyle>)
 
-const label = new Label(100, 100, "Score: 0", {
-  fontSize: 24,
-  textColor: Colors.BLACK,
-  backgroundColor: Colors.WHITE, // Optional
-});
-
-// Update text
-label.setText("Score: 100");
-
-// In your game loop
-label.draw(rl);
+setText(text: string): void
+setLabelStyle(style: Partial<LabelStyle>): void  // Старый API
 ```
 
 ### Panel
-Container for grouping components.
 
 ```typescript
-import { Panel, Button, Label } from "raylib-js";
+constructor(x: number, y: number, width: number, height: number, title?: string, style?: Partial<PanelStyle>)
 
-const panel = new Panel(50, 50, 400, 300, "Settings");
-
-const button = new Button(70, 100, 150, 40, "Apply");
-const label = new Label(70, 150, "Volume");
-
-panel.addChild(button);
-panel.addChild(label);
-
-// In your game loop
-panel.update(rl); // Updates all children
-panel.draw(rl);   // Draws all children
+addChild(component: UIComponent): void
+removeChild(component: UIComponent): void
+clearChildren(): void
+getChildren(): UIComponent[]
+setTitle(title: string): void
+setPanelStyle(style: Partial<PanelStyle>): void  // Старый API
 ```
 
-## Creating Custom Components
+## UIRenderer
 
-Extend the `UIComponent` base class:
+Утилиты для рендеринга с расширенной стилизацией:
 
 ```typescript
-import { UIComponent } from "raylib-js";
-import type Raylib from "raylib-js";
-import type { RaylibResult } from "raylib-js";
+// Рендеринг стилизованного прямоугольника
+UIRenderer.drawStyledRectangle(rl: Raylib, bounds: Rectangle, style: Partial<UIStyleProperties>): RaylibResult<void>
 
-export class CustomWidget extends UIComponent {
-  constructor(x: number, y: number, width: number, height: number) {
-    super(x, y, width, height);
-  }
+// Рендеринг стилизованного текста
+UIRenderer.drawStyledText(rl: Raylib, text: string, x: number, y: number, style: TextStyle): RaylibResult<void>
 
-  public update(rl: Raylib): void {
-    // Update component state
-    this.updateState(rl);
-    
-    // Custom update logic
-    if (this.state.isPressed) {
-      // Handle press
-    }
-  }
-
-  public draw(rl: Raylib): RaylibResult<void> {
-    if (!this.visible) return new Ok(undefined);
-    
-    // Custom drawing logic
-    return rl.drawRectangleRec(this.bounds, Colors.BLUE);
-  }
-}
+// Измерение текста
+UIRenderer.measureText(text: string, style: TextStyle): { width: number; height: number }
 ```
 
-## Component State
+## UIStyleHelper
 
-All components have access to these states:
-
-- `isHovered` - Mouse is over the component
-- `isPressed` - Mouse button is down while hovering
-- `isFocused` - Component has keyboard focus (future feature)
-- `isDisabled` - Component is disabled
+Утилиты для работы со стилями:
 
 ```typescript
-// Disable a component
-button.setDisabled(true);
+// Нормализация отступов
+UIStyleHelper.normalizeSpacing(value: number | Spacing | undefined): Spacing
 
-// Hide a component
-button.setVisible(false);
+// Слияние стилей
+UIStyleHelper.mergeStyles(base: Partial<UIStyleProperties>, override: Partial<UIStyleProperties>): UIStyleProperties
 
-// Check state
-if (button.isDisabled()) {
-  // Component is disabled
-}
+// Стили по умолчанию
+UIStyleHelper.defaultTextStyle(): TextStyle
+UIStyleHelper.defaultBorderStyle(): BorderStyle
+UIStyleHelper.defaultBackgroundStyle(): BackgroundStyle
+
+// Интерполяция цветов
+UIStyleHelper.lerpColor(color1: number, color2: number, t: number): number
+
+// Функции плавности
+UIStyleHelper.applyEasing(t: number, easing: string): number
 ```
-
-## Styling
-
-Each component has a default style that can be customized:
-
-```typescript
-import { Button, DefaultButtonStyle } from "raylib-js";
-
-// Use default style
-const button1 = new Button(100, 100, 200, 50, "Default");
-
-// Partial style override
-const button2 = new Button(100, 160, 200, 50, "Custom", {
-  normalColor: Colors.GREEN,
-  hoverColor: Colors.DARKGREEN,
-});
-
-// Update style after creation
-button1.setStyle({
-  fontSize: 28,
-  borderWidth: 4,
-});
-```
-
-## Examples
-
-See the examples directory:
-- `examples/15-ui-components.ts` - Comprehensive demo of all components
-- `examples/16-simple-ui.ts` - Minimal button example
-
-Run examples:
-```bash
-bun examples/15-ui-components.ts
-bun examples/16-simple-ui.ts
-```
-
-## Best Practices
-
-1. **Update before draw** - Always call `update()` before `draw()`
-2. **Use panels for organization** - Group related components in panels
-3. **Handle errors** - Check `RaylibResult` return values from `draw()`
-4. **Reuse styles** - Create style objects for consistent theming
-5. **Disable when needed** - Use `setDisabled()` instead of hiding components
-
-## Future Enhancements
-
-Planned features:
-- Text input field
-- Dropdown menu
-- Radio button group
-- Progress bar
-- Tooltip system
-- Keyboard navigation
-- Layout managers (grid, flex)
-- Animation support
-- Theme system

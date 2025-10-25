@@ -15,3 +15,19 @@ export type { PanelStyle } from "./Panel";
 
 export { Label, DefaultLabelStyle } from "./Label";
 export type { LabelStyle } from "./Label";
+
+// New styling system
+export { UIStyleHelper, UIThemes } from "./UIStyle";
+export type {
+    UIStyleProperties,
+    Spacing,
+    BorderStyle,
+    ShadowStyle,
+    TextStyle,
+    BackgroundStyle,
+    LayoutStyle,
+    TransformStyle,
+    TransitionStyle,
+} from "./UIStyle";
+
+export { UIRenderer } from "./UIRenderer";

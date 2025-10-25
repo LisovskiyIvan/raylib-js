@@ -3,6 +3,7 @@ import type Raylib from "../Raylib";
 import type { RaylibResult } from "../types";
 import { Colors } from "../constants";
 import { Ok } from "../result";
+import { UIRenderer } from "./UIRenderer";
 
 export interface PanelStyle {
     backgroundColor: number;
@@ -20,7 +21,7 @@ export const DefaultPanelStyle: PanelStyle = {
 
 export class Panel extends UIComponent {
     private children: UIComponent[] = [];
-    private style: PanelStyle;
+    private panelStyle: PanelStyle;
     private title?: string;
 
     constructor(
@@ -33,7 +34,7 @@ export class Panel extends UIComponent {
     ) {
         super(x, y, width, height);
         this.title = title;
-        this.style = { ...DefaultPanelStyle, ...style };
+        this.panelStyle = { ...DefaultPanelStyle, ...style };
     }
 
     public addChild(component: UIComponent): void {
@@ -55,8 +56,8 @@ export class Panel extends UIComponent {
         return this.children;
     }
 
-    public setStyle(style: Partial<PanelStyle>): void {
-        this.style = { ...this.style, ...style };
+    public setPanelStyle(style: Partial<PanelStyle>): void {
+        this.panelStyle = { ...this.panelStyle, ...style };
     }
 
     public setTitle(title: string): void {
@@ -77,20 +78,53 @@ export class Panel extends UIComponent {
     public draw(rl: Raylib): RaylibResult<void> {
         if (!this.visible) return new Ok(undefined);
 
+        // Use new styling system if style is set
+        if (Object.keys(this.style).length > 0) {
+            return this.drawWithNewStyle(rl);
+        }
+
+        // Legacy rendering
         // Draw background
-        let result = rl.drawRectangleRec(this.bounds, this.style.backgroundColor);
+        let result = rl.drawRectangleRec(this.bounds, this.panelStyle.backgroundColor);
         if (result.isErr()) return result;
 
         // Draw border
-        if (this.style.borderWidth > 0) {
+        if (this.panelStyle.borderWidth > 0) {
             result = this.drawBorder(rl);
             if (result.isErr()) return result;
         }
 
         // Draw title if present
         if (this.title) {
-            const titleX = this.bounds.x + this.style.padding;
-            const titleY = this.bounds.y + this.style.padding;
+            const titleX = this.bounds.x + this.panelStyle.padding;
+            const titleY = this.bounds.y + this.panelStyle.padding;
+            result = rl.drawText(this.title, titleX, titleY, 20, Colors.BLACK);
+            if (result.isErr()) return result;
+        }
+
+        // Draw all children
+        for (const child of this.children) {
+            result = child.draw(rl);
+            if (result.isErr()) return result;
+        }
+
+        return new Ok(undefined);
+    }
+
+    private drawWithNewStyle(rl: Raylib): RaylibResult<void> {
+        // Draw styled rectangle
+        let result = UIRenderer.drawStyledRectangle(rl, this.computedBounds, this.style);
+        if (result.isErr()) return result;
+
+        // Draw title if present
+        if (this.title && this.style.text) {
+            const titleX = this.computedBounds.x + 10;
+            const titleY = this.computedBounds.y + 10;
+            result = UIRenderer.drawStyledText(rl, this.title, titleX, titleY, this.style.text);
+            if (result.isErr()) return result;
+        } else if (this.title) {
+            const titleX = this.computedBounds.x + 10;
+            const titleY = this.computedBounds.y + 10;
             result = rl.drawText(this.title, titleX, titleY, 20, Colors.BLACK);
             if (result.isErr()) return result;
         }
@@ -105,7 +139,7 @@ export class Panel extends UIComponent {
     }
 
     private drawBorder(rl: Raylib): RaylibResult<void> {
-        const w = this.style.borderWidth;
+        const w = this.panelStyle.borderWidth;
 
         // Top
         let result = rl.drawRectangle(
@@ -113,7 +147,7 @@ export class Panel extends UIComponent {
             this.bounds.y,
             this.bounds.width,
             w,
-            this.style.borderColor
+            this.panelStyle.borderColor
         );
         if (result.isErr()) return result;
 
@@ -123,7 +157,7 @@ export class Panel extends UIComponent {
             this.bounds.y + this.bounds.height - w,
             this.bounds.width,
             w,
-            this.style.borderColor
+            this.panelStyle.borderColor
         );
         if (result.isErr()) return result;
 
@@ -133,7 +167,7 @@ export class Panel extends UIComponent {
             this.bounds.y,
             w,
             this.bounds.height,
-            this.style.borderColor
+            this.panelStyle.borderColor
         );
         if (result.isErr()) return result;
 
@@ -143,7 +177,7 @@ export class Panel extends UIComponent {
             this.bounds.y,
             w,
             this.bounds.height,
-            this.style.borderColor
+            this.panelStyle.borderColor
         );
     }
 }
