@@ -573,6 +573,54 @@ const shaderWrapperSymbols = {
   }
 };
 
+const fontWrapperSymbols = {
+  // Font loading and management
+  LoadFontToSlot: {
+    args: [FFIType.ptr, FFIType.i32],
+    returns: FFIType.i32
+  },
+  UnloadFontBySlot: {
+    args: [FFIType.i32],
+    returns: FFIType.void
+  },
+  IsFontSlotValid: {
+    args: [FFIType.i32],
+    returns: FFIType.bool
+  },
+  GetLoadedFontCount: {
+    args: [],
+    returns: FFIType.i32
+  },
+  UnloadAllFonts: {
+    args: [],
+    returns: FFIType.void
+  },
+
+  // Font information
+  GetFontDataBySlot: {
+    args: [FFIType.i32, FFIType.ptr],
+    returns: FFIType.void
+  },
+
+  // Text measurement
+  MeasureTextBySlot: {
+    args: [FFIType.i32, FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.ptr],
+    returns: FFIType.void
+  },
+
+  // Text rendering
+  DrawTextBySlot: {
+    args: [FFIType.i32, FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.u32],
+    returns: FFIType.void
+  },
+
+  // Text wrapping
+  WrapTextBySlot: {
+    args: [FFIType.i32, FFIType.ptr, FFIType.f32, FFIType.f32, FFIType.f32, FFIType.ptr, FFIType.i32],
+    returns: FFIType.i32
+  }
+};
+
 export interface FFILoaderConfig {
   platformInfo?: PlatformInfo;
   libraryPaths?: LibraryPaths;
@@ -721,6 +769,13 @@ export const initRaylib = (libraryPath?: string, config?: FFILoaderConfig) => {
       'shader-wrapper'
     );
 
+    const fontWrapperLib = loadLibraryWithFallback(
+      libraryPaths.fontWrapper,
+      [prebuiltPaths.fontWrapper, systemPaths.fontWrapper, ...customFallbacks],
+      fontWrapperSymbols,
+      'font-wrapper'
+    );
+
     return {
       ...raylibWrapperLib.symbols,
       ...wrapperLib.symbols,
@@ -728,7 +783,8 @@ export const initRaylib = (libraryPath?: string, config?: FFILoaderConfig) => {
       ...modelWrapperLib.symbols,
       ...rayCollisionWrapperLib.symbols,
       ...triangleWrapperLib.symbols,
-      ...shaderWrapperLib.symbols
+      ...shaderWrapperLib.symbols,
+      ...fontWrapperLib.symbols
     };
   } catch (error) {
     // Enhanced error reporting with platform information

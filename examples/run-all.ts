@@ -75,6 +75,11 @@ const examples = [
         name: "15-ui-componets.ts",
         title: "Ready ui components",
         description: "Готовые ui компоненты"
+    },
+    {
+        name: "16-font-demo.ts",
+        title: "Font System Demo",
+        description: "Custom fonts, text measurement, wrapping, and alignment"
     }
 ]
 

@@ -120,5 +120,35 @@ export enum BlendMode {
     CUSTOM_SEPARATE = 7     // Blend textures using custom rgb/alpha factors
 }
 
+// Font structure using slot-based approach
+export interface Font {
+    slotIndex: number      // Index in the font wrapper's slot array
+    baseSize: number       // Base size (default chars height)
+    glyphCount: number     // Number of glyphs in the font
+}
+
+// Text measurement result
+export interface TextMeasurement {
+    width: number          // Text width in pixels
+    height: number         // Text height in pixels
+}
+
+// Text alignment enum
+export enum TextAlignment {
+    LEFT = 0,
+    CENTER = 1,
+    RIGHT = 2
+}
+
+// Text formatting options
+export interface TextFormatOptions {
+    fontSize?: number
+    spacing?: number
+    lineSpacing?: number
+    alignment?: TextAlignment
+    maxWidth?: number
+    wordWrap?: boolean
+}
+
 // Type aliases для Result types
 export type RaylibResult<T> = Result<T, RaylibError>

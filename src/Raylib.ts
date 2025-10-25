@@ -8,8 +8,11 @@ import type {
   Shader,
   RayCollision,
   Matrix,
+  Font,
+  TextMeasurement,
+  TextFormatOptions,
 } from "./types";
-import { BlendMode } from "./types";
+import { BlendMode, TextAlignment } from "./types";
 import { initError, ffiError, stateError, validationError } from "./types";
 import { Ok, Err, tryFn } from "./result";
 import { ptr } from "bun:ffi";
@@ -2393,5 +2396,401 @@ export default class Raylib {
           };
         }),
       );
+  }
+
+  // Font loading and management
+  public loadFont(fileName: string, fontSize: number): RaylibResult<Font> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateNonEmptyString(fileName, "fileName"),
+          validatePositive(fontSize, "fontSize"),
+        ),
+      )
+      .andThen(() =>
+        this.safeFFICall("load font to slot", () => {
+          const fileNameBuffer = this.textEncoder.encode(fileName + "\0");
+          const fileNamePtr = ptr(fileNameBuffer);
+
+          const slotIndex = this.rl.LoadFontToSlot(fileNamePtr, fontSize);
+
+          if (slotIndex < 0) {
+            throw new Error(
+              "Failed to load font or no free slots available",
+            );
+          }
+
+          // Get font metadata
+          const dataBuffer = new Int32Array(2);
+          this.rl.GetFontDataBySlot(slotIndex, ptr(dataBuffer));
+
+          return {
+            slotIndex,
+            baseSize: dataBuffer[0]!,
+            glyphCount: dataBuffer[1]!,
+          };
+        }),
+      );
+  }
+
+  public unloadFont(font: Font): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(font.slotIndex, "font.slotIndex"))
+      .andThen(() => {
+        if (font.slotIndex < 0) {
+          return new Err(validationError("Invalid font slot index"));
+        }
+        return this.safeFFICall("unload font from slot", () => {
+          this.rl.UnloadFontBySlot(font.slotIndex);
+        });
+      });
+  }
+
+  public isFontValid(font: Font): RaylibResult<boolean> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(font.slotIndex, "font.slotIndex"))
+      .andThen(() =>
+        this.safeFFICall("check font slot validity", () => {
+          return this.rl.IsFontSlotValid(font.slotIndex);
+        }),
+      );
+  }
+
+  public getLoadedFontCount(): RaylibResult<number> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("get loaded font count", () => {
+        return this.rl.GetLoadedFontCount();
+      }),
+    );
+  }
+
+  public unloadAllFonts(): RaylibResult<void> {
+    return this.requireInitialized().andThen(() =>
+      this.safeFFICall("unload all fonts", () => {
+        this.rl.UnloadAllFonts();
+      }),
+    );
+  }
+
+  // Text measurement methods
+  public measureText(text: string, fontSize: number): RaylibResult<TextMeasurement> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateNonEmptyString(text, "text"),
+          validatePositive(fontSize, "fontSize"),
+        ),
+      )
+      .andThen(() =>
+        this.safeFFICall("measure text", () => {
+          const textBuffer = this.textEncoder.encode(text + "\0");
+          const textPtr = ptr(textBuffer);
+
+          // Use slot index 0 for default font
+          const outBuffer = new Float32Array(2);
+          this.rl.MeasureTextBySlot(0, textPtr, fontSize, 1.0, ptr(outBuffer));
+
+          return {
+            width: outBuffer[0]!,
+            height: outBuffer[1]!,
+          };
+        }),
+      );
+  }
+
+  public measureTextEx(
+    font: Font,
+    text: string,
+    fontSize: number,
+    spacing: number,
+  ): RaylibResult<TextMeasurement> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(font.slotIndex, "font.slotIndex"),
+          validateNonEmptyString(text, "text"),
+          validatePositive(fontSize, "fontSize"),
+          validateFinite(spacing, "spacing"),
+        ),
+      )
+      .andThen(() => {
+        if (font.slotIndex < 0) {
+          return new Err(validationError("Invalid font slot index"));
+        }
+        return this.safeFFICall("measure text ex", () => {
+          const textBuffer = this.textEncoder.encode(text + "\0");
+          const textPtr = ptr(textBuffer);
+
+          const outBuffer = new Float32Array(2);
+          this.rl.MeasureTextBySlot(
+            font.slotIndex,
+            textPtr,
+            fontSize,
+            spacing,
+            ptr(outBuffer),
+          );
+
+          return {
+            width: outBuffer[0]!,
+            height: outBuffer[1]!,
+          };
+        });
+      });
+  }
+
+  // Text rendering methods
+  public drawTextEx(
+    font: Font,
+    text: string,
+    position: Vector2,
+    fontSize: number,
+    spacing: number,
+    color: number,
+  ): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(font.slotIndex, "font.slotIndex"),
+          validateNonEmptyString(text, "text"),
+          validateFinite(position.x, "position.x"),
+          validateFinite(position.y, "position.y"),
+          validatePositive(fontSize, "fontSize"),
+          validateFinite(spacing, "spacing"),
+          validateColor(color, "color"),
+        ),
+      )
+      .andThen(() => {
+        if (font.slotIndex < 0) {
+          return new Err(validationError("Invalid font slot index"));
+        }
+        return this.safeFFICall("draw text ex", () => {
+          const textBuffer = this.textEncoder.encode(text + "\0");
+          const textPtr = ptr(textBuffer);
+
+          this.rl.DrawTextBySlot(
+            font.slotIndex,
+            textPtr,
+            position.x,
+            position.y,
+            fontSize,
+            spacing,
+            color,
+          );
+        });
+      });
+  }
+
+  // Text wrapping methods
+  public wrapText(
+    text: string,
+    maxWidth: number,
+    fontSize: number,
+  ): RaylibResult<string> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateNonEmptyString(text, "text"),
+          validatePositive(maxWidth, "maxWidth"),
+          validatePositive(fontSize, "fontSize"),
+        ),
+      )
+      .andThen(() =>
+        this.safeFFICall("wrap text", () => {
+          const textBuffer = this.textEncoder.encode(text + "\0");
+          const textPtr = ptr(textBuffer);
+
+          // Allocate buffer for wrapped text (4x input length to be safe)
+          const bufferSize = text.length * 4;
+          const outBuffer = new Uint8Array(bufferSize);
+          const outPtr = ptr(outBuffer);
+
+          // Use slot index 0 for default font
+          const lineCount = this.rl.WrapTextBySlot(
+            0,
+            textPtr,
+            fontSize,
+            1.0,
+            maxWidth,
+            outPtr,
+            bufferSize,
+          );
+
+          if (lineCount < 0) {
+            throw new Error("Failed to wrap text");
+          }
+
+          // Decode buffer to string
+          const nullIndex = outBuffer.indexOf(0);
+          const wrappedText = new TextDecoder().decode(
+            outBuffer.slice(0, nullIndex >= 0 ? nullIndex : outBuffer.length),
+          );
+
+          return wrappedText;
+        }),
+      );
+  }
+
+  public wrapTextEx(
+    font: Font,
+    text: string,
+    maxWidth: number,
+    fontSize: number,
+    spacing: number,
+  ): RaylibResult<string> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(font.slotIndex, "font.slotIndex"),
+          validateNonEmptyString(text, "text"),
+          validatePositive(maxWidth, "maxWidth"),
+          validatePositive(fontSize, "fontSize"),
+          validateFinite(spacing, "spacing"),
+        ),
+      )
+      .andThen(() => {
+        if (font.slotIndex < 0) {
+          return new Err(validationError("Invalid font slot index"));
+        }
+        return this.safeFFICall("wrap text ex", () => {
+          const textBuffer = this.textEncoder.encode(text + "\0");
+          const textPtr = ptr(textBuffer);
+
+          // Allocate buffer for wrapped text (4x input length to be safe)
+          const bufferSize = text.length * 4;
+          const outBuffer = new Uint8Array(bufferSize);
+          const outPtr = ptr(outBuffer);
+
+          const lineCount = this.rl.WrapTextBySlot(
+            font.slotIndex,
+            textPtr,
+            fontSize,
+            spacing,
+            maxWidth,
+            outPtr,
+            bufferSize,
+          );
+
+          if (lineCount < 0) {
+            throw new Error("Failed to wrap text");
+          }
+
+          // Decode buffer to string
+          const nullIndex = outBuffer.indexOf(0);
+          const wrappedText = new TextDecoder().decode(
+            outBuffer.slice(0, nullIndex >= 0 ? nullIndex : outBuffer.length),
+          );
+
+          return wrappedText;
+        });
+      });
+  }
+
+  // Text formatting and alignment
+  public drawTextFormatted(
+    font: Font,
+    text: string,
+    position: Vector2,
+    options: TextFormatOptions,
+    color: number,
+  ): RaylibResult<void> {
+    return this.requireInitialized()
+      .andThen(() =>
+        validateAll(
+          validateFinite(font.slotIndex, "font.slotIndex"),
+          validateNonEmptyString(text, "text"),
+          validateFinite(position.x, "position.x"),
+          validateFinite(position.y, "position.y"),
+          validateColor(color, "color"),
+        ),
+      )
+      .andThen(() => {
+        if (font.slotIndex < 0) {
+          return new Err(validationError("Invalid font slot index"));
+        }
+
+        // Apply default values for optional fields
+        const fontSize = options.fontSize ?? font.baseSize;
+        const spacing = options.spacing ?? 1.0;
+        const lineSpacing = options.lineSpacing ?? fontSize;
+        const alignment = options.alignment ?? TextAlignment.LEFT;
+        const maxWidth = options.maxWidth;
+        const wordWrap = options.wordWrap ?? false;
+
+        // Validate options
+        const optionsValidation = validateAll(
+          validatePositive(fontSize, "fontSize"),
+          validateFinite(spacing, "spacing"),
+          validatePositive(lineSpacing, "lineSpacing"),
+        );
+
+        if (optionsValidation.isErr()) {
+          return optionsValidation;
+        }
+
+        return this.safeFFICall("draw text formatted", () => {
+          let textToDraw = text;
+
+          // Wrap text if maxWidth and wordWrap are specified
+          if (maxWidth !== undefined && wordWrap) {
+            const wrapResult = this.wrapTextEx(
+              font,
+              text,
+              maxWidth,
+              fontSize,
+              spacing,
+            );
+            if (wrapResult.isErr()) {
+              throw new Error("Failed to wrap text");
+            }
+            textToDraw = wrapResult.unwrap();
+          }
+
+          // Split text into lines by \n
+          const lines = textToDraw.split("\n");
+
+          // Render each line with alignment
+          let currentY = position.y;
+          for (const line of lines) {
+            if (line.length === 0) {
+              currentY += lineSpacing;
+              continue;
+            }
+
+            // Calculate x position based on alignment
+            let currentX = position.x;
+            if (alignment !== TextAlignment.LEFT && maxWidth !== undefined) {
+              const measureResult = this.measureTextEx(
+                font,
+                line,
+                fontSize,
+                spacing,
+              );
+              if (measureResult.isOk()) {
+                const lineWidth = measureResult.unwrap().width;
+                if (alignment === TextAlignment.CENTER) {
+                  currentX = position.x + (maxWidth - lineWidth) / 2;
+                } else if (alignment === TextAlignment.RIGHT) {
+                  currentX = position.x + (maxWidth - lineWidth);
+                }
+              }
+            }
+
+            // Draw the line
+            const drawResult = this.drawTextEx(
+              font,
+              line,
+              new Vector2(currentX, currentY),
+              fontSize,
+              spacing,
+              color,
+            );
+            if (drawResult.isErr()) {
+              throw new Error("Failed to draw text line");
+            }
+
+            currentY += lineSpacing;
+          }
+        });
+      });
   }
 }

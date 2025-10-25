@@ -172,6 +172,11 @@ export class PlatformBuilder {
                 name: 'shader-wrapper',
                 source: join(wrappersBase, 'shaders', 'shader-wrapper.c'),
                 output: join(outputDir, `shader-wrapper${this.platform.libraryExtension}`)
+            },
+            {
+                name: 'font-wrapper',
+                source: join(wrappersBase, 'fonts', 'font-wrapper.c'),
+                output: join(outputDir, `font-wrapper${this.platform.libraryExtension}`)
             }
         ];
     }
