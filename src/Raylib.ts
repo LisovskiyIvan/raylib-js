@@ -252,6 +252,22 @@ export default class Raylib {
         this.safeFFICall("check key up", () => this.rl.IsKeyUpWrapper(key)),
       );
   }
+  
+  public isKeyPressed(key: number): RaylibResult<boolean> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(key, "key"))
+      .andThen(() =>
+        this.safeFFICall("check pressed key", () => this.rl.IsKeyPressedWrapper(key)),
+      );
+  }
+  
+  public isKeyPressedRepeat(key: number): RaylibResult<boolean> {
+    return this.requireInitialized()
+      .andThen(() => validateFinite(key, "key"))
+      .andThen(() =>
+        this.safeFFICall("check key pressed repeat", () => this.rl.isKeyPressedRepeatWrapper(key)),
+      );
+  }
 
   public getKeyPressed(): RaylibResult<number> {
     return this.requireInitialized().andThen(() =>

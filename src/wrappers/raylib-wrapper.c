@@ -60,6 +60,10 @@ EXPORT bool IsKeyDownWrapper(short key) { return IsKeyDown((int)key); }
 
 EXPORT bool IsKeyUpWrapper(short key) { return IsKeyUp((int)key); }
 
+EXPORT bool IsKeyPressedWrapper(short key) { return IsKeyPressed((int)key); }
+
+EXPORT bool IsKeyPressedRepeatWrapper(short key) { return IsKeyPressedRepeat((int)key); }
+
 EXPORT char GetKeyPressedWrapper(void) { return (char)GetKeyPressed(); }
 
 // Input functions - Mouse

@@ -33,7 +33,7 @@ if (initResult.isErr()) {
     process.exit(1)
 }
 
-rl.setTargetFPS(60)
+// rl.setTargetFPS(60)
 
 // Camera setup - will rotate around model for better view
 let cameraAngle = 0

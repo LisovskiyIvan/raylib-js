@@ -55,6 +55,14 @@ const raylibWrapperSymbols = {
     args: [FFIType.i16],
     returns: FFIType.bool
   },
+  IsKeyPressedWrapper: {
+    args: [FFIType.i16],
+    returns: FFIType.bool
+  },
+  IsKeyPressedRepeatWrapper: {
+    args: [FFIType.i16],
+    returns: FFIType.bool
+  },
   GetKeyPressedWrapper: {
     args: [],
     returns: FFIType.i8
